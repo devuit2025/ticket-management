@@ -1,0 +1,9 @@
+.git
+**/bin
+**/tmp
+**/vendor
+**/coverage
+**/*.log
+deployments
+README.md
+.env*
