@@ -6,11 +6,11 @@ import HomeScreen from '../screens/Home/HomeScreen';
 const Stack = createStackNavigator();
 
 const AppNavigator = () => (
-  <NavigationContainer>
-    <Stack.Navigator initialRouteName="Home">
-      <Stack.Screen name="Home" component={HomeScreen} />
-    </Stack.Navigator>
-  </NavigationContainer>
+    <NavigationContainer>
+        <Stack.Navigator initialRouteName="Home">
+            <Stack.Screen name="Home" component={HomeScreen} />
+        </Stack.Navigator>
+    </NavigationContainer>
 );
 
 export default AppNavigator;
