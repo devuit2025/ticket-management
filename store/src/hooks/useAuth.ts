@@ -1,12 +1,12 @@
 import { useState, useEffect } from 'react';
 
 export const useAuth = () => {
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
+    const [isLoggedIn, setIsLoggedIn] = useState(false);
 
-  useEffect(() => {
-    // Your auth logic here
-    setIsLoggedIn(true);
-  }, []);
+    useEffect(() => {
+        // Your auth logic here
+        setIsLoggedIn(true);
+    }, []);
 
-  return { isLoggedIn };
+    return { isLoggedIn };
 };

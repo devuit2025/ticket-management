@@ -4,9 +4,9 @@ import { store } from './store';
 import AppNavigator from './navigation/AppNavigator';
 
 const App = () => (
-  <Provider store={store}>
-    <AppNavigator />
-  </Provider>
+    <Provider store={store}>
+        <AppNavigator />
+    </Provider>
 );
 
 export default App;
