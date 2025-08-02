@@ -1,27 +1,30 @@
-// services/user/repository/user_repository.go
 package repository
 
 import (
-    "ticket-management/shared/repository"
-    "ticket-management/services/user/model"
-    "gorm.io/gorm"
+    "github.com/devuit2025/ticket-management/api/services/user/model"
+    "github.com/devuit2025/ticket-management/api/services/user/config"
 )
 
-type UserRepository struct {
-    repository.GormRepository[model.User]  // embed base
+func GetAllUsers() ([]model.User, error) {
+    var users []model.User
+    result := config.DB.Find(&users)
+    return users, result.Error
 }
 
-// Có thể thêm method riêng nếu cần
-func (r *UserRepository) FindByEmail(email string) (*model.User, error) {
+func GetUserByID(id uint) (model.User, error) {
     var user model.User
-    if err := r.DB.Where("email = ?", email).First(&user).Error; err != nil {
-        return nil, err
-    }
-    return &user, nil
+    result := config.DB.First(&user, id)
+    return user, result.Error
 }
 
-func NewUserRepository(db *gorm.DB) *UserRepository {
-    return &UserRepository{
-        GormRepository: repository.GormRepository[model.User]{DB: db},
-    }
+func CreateUser(user *model.User) error {
+    return config.DB.Create(user).Error
+}
+
+func UpdateUser(user *model.User) error {
+    return config.DB.Save(user).Error
+}
+
+func DeleteUser(id uint) error {
+    return config.DB.Delete(&model.User{}, id).Error
 }

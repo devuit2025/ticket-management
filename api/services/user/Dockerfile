@@ -1,32 +1,35 @@
-# Stage 1: Build app
-FROM golang:1.22-alpine AS builder
+# base image
+FROM golang:1.24.5-alpine
 
-# Cài đặt git và build tools
-RUN apk add --no-cache git
+# set environment variables
+ENV GO111MODULE=on \
+    CGO_ENABLED=0 \
+    GOOS=linux \
+    GOARCH=amd64
 
-# Set working dir trong container
+# install git
+RUN apk update && apk add --no-cache git
+
+# create working directory
 WORKDIR /app
-
-# Copy go.mod và go.sum để download deps trước (cache)
-COPY services/user/go.mod services/user/go.sum ./services/user/
+# copy go mod and download dependencies
+COPY go.mod go.sum ./
+RUN go mod tidy
 RUN go mod download
 
-# Copy toàn bộ source code service user
+# copy source code
 COPY . .
 
-# Build binary
-RUN go build -o user-service ./cmd/main.go
+# build binary
+RUN go build -o user-service ./cmd
 
-# Stage 2: Run binary
-FROM alpine:latest
+# Air hot reload
+RUN go install github.com/air-verse/air@latest
 
-WORKDIR /root/
+COPY .air.toml .
 
-# Copy binary từ stage builder
-COPY --from=builder /app/user-service .
+# expose port
+EXPOSE 8080
 
-# Expose port service user
-EXPOSE 8000
-
-# Run binary
-CMD ["./user-service"]
+# run the service
+CMD ["./user-service", "air"]

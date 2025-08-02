@@ -1,0 +1,35 @@
+version: "3.8"
+
+services:
+  user-service:
+    build:
+      context: ./api/services/user
+      dockerfile: Dockerfile
+    container_name: user-service
+    ports:
+      - "8080:8080"
+    depends_on:
+      - postgres
+    environment:
+      DB_HOST: postgres
+      DB_USER: postgres
+      DB_PASSWORD: secret
+      DB_NAME: ticketdb
+      DB_PORT: 5432
+    restart: always
+
+  postgres:
+    image: postgres:15
+    container_name: ticket-postgres
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: secret
+      POSTGRES_DB: ticketdb
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    restart: always
+
+volumes:
+  pgdata:

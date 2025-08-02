@@ -1,11 +1,2 @@
 run-user:
-	cd services/user && go run cmd/main.go
-
-run-booking:
-	cd services/booking && go run cmd/main.go
-
-build:
-	docker-compose build
-
-up:
-	docker-compose up
+	cd api/service/user && go run ./cmd
