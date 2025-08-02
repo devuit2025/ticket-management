@@ -1,13 +1,12 @@
 import React from 'react';
 
-// Import from feature folder index files
-import { HomeScreen, SearchResultScreen, BusDetailScreen } from '@screens/home';
-import { MyAccountScreen, PreferencesScreen, SavedCardsScreen, SettingsScreen } from '@screens/profile';
+import GlobalComponentsScreen from '@screens/dev/GlobalComponentsScreen';
+import { HomeScreen } from '@screens/home';
 
 import { NavigationContainer, DefaultTheme, DarkTheme } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import { useTheme } from '@context/ThemeContext';
 import { RootStackParamList } from '@navigation/navigationTypes';
+import { useTheme } from '@context/ThemeContext';
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
@@ -16,16 +15,9 @@ export default function AppNavigator() {
 
   return (
     <NavigationContainer theme={theme.dark ? DarkTheme : DefaultTheme}>
-      <Stack.Navigator>
-        {/* Example screens from home */}
+      <Stack.Navigator initialRouteName='GlobalComponents'>
         <Stack.Screen name="Home" component={HomeScreen} />
-        {/* <Stack.Screen name="SearchResult" component={SearchResultScreen} />
-        <Stack.Screen name="BusDetail" component={BusDetailScreen} />
-
-        <Stack.Screen name="MyAccount" component={MyAccountScreen} />
-        <Stack.Screen name="Preferences" component={PreferencesScreen} />
-        <Stack.Screen name="SavedCards" component={SavedCardsScreen} />
-        <Stack.Screen name="Settings" component={SettingsScreen} /> */}
+        <Stack.Screen name="GlobalComponents" component={GlobalComponentsScreen} options={{ title: 'Component Showcase' }}/>
       </Stack.Navigator>
     </NavigationContainer>
   );
