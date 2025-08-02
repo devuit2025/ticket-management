@@ -1,16 +1,23 @@
 import React from 'react';
-import { NavigationContainer } from '@react-navigation/native';
-import { createStackNavigator } from '@react-navigation/stack';
-import HomeScreen from '../screens/Home/HomeScreen';
+import HomeScreen from '@screens/HomeScreen';
+import ProfileScreen from '@screens/ProfileScreen';
 
-const Stack = createStackNavigator();
+import { NavigationContainer, DefaultTheme, DarkTheme } from '@react-navigation/native';
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import { useTheme } from '@context/ThemeContext';
+import { RootStackParamList } from '@navigation/navigationTypes';
 
-const AppNavigator = () => (
-    <NavigationContainer>
-        <Stack.Navigator initialRouteName="Home">
-            <Stack.Screen name="Home" component={HomeScreen} />
-        </Stack.Navigator>
+const Stack = createNativeStackNavigator<RootStackParamList>();
+
+export default function AppNavigator() {
+  const { theme } = useTheme();
+
+  return (
+    <NavigationContainer theme={theme.dark ? DarkTheme : DefaultTheme}>
+      <Stack.Navigator>
+        <Stack.Screen name="Home" component={HomeScreen} />
+        <Stack.Screen name="Profile" component={ProfileScreen} />
+      </Stack.Navigator>
     </NavigationContainer>
-);
-
-export default AppNavigator;
+  );
+}

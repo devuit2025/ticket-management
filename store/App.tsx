@@ -1,7 +1,8 @@
-import { Theme } from './src/theme'; // assuming you export `Theme` type in src/theme/index.ts
 import React, { useMemo } from 'react';
+import AppNavigator from './src/navigation/AppNavigator';
 import { View, Text, StyleSheet, Button } from 'react-native';
 import { ThemeProvider, useTheme } from './src/context/ThemeContext';
+import { Theme } from './src/theme';
 
 const ThemedScreen = () => {
     const { theme, toggleTheme } = useTheme();
@@ -22,8 +23,11 @@ const ThemedScreen = () => {
 
 export default function App() {
     return (
+        // <ThemeProvider>
+        //     <ThemedScreen />
+        // </ThemeProvider>
         <ThemeProvider>
-            <ThemedScreen />
+            <AppNavigator />
         </ThemeProvider>
     );
 }
