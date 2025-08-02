@@ -14,9 +14,9 @@ export const coreTokens = {
         pill: 9999,
     },
     fonts: {
-        regular: 'System',
-        medium: 'System',
-        bold: 'System',
+        regular: 'Inter-Regular',
+        medium: 'Inter-Medium',
+        bold: 'Inter-Bold',
         sizes: {
             sm: 12,
             md: 14,

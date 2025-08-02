@@ -7,14 +7,14 @@ import { RootStackParamList } from '../navigation/navigationTypes';
 type HomeScreenNavigationProp = NativeStackNavigationProp<RootStackParamList, 'Home'>;
 
 const HomeScreen = () => {
-  const navigation = useNavigation<HomeScreenNavigationProp>();
+    const navigation = useNavigation<HomeScreenNavigationProp>();
 
-  return (
-    <View>
-      <Text>Home Screen</Text>
-      <Button title="Go to Profile" onPress={() => navigation.navigate('Profile')} />
-    </View>
-  );
+    return (
+        <View>
+            <Text>Home Screen</Text>
+            <Button title="Go to Profile" onPress={() => navigation.navigate('Profile')} />
+        </View>
+    );
 };
 
 export default HomeScreen;
