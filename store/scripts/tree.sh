@@ -4,7 +4,7 @@
 # Optionally edit the IGNORE_DIRS variable to add directory names to ignore
 
 TARGET_DIR="$1"
-IGNORE_DIRS=("node_modules" ".git" "vendor" ".expo" "scripts")  # Add directories you want to ignore here
+IGNORE_DIRS=("node_modules" ".git" "vendor" ".expo" "scripts" "fonts")  # Add directories you want to ignore here
 
 if [[ -z "$TARGET_DIR" ]]; then
   echo "Usage: $0 /path/to/target-folder"

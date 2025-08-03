@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import AppNavigator from './src/navigation/AppNavigator';
 import { ThemeProvider } from './src/context/ThemeContext';
 import * as Font from 'expo-font';
+import { LanguageProvider } from '@i18n/LanguageProvider';
 
 export default function App() {
     const [fontsLoaded, setFontsLoaded] = useState(false);
@@ -20,8 +21,10 @@ export default function App() {
     }, []);
 
     return (
-        <ThemeProvider>
-            <AppNavigator />
-        </ThemeProvider>
+        <LanguageProvider>
+            <ThemeProvider>
+                <AppNavigator />
+            </ThemeProvider>
+        </LanguageProvider>
     );
 }

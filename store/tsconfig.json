@@ -10,6 +10,7 @@
             "@context/*": ["src/context/*"],
             "@hooks/*": ["src/hooks/*"],
             "@navigation/*": ["src/navigation/*"],
+            "@i18n/*": ["src/i18n/*"],
             "@store/*": ["src/store/*"],
             "@theme/*": ["src/theme/*"],
             "@utils/*": ["src/utils/*"]

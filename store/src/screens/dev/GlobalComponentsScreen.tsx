@@ -17,6 +17,7 @@ import Checkbox from '@components/global/checkbox/Checkbox';
 import RadioButton from '@components/global/radiobutton/RadioButton';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '@navigation/navigationTypes';
+import { useTranslation } from '@i18n/useTranslation';
 
 type GlobalComponentsScreenNavigationProp = NativeStackNavigationProp<
     RootStackParamList,
@@ -24,6 +25,8 @@ type GlobalComponentsScreenNavigationProp = NativeStackNavigationProp<
 >;
 
 const GlobalComponentsScreen = () => {
+    const { translate } = useTranslation();
+
     const [modalVisible, setModalVisible] = useState(false);
     const [switchValue, setSwitchValue] = useState(false);
     const [checkboxValue, setCheckboxValue] = useState(false);
@@ -31,7 +34,7 @@ const GlobalComponentsScreen = () => {
 
     return (
         <ScrollView contentContainerStyle={styles.container}>
-            <Text style={styles.title}>Global Components Showcase</Text>
+            <Text style={styles.title}>{translate('common.welcome')}</Text>
 
             <View style={styles.section}>
                 <Text style={styles.heading}>Button</Text>
