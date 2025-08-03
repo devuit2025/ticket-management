@@ -13,7 +13,8 @@ export const lightColors = {
     error: '#DC2626', // strong red for errors
     success: '#16A34A', // fresh green for success messages
     warning: '#FBBF24', // amber warning color, softer than orange
-    info: '#3B82F6', // bright blue info
+    info: '#3B82F6', // bright blue info,
+    surface: '#D1D5DB',
 };
 
 export const darkColors = {
@@ -31,5 +32,6 @@ export const darkColors = {
     error: '#EF4444', // red error for dark
     success: '#22C55E', // green success
     warning: '#F59E0B', // amber warning
-    info: '#60A5FA', // lighter blue info
+    info: '#60A5FA', // lighter blue info,
+    surface: '#D1D5DB',
 };

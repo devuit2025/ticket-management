@@ -8,7 +8,6 @@ import Typography from '@components/global/typography/Typography';
 import Icon from '@components/global/icon/Icon';
 import Card from '@components/global/card/Card';
 import Modal from '@components/global/modal/Modal';
-import Loader from '@components/global/loader/Loader';
 import Divider from '@components/global/divider/Divider';
 import Avatar from '@components/global/avatar/Avatar';
 import Snackbar from '@components/global/snackbar/Snackbar';
@@ -18,6 +17,7 @@ import RadioButton from '@components/global/radiobutton/RadioButton';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '@navigation/navigationTypes';
 import { useTranslation } from '@i18n/useTranslation';
+import Loader from './Loader';
 
 type GlobalComponentsScreenNavigationProp = NativeStackNavigationProp<
     RootStackParamList,
@@ -53,7 +53,7 @@ const GlobalComponentsScreen = () => {
                     <Button title="Disabled" disabled />
                 </View>
             </View>
-
+            <Divider />
             <View style={styles.section}>
                 <Text style={styles.heading}>TextInput</Text>
 
@@ -103,7 +103,7 @@ const GlobalComponentsScreen = () => {
                     style={{ height: 100, textAlignVertical: 'top' }}
                 />
             </View>
-
+            <Divider />
             <View style={styles.section}>
                 <Text style={[styles.heading, { marginBottom: 20 }]}>Typography</Text>
 
@@ -133,6 +133,7 @@ const GlobalComponentsScreen = () => {
                     refund policy for details.
                 </Typography>
             </View>
+            <Divider />
             <View style={styles.section}>
                 <Text style={[styles.heading, { marginBottom: 12 }]}>Icon Examples</Text>
 
@@ -175,7 +176,7 @@ const GlobalComponentsScreen = () => {
                     </View>
                 </View>
             </View>
-
+            <Divider />
             <View style={styles.section}>
                 <Text style={styles.heading}>Card</Text>
 
@@ -195,7 +196,7 @@ const GlobalComponentsScreen = () => {
                     </Typography>
                 </Card>
             </View>
-
+            <Divider />
             <View style={styles.section}>
                 <Text style={styles.heading}>Modal</Text>
                 {/* Trigger modal */}
@@ -218,7 +219,13 @@ const GlobalComponentsScreen = () => {
 
             <View style={styles.section}>
                 <Text style={styles.heading}>Avatar</Text>
-                <Avatar uri="https://placekitten.com/100/100" />
+
+                <View style={{ flexDirection: 'row', gap: 16, padding: 16 }}>
+                    <Avatar size={64} imageUrl="https://randomuser.me/api/portraits/men/32.jpg" />
+                    <Avatar size={48} initials="LT" borderColor="#FF6B00" />
+                    <Avatar size={40} initials="HN" showStatus statusOnline />
+                    <Avatar size={40} initials="NH" showStatus statusOnline={false} />
+                </View>
             </View>
 
             <View style={styles.section}>

@@ -1,18 +1,37 @@
 import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import { View, StyleSheet, ViewStyle } from 'react-native';
+import { useTheme } from '@context/ThemeContext';
 
-const Divider = () => {
+interface DividerProps {
+    thickness?: number;
+    color?: string;
+    style?: ViewStyle;
+    marginVertical?: number;
+    marginHorizontal?: number;
+}
+
+const Divider: React.FC<DividerProps> = ({
+    thickness = StyleSheet.hairlineWidth,
+    color,
+    style,
+    marginVertical = 8,
+    marginHorizontal = 0,
+}) => {
+    const { theme } = useTheme();
+
     return (
-        <View style={styles.container}>
-            <Text>Divider component</Text>
-        </View>
+        <View
+            style={[
+                {
+                    height: thickness,
+                    backgroundColor: color || theme.colors.border,
+                    marginVertical,
+                    marginHorizontal,
+                },
+                style,
+            ]}
+        />
     );
 };
-
-const styles = StyleSheet.create({
-    container: {
-        padding: 10,
-    },
-});
 
 export default Divider;
