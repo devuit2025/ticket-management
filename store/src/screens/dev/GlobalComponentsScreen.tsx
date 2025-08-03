@@ -105,8 +105,33 @@ const GlobalComponentsScreen = () => {
             </View>
 
             <View style={styles.section}>
-                <Text style={styles.heading}>Typography</Text>
-                <Typography>Sample typography text</Typography>
+                <Text style={[styles.heading, { marginBottom: 20 }]}>Typography</Text>
+
+                <Typography variant="h1" weight="bold" style={{ marginBottom: 10 }}>
+                    Welcome to Phuong Trang Tickets
+                </Typography>
+
+                <Typography variant="h2" weight="bold" style={{ marginBottom: 10 }}>
+                    Welcome to Phuong Trang Tickets
+                </Typography>
+
+                <Typography variant="h3" weight="bold" style={{ marginBottom: 10 }}>
+                    Welcome to Phuong Trang Tickets
+                </Typography>
+
+                <Typography variant="body" style={{ marginBottom: 10 }}>
+                    Planning your trip has never been easier. Browse our extensive list of bus
+                    routes and schedules, select the best seat for your comfort, and book your
+                    ticket securely within minutes. Whether you're traveling for business or
+                    leisure, we ensure a smooth and safe journey with our modern fleet and
+                    professional drivers. Enjoy exclusive offers and real-time updates on your trip
+                    status right from your device.
+                </Typography>
+
+                <Typography variant="caption" weight="medium" color="#888" style={{ marginTop: 8 }}>
+                    * Tickets are refundable up to 24 hours before departure. Please check our
+                    refund policy for details.
+                </Typography>
             </View>
 
             <View style={styles.section}>
