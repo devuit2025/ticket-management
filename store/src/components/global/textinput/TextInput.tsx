@@ -45,10 +45,10 @@ const TextInput = forwardRef<RNTextInput, TextInputProps>(
                             borderColor,
                             color: theme.colors.text,
                             borderRadius: theme.radius.md,
-                            paddingHorizontal: theme.spacing.sm,
+                            paddingHorizontal: theme.spacing.md,
                             fontFamily: theme.fonts.regular,
                             fontSize: theme.fonts.sizes.lg,
-                            height: 44,
+                            height: 40,
                         },
                         style,
                     ]}

@@ -133,16 +133,66 @@ const GlobalComponentsScreen = () => {
                     refund policy for details.
                 </Typography>
             </View>
-
             <View style={styles.section}>
-                <Text style={styles.heading}>Icon</Text>
-                <Icon name="star" size={30} color="orange" />
+                <Text style={[styles.heading, { marginBottom: 12 }]}>Icon Examples</Text>
+
+                <View
+                    style={{
+                        flexDirection: 'row',
+                        alignItems: 'center',
+                        gap: 16,
+                        flexWrap: 'wrap',
+                    }}
+                >
+                    <View style={styles.iconItem}>
+                        <Icon name="home-outline" type="ion" size="lg" />
+                        <Text style={styles.iconLabel}>Home</Text>
+                    </View>
+
+                    <View style={styles.iconItem}>
+                        <Icon name="person" type="material" color="#FF6B00" />
+                        <Text style={styles.iconLabel}>Profile</Text>
+                    </View>
+
+                    <View style={styles.iconItem}>
+                        <Icon name="bus" type="fa" size="lg" />
+                        <Text style={styles.iconLabel}>Bus</Text>
+                    </View>
+
+                    <View style={styles.iconItem}>
+                        <Icon name="credit-card" type="fa" size="md" />
+                        <Text style={styles.iconLabel}>Payment</Text>
+                    </View>
+
+                    <View style={styles.iconItem}>
+                        <Icon name="calendar-outline" type="ion" />
+                        <Text style={styles.iconLabel}>Schedule</Text>
+                    </View>
+
+                    <View style={styles.iconItem}>
+                        <Icon name="help-circle-outline" type="ion" />
+                        <Text style={styles.iconLabel}>Help</Text>
+                    </View>
+                </View>
             </View>
 
             <View style={styles.section}>
                 <Text style={styles.heading}>Card</Text>
+
                 <Card>
-                    <Text>Card content</Text>
+                    <Typography variant="h3" weight="bold">
+                        Saigon → Da Lat
+                    </Typography>
+                    <Typography variant="body" style={{ marginTop: 4 }}>
+                        Departure: 10:00 AM · Duration: 6h 30m · Price: 250,000đ
+                    </Typography>
+                </Card>
+
+                <Card bordered style={{ marginTop: 16 }}>
+                    <Typography variant="body">Passenger: Nguyen Van A</Typography>
+                    <Typography variant="caption" color="#888" style={{ marginTop: 4 }}>
+                        Seat: B12 · Payment: Momo
+                    </Typography>
                 </Card>
             </View>
 
@@ -213,6 +263,18 @@ const styles = StyleSheet.create({
         fontSize: 18,
         fontWeight: '600',
         marginBottom: 8,
+    },
+    iconItem: {
+        alignItems: 'center',
+        justifyContent: 'center',
+        width: 80,
+        marginBottom: 16,
+    },
+    iconLabel: {
+        marginTop: 6,
+        fontSize: 12,
+        color: '#444',
+        fontFamily: 'inter-Regular',
     },
 });
 

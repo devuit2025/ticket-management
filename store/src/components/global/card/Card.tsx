@@ -1,18 +1,50 @@
 import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import { View, StyleSheet, ViewStyle, StyleProp, ViewProps } from 'react-native';
+import { useTheme } from '@context/ThemeContext';
 
-const Card = () => {
+export interface CardProps extends ViewProps {
+    children: React.ReactNode;
+    style?: StyleProp<ViewStyle>;
+    elevation?: number;
+    bordered?: boolean;
+}
+
+const Card: React.FC<CardProps> = ({
+    children,
+    style,
+    elevation = 2,
+    bordered = false,
+    ...rest
+}) => {
+    const { theme } = useTheme();
+
+    const backgroundColor = theme.colors.card;
+    const borderColor = theme.colors.border;
+    const shadow = {
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 1 },
+        shadowOpacity: 0.1,
+        shadowRadius: elevation,
+        elevation,
+    };
+
     return (
-        <View style={styles.container}>
-            <Text>Card component</Text>
+        <View
+            style={[
+                {
+                    backgroundColor,
+                    padding: theme.spacing.md,
+                    borderRadius: theme.radius.md,
+                    ...(bordered ? { borderWidth: 1, borderColor } : {}),
+                    ...shadow,
+                },
+                style,
+            ]}
+            {...rest}
+        >
+            {children}
         </View>
     );
 };
-
-const styles = StyleSheet.create({
-    container: {
-        padding: 10,
-    },
-});
 
 export default Card;

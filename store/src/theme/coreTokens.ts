@@ -1,6 +1,6 @@
 export const coreTokens = {
     spacing: {
-        xs: 4,
+        xs: 5,
         sm: 8,
         md: 16,
         lg: 24,
