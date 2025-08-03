@@ -32,6 +32,13 @@ const GlobalComponentsScreen = () => {
     const [checkboxValue, setCheckboxValue] = useState(false);
     const [radioValue, setRadioValue] = useState(false);
 
+    const [textInputValue, setTextInputValue] = useState('');
+
+    const [text, setText] = useState('');
+    const [email, setEmail] = useState('');
+    const [password, setPassword] = useState('');
+    const [errorInput, setErrorInput] = useState('');
+
     return (
         <ScrollView contentContainerStyle={styles.container}>
             <Text style={styles.title}>{translate('common.welcome')}</Text>
@@ -49,7 +56,52 @@ const GlobalComponentsScreen = () => {
 
             <View style={styles.section}>
                 <Text style={styles.heading}>TextInput</Text>
-                <TextInput placeholder="Sample input" />
+
+                {/* Basic TextInput */}
+                <TextInput
+                    label="Sample Input"
+                    placeholder="Enter something..."
+                    value={text}
+                    onChangeText={setText}
+                />
+
+                {/* TextInput with helper text */}
+                <TextInput
+                    label="Email"
+                    placeholder="email@example.com"
+                    keyboardType="email-address"
+                    autoCapitalize="none"
+                    value={email}
+                    onChangeText={setEmail}
+                    helperText="We'll never share your email."
+                />
+
+                {/* Password input */}
+                <TextInput
+                    label="Password"
+                    placeholder="Enter your password"
+                    secureTextEntry
+                    value={password}
+                    onChangeText={setPassword}
+                />
+
+                {/* TextInput showing error */}
+                <TextInput
+                    label="Error input"
+                    placeholder="Try something"
+                    value={errorInput}
+                    onChangeText={setErrorInput}
+                    error={errorInput.length < 5 ? 'Minimum 5 characters required' : undefined}
+                />
+
+                {/* Multiline input */}
+                <TextInput
+                    label="Multiline Input"
+                    placeholder="Type your message"
+                    multiline
+                    numberOfLines={4}
+                    style={{ height: 100, textAlignVertical: 'top' }}
+                />
             </View>
 
             <View style={styles.section}>

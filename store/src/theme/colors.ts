@@ -3,6 +3,7 @@ export const lightColors = {
     disabledBackground: '#E5E7EB', // light gray (cooler than #F0F0F3) for disabled states
     disabledText: '#9CA3AF', // gray for disabled text, softer than black
     text: '#1F2937', // dark slate gray, easier on eyes than pure black
+    placeholder: '#D1D5DB',
     primary: '#093FB4', // your strong blue for trust and action
     onPrimary: '#FFFFFF', // white text on blue buttons
     secondary: '#0B9BF5', // warm amber (similar to Shopify’s secondary) for highlights and CTAs
@@ -20,6 +21,7 @@ export const darkColors = {
     disabledBackground: '#2C2C2E',
     disabledText: '#6B7280', // softer gray for disabled text
     text: '#E5E7EB', // light gray text
+    placeholder: '#D1D5DB',
     primary: '#3762D9', // slightly lighter blue for dark mode
     onPrimary: '#FFFFFF',
     secondary: '#0B9BF5', // amber secondary for contrast
