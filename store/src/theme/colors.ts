@@ -15,6 +15,7 @@ export const lightColors = {
     warning: '#FBBF24', // amber warning color, softer than orange
     info: '#3B82F6', // bright blue info,
     surface: '#D1D5DB',
+    inputBackground: '#FFFFFF',
 };
 
 export const darkColors = {
@@ -34,4 +35,5 @@ export const darkColors = {
     warning: '#F59E0B', // amber warning
     info: '#60A5FA', // lighter blue info,
     surface: '#D1D5DB',
+    inputBackground: '#6B7280',
 };

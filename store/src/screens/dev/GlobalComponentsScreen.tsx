@@ -28,11 +28,6 @@ const GlobalComponentsScreen = () => {
     const { translate } = useTranslation();
 
     const [modalVisible, setModalVisible] = useState(false);
-    const [switchValue, setSwitchValue] = useState(false);
-    const [checkboxValue, setCheckboxValue] = useState(false);
-    const [radioValue, setRadioValue] = useState(false);
-
-    const [textInputValue, setTextInputValue] = useState('');
 
     const [text, setText] = useState('');
     const [email, setEmail] = useState('');
@@ -226,26 +221,6 @@ const GlobalComponentsScreen = () => {
                     <Avatar size={40} initials="HN" showStatus statusOnline />
                     <Avatar size={40} initials="NH" showStatus statusOnline={false} />
                 </View>
-            </View>
-
-            <View style={styles.section}>
-                <Text style={styles.heading}>Snackbar</Text>
-                <Snackbar message="This is a snackbar message" />
-            </View>
-
-            <View style={styles.section}>
-                <Text style={styles.heading}>Switch</Text>
-                <Switch value={switchValue} onValueChange={setSwitchValue} />
-            </View>
-
-            <View style={styles.section}>
-                <Text style={styles.heading}>Checkbox</Text>
-                <Checkbox value={checkboxValue} onValueChange={setCheckboxValue} />
-            </View>
-
-            <View style={styles.section}>
-                <Text style={styles.heading}>RadioButton</Text>
-                <RadioButton selected={radioValue} onPress={() => setRadioValue(!radioValue)} />
             </View>
         </ScrollView>
     );
