@@ -5,12 +5,8 @@ import { yupResolver } from '@hookform/resolvers/yup';
 import { loginSchema } from '@validations/authSchema';
 import { FormInput } from '@components/form/FormInput';
 
-import { useNavigation } from '@react-navigation/native';
-import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { RootStackParamList } from '@navigation/navigationTypes';
 import { FormSubmitButton } from '@components/form/FormSubmitButton';
-
-type LoginScreenNavigationProp = NativeStackNavigationProp<RootStackParamList, 'Login'>;
+import { MainLayout } from '@components/layouts/MainLayout';
 
 type LoginFormData = {
     email: string;
@@ -35,32 +31,34 @@ const LoginScreen = () => {
     };
 
     return (
-        <View style={styles.container}>
-            <FormInput
-                name="email"
-                label="Email"
-                control={control}
-                error={errors.email?.message}
-                keyboardType="email-address"
-                autoCapitalize="none"
-                placeholder="Enter your email"
-            />
+        <MainLayout>
+            <View style={styles.container}>
+                <FormInput
+                    name="email"
+                    label="Email"
+                    control={control}
+                    error={errors.email?.message}
+                    keyboardType="email-address"
+                    autoCapitalize="none"
+                    placeholder="Enter your email"
+                />
 
-            <FormInput
-                name="password"
-                label="Password"
-                control={control}
-                error={errors.password?.message}
-                secureTextEntry
-                placeholder="Password"
-            />
+                <FormInput
+                    name="password"
+                    label="Password"
+                    control={control}
+                    error={errors.password?.message}
+                    secureTextEntry
+                    placeholder="Password"
+                />
 
-            <FormSubmitButton
-                title="Login"
-                onPress={handleSubmit(onSubmit)}
-                isSubmitting={isSubmitting}
-            />
-        </View>
+                <FormSubmitButton
+                    title="Login"
+                    onPress={handleSubmit(onSubmit)}
+                    isSubmitting={isSubmitting}
+                />
+            </View>
+        </MainLayout>
     );
 };
 

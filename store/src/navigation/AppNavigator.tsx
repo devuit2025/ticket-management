@@ -8,6 +8,8 @@ import { useTheme } from '@context/ThemeContext';
 import GlobalComponentsScreen from '@screens/dev/GlobalComponentsScreen';
 import { HomeScreen } from '@screens/home';
 import { LoginScreen } from '@screens/onboarding';
+import { SelectPickupDropoffScreen } from '@screens/booking';
+import { BookingNavigator } from '@navigation/BookingNavigator';
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
@@ -17,11 +19,18 @@ export default function AppNavigator() {
     return (
         <NavigationContainer theme={theme.dark ? DarkTheme : DefaultTheme}>
             <Stack.Navigator
-                initialRouteName="Login"
+                initialRouteName="Booking"
                 screenOptions={{
                     headerShown: false,
                 }}
             >
+                {/* <Stack.Screen name="SelectPickupDropoff" component={SelectPickupDropoffScreen} /> */}
+                <Stack.Screen
+                    name="Booking"
+                    component={BookingNavigator}
+                    options={{ headerShown: false }}
+                />
+
                 <Stack.Screen name="Home" component={HomeScreen} />
                 <Stack.Screen name="Login" component={LoginScreen} />
                 <Stack.Screen
