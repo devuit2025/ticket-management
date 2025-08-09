@@ -1,32 +1,9 @@
 import React, { useState } from 'react';
-import {
-    View,
-    Text,
-    TouchableOpacity,
-    StyleSheet,
-    Modal,
-    FlatList,
-    TextInput,
-    StyleProp,
-    ViewStyle,
-} from 'react-native';
-import { Controller, Control } from 'react-hook-form';
+import { View, Text, TouchableOpacity, StyleSheet, Modal, FlatList, TextInput } from 'react-native';
+import { Controller } from 'react-hook-form';
 import { useTheme } from '@context/ThemeContext';
-
-export interface FormSelectOption {
-    label: string;
-    value: string | number;
-}
-
-interface FormSelectProps {
-    name: string;
-    label: string;
-    control: Control<any>;
-    error?: string;
-    options: FormSelectOption[];
-    placeholder?: string;
-    containerStyle?: StyleProp<ViewStyle>;
-}
+import type { FormSelectProps, Options } from '@types';
+import Icon from '@components/global/icon/Icon';
 
 export const FormSelect: React.FC<FormSelectProps> = ({
     name,
@@ -36,12 +13,13 @@ export const FormSelect: React.FC<FormSelectProps> = ({
     options,
     placeholder,
     containerStyle,
+    iconName,
 }) => {
     const { theme } = useTheme();
     const [modalVisible, setModalVisible] = useState(false);
     const [searchTerm, setSearchTerm] = useState('');
 
-    const filteredOptions = options.filter((option) =>
+    const filteredOptions = options.filter((option: Options) =>
         option.label.toLowerCase().includes(searchTerm.toLowerCase())
     );
 
@@ -75,8 +53,17 @@ export const FormSelect: React.FC<FormSelectProps> = ({
                                     backgroundColor: theme.colors.inputBackground,
                                     borderRadius: theme.radius.sm,
                                     padding: theme.spacing.sm,
+                                    flexDirection: 'row',
+                                    alignItems: 'center',
                                 }}
                             >
+                                {iconName && (
+                                    <Icon
+                                        name={iconName}
+                                        style={{ marginRight: theme.spacing.xs }}
+                                    />
+                                )}
+
                                 <Text
                                     style={{
                                         color: selected
@@ -88,7 +75,7 @@ export const FormSelect: React.FC<FormSelectProps> = ({
                                 </Text>
                             </TouchableOpacity>
 
-                            <Modal visible={modalVisible} animationType="slide" transparent>
+                            <Modal visible={modalVisible} animationType="fade" transparent>
                                 <View style={styles.modalOverlay}>
                                     <View
                                         style={[

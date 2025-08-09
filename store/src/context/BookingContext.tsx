@@ -1,13 +1,5 @@
-// src/context/BookingContext.tsx
 import React, { createContext, useContext, useState, ReactNode } from 'react';
-
-interface BookingData {
-    pickupLocation?: string;
-    dropoffLocation?: string;
-    passengers?: Array<{ name: string; age: number }>;
-    paymentMethod?: string;
-    // add other booking fields as needed
-}
+import type { BookingData } from '@types';
 
 interface BookingContextValue {
     bookingData: BookingData;

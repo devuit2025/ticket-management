@@ -13,6 +13,7 @@
             "@validations/*": ["src/validations/*"],
 
             "@i18n/*": ["src/i18n/*"],
+            "@types/*": ["src/types/*"],
             "@store/*": ["src/store/*"],
             "@theme/*": ["src/theme/*"],
             "@utils/*": ["src/utils/*"]

@@ -9,7 +9,7 @@ import {
     ViewStyle,
     TextStyle,
 } from 'react-native';
-import { useTheme } from '@context/ThemeContext'; // Assuming you have a ThemeContext for colors, spacing, radius
+import { useTheme } from '@context/ThemeContext';
 
 type ButtonVariant = 'primary' | 'secondary' | 'outline';
 

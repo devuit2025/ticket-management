@@ -3,3 +3,6 @@ export interface User {
     name: string;
     email: string;
 }
+
+export * from './booking';
+export * from './form';

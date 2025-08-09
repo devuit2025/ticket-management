@@ -1,34 +1,110 @@
 import React from 'react';
-import { View } from 'react-native';
-import { useBooking } from '@context/BookingContext';
 import { MainLayout } from '@components/layouts/MainLayout';
 import { FormSelect } from '@components/form/FormSelect';
+import { FormDatePicker } from '@components/form/FormDatePicker';
 import { FormSubmitButton } from '@components/form/FormSubmitButton';
+import { useBooking } from '@context/BookingContext';
+import type { BookingData, Options } from '@types';
+import { useForm } from 'react-hook-form';
+import { useTranslation } from '@i18n/useTranslation';
 
-const locations = [
+const locations: Options[] = [
     { label: 'Hanoi', value: 'hanoi' },
     { label: 'Ho Chi Minh City', value: 'hcmc' },
 ];
 
-export default function SelectPickupDropoffScreen({ navigation }) {
-    const { bookingData, setBookingData } = useBooking();
+const ticketNumbers: Options[] = Array.from({ length: 10 }, (_, i) => ({
+    label: `${i + 1}`,
+    value: `${i + 1}`,
+}));
 
-    const onNext = () => {
-        navigation.navigate('PassengerInfo');
-        // Basic validation can be added here
-        if (bookingData.pickupLocation && bookingData.dropoffLocation) {
-            navigation.navigate('PassengerInfo');
-        } else {
-            //   alert('Please select pickup and dropoff locations');
-        }
+export default function SelectPickupDropoffScreen() {
+    const { bookingData, setBookingData } = useBooking();
+    const {
+        control,
+        handleSubmit,
+        formState: { errors },
+    } = useForm({
+        defaultValues: {
+            numberOfTickets: '1',
+        },
+    });
+
+    const { translate } = useTranslation();
+
+    const handleChange = (field: keyof BookingData, value: string | Date | null) => {
+        setBookingData((prev: BookingData) => ({
+            ...prev,
+            [field]: value,
+        }));
     };
 
     return (
         <MainLayout withPadding>
-            {/* select 1
+            <FormSelect
+                name="from"
+                control={control}
+                label={translate('booking.pickupLocation')}
+                placeholder={translate('booking.pickupLocationPlaceholder')}
+                options={locations}
+                value={bookingData.from}
+                onChange={(val: string) => handleChange('from', val)}
+                error={errors.from?.message}
+                textAlign="left"
+                iconName="location-outline"
+            />
 
-        select 2 */}
-            <FormSubmitButton title="Next" onPress={onNext} />
+            <FormSelect
+                name="to"
+                control={control}
+                label={translate('booking.dropoffLocation')}
+                placeholder={translate('booking.dropoffLocationPlaceholder')}
+                options={locations}
+                value={bookingData.to}
+                onChange={(val: string) => handleChange('to', val)}
+                error={errors.to?.message}
+                textAlign="left"
+                iconName="location-outline"
+            />
+
+            <FormDatePicker
+                name="day"
+                control={control}
+                label={translate('booking.travelDate')}
+                placeholder={translate('booking.travelDatePlaceholder')}
+                value={bookingData.day}
+                onChange={(val: string) => handleChange('day', val)}
+                error={errors.day?.message}
+                textAlign="left"
+                iconName="calendar-outline"
+            />
+
+            <FormDatePicker
+                name="dayBack"
+                control={control}
+                label={translate('booking.travelDate') + ' ' + translate('booking.roundTrip')}
+                placeholder={translate('booking.travelDatePlaceholder')}
+                value={bookingData.dayBack}
+                onChange={(val: string) => handleChange('dayBack', val)}
+                error={errors.dayBack?.message}
+                textAlign="left"
+                iconName="calendar-outline"
+            />
+
+            <FormSelect
+                name="numberOfTickets"
+                control={control}
+                label={translate('booking.numberOfTickets')}
+                placeholder={translate('booking.numberOfTicketsPlaceholder')}
+                options={ticketNumbers}
+                value={bookingData.numberOfTickets}
+                onChange={(val: string) => handleChange('numberOfTickets', val)}
+                error={errors.numberOfTickets?.message}
+                textAlign="left"
+                iconName="ticket-outline"
+            />
+
+            <FormSubmitButton title={translate('booking.searchBus')} />
         </MainLayout>
     );
 }

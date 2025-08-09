@@ -11,15 +11,8 @@ import {
 import { Controller, Control } from 'react-hook-form';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { useTheme } from '@context/ThemeContext';
-
-interface FormDatePickerProps {
-    name: string;
-    label: string;
-    control: Control<any>;
-    error?: string;
-    placeholder?: string;
-    containerStyle?: StyleProp<ViewStyle>;
-}
+import Icon from '@components/global/icon/Icon';
+import type { FormDatePickerProps } from '@types';
 
 export const FormDatePicker: React.FC<FormDatePickerProps> = ({
     name,
@@ -28,6 +21,7 @@ export const FormDatePicker: React.FC<FormDatePickerProps> = ({
     error,
     placeholder = 'Select date',
     containerStyle,
+    iconName,
 }) => {
     const { theme } = useTheme();
     const [showPicker, setShowPicker] = useState(false);
@@ -70,8 +64,17 @@ export const FormDatePicker: React.FC<FormDatePickerProps> = ({
                                     backgroundColor: theme.colors.inputBackground,
                                     borderRadius: theme.radius.sm,
                                     padding: theme.spacing.sm,
+                                    flexDirection: 'row',
+                                    alignItems: 'center',
                                 }}
                             >
+                                {iconName && (
+                                    <Icon
+                                        name={iconName}
+                                        style={{ marginRight: theme.spacing.xs }}
+                                    />
+                                )}
+
                                 <Text
                                     style={{
                                         color: value ? theme.colors.text : theme.colors.placeholder,
@@ -81,14 +84,25 @@ export const FormDatePicker: React.FC<FormDatePickerProps> = ({
                                 </Text>
                             </TouchableOpacity>
 
-                            {showPicker && (
-                                <DateTimePicker
-                                    value={value ? new Date(value) : new Date()}
-                                    mode="date"
-                                    display={Platform.OS === 'ios' ? 'spinner' : 'default'}
-                                    onChange={handleChange}
-                                />
-                            )}
+                            {showPicker &&
+                                (Platform.OS === 'web' ? (
+                                    <input
+                                        type="date"
+                                        value={value ? value.split('T')[0] : ''}
+                                        onChange={(e) => {
+                                            setShowPicker(false);
+                                            onChange(new Date(e.target.value).toISOString());
+                                        }}
+                                        style={{ padding: 8, fontSize: 16 }}
+                                    />
+                                ) : (
+                                    <DateTimePicker
+                                        value={value ? new Date(value) : new Date()}
+                                        mode="date"
+                                        display={Platform.OS === 'ios' ? 'spinner' : 'default'}
+                                        onChange={handleChange}
+                                    />
+                                ))}
                         </>
                     );
                 }}

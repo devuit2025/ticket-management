@@ -19,6 +19,9 @@ export default {
         successMessage: 'Đặt vé thành công! Cảm ơn bạn đã sử dụng dịch vụ.',
 
         // Booking form fields
+        searchBus: 'Tìm kiếm tuyến',
+        numberOfTickets: 'Số vé',
+        numberOfTicketsPlaceholder: 'Chọn Số vé',
         fullName: 'Họ và tên',
         fullNamePlaceholder: 'Nhập họ và tên',
         phoneNumber: 'Số điện thoại',
