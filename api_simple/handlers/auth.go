@@ -14,9 +14,10 @@ import (
 )
 
 type RegisterRequest struct {
-	Phone    string `json:"phone" binding:"required"`
-	Password string `json:"password" binding:"required"`
-	Name     string `json:"name" binding:"required"`
+	Phone    string      `json:"phone" binding:"required"`
+	Password string      `json:"password" binding:"required"`
+	Name     string      `json:"name" binding:"required"`
+	Role     models.Role `json:"role"`
 }
 
 type LoginRequest struct {
@@ -82,11 +83,23 @@ func Register(c *gin.Context) {
 		return
 	}
 
+	// Set default role to customer if not provided
+	role := req.Role
+	if role == "" {
+		role = models.RoleCustomer
+	}
+
+	// Validate role
+	if role != models.RoleAdmin && role != models.RoleCustomer && role != models.RoleDriver {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Vai trò không hợp lệ"})
+		return
+	}
+
 	user := models.User{
 		Phone:    req.Phone,
 		Password: req.Password,
 		Name:     req.Name,
-		Role:     models.RoleCustomer,
+		Role:     role,
 	}
 
 	if err := userRepo.Create(&user); err != nil {

@@ -81,3 +81,18 @@ func ValidateName(name string) (bool, string) {
 	}
 	return true, ""
 }
+
+// ValidatePlateNumber validates a plate number format
+func ValidatePlateNumber(plateNumber string) bool {
+	// For simplicity, just check if it matches the format: XXX-XXXXX
+	// where X can be a letter or number
+	// In production, use a more strict regex based on your country's plate number format
+	return len(plateNumber) >= 8 && len(plateNumber) <= 10 && plateNumber[3] == '-'
+}
+
+// ValidateEmail checks if the email is valid
+func ValidateEmail(email string) bool {
+	// Simple email validation using regex
+	emailRegex := regexp.MustCompile(`^[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}$`)
+	return emailRegex.MatchString(email)
+}

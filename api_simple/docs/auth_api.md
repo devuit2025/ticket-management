@@ -18,7 +18,8 @@ Tạo tài khoản mới cho người dùng.
 {
   "phone": "0987654321", // Số điện thoại (bắt đầu bằng 0, 10 số)
   "password": "Password123!", // Mật khẩu (ít nhất 8 ký tự, tối đa 32 ký tự)
-  "name": "Nguyễn Văn A" // Họ tên (2-50 ký tự)
+  "name": "Nguyễn Văn A", // Họ tên (2-50 ký tự)
+  "role": "customer" // Vai trò (customer/driver/admin, mặc định: customer)
 }
 ```
 
@@ -55,6 +56,7 @@ Tạo tài khoản mới cho người dùng.
   // "Mật khẩu phải có ít nhất 8 ký tự"
   // "Mật khẩu phải chứa ít nhất 1 chữ hoa, 1 chữ thường, 1 số và 1 ký tự đặc biệt"
   // "Họ tên không được để trống"
+  // "Vai trò không hợp lệ"
 }
 ```
 
@@ -282,3 +284,9 @@ Authorization: Bearer <token>
 - 401: Chưa xác thực hoặc xác thực thất bại
 - 404: Không tìm thấy tài nguyên
 - 500: Lỗi server
+
+5. Vai trò người dùng:
+
+- customer: Khách hàng (mặc định)
+- driver: Tài xế
+- admin: Quản trị viên

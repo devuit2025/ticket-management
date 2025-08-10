@@ -1,284 +1,327 @@
 package tests
 
 import (
+	"bytes"
 	"encoding/json"
 	"net/http"
+	"net/http/httptest"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
 )
 
-func TestRegister(t *testing.T) {
-	// Clean up database before running tests
-	CleanupTestDB(t)
+func TestAuth(t *testing.T) {
+	// Setup
+	router := SetupTestRouter()
+	w := httptest.NewRecorder()
 
-	logger := NewTestLogger("Auth API Tests - Register")
+	t.Run("Register", func(t *testing.T) {
+		CleanupTestDB(t)
 
-	t.Run("successful_registration", func(t *testing.T) {
-		logger.LogTestStart("Register a new user")
-		logger.LogStep("Making request to /api/v1/auth/register")
+		t.Run("Success", func(t *testing.T) {
+			BeginTx(t)
+			defer RollbackTx(t)
 
-		resp := MakeRequest(RequestConfig{
-			Method: "POST",
-			URL:    "/api/v1/auth/register",
-			Body: map[string]interface{}{
-				"phone":    "0987654321", // Changed to a different number
-				"password": "password123",
-				"name":     "New User",
-			},
+			// Create request body
+			body := map[string]interface{}{
+				"phone":    "0987654321",
+				"password": "Password123!",
+				"name":     "Test User",
+				"role":     "admin",
+			}
+			jsonBody, _ := json.Marshal(body)
+
+			// Create request
+			req := httptest.NewRequest("POST", "/api/v1/auth/register", bytes.NewBuffer(jsonBody))
+			req.Header.Set("Content-Type", "application/json")
+
+			// Serve request
+			router.ServeHTTP(w, req)
+
+			// Assert
+			assert.Equal(t, http.StatusCreated, w.Code)
+
+			var response map[string]interface{}
+			err := json.Unmarshal(w.Body.Bytes(), &response)
+			assert.NoError(t, err)
+			assert.Contains(t, response, "token")
+			assert.Contains(t, response, "user")
 		})
 
-		assert.Equal(t, http.StatusCreated, resp.Code)
+		t.Run("DuplicatePhone", func(t *testing.T) {
+			BeginTx(t)
+			defer RollbackTx(t)
 
-		var response map[string]interface{}
-		err := json.Unmarshal(resp.Body.Bytes(), &response)
-		assert.NoError(t, err)
+			// First registration
+			firstBody := map[string]interface{}{
+				"phone":    "0987654321",
+				"password": "Password123!",
+				"name":     "Test User",
+				"role":     "admin",
+			}
+			jsonFirstBody, _ := json.Marshal(firstBody)
+			firstReq := httptest.NewRequest("POST", "/api/v1/auth/register", bytes.NewBuffer(jsonFirstBody))
+			firstReq.Header.Set("Content-Type", "application/json")
+			router.ServeHTTP(httptest.NewRecorder(), firstReq)
 
-		logger.LogTestResult(response, nil)
-	})
-
-	t.Run("duplicate_phone_number", func(t *testing.T) {
-		// First register a user
-		MakeRequest(RequestConfig{
-			Method: "POST",
-			URL:    "/api/v1/auth/register",
-			Body: map[string]interface{}{
-				"phone":    "0987654322",
-				"password": "password123",
-				"name":     "First User",
-			},
-		})
-
-		// Try to register again with the same phone
-		logger.LogTestStart("Try to register with existing phone number")
-		logger.LogStep("Making request to /api/v1/auth/register with duplicate phone")
-
-		resp := MakeRequest(RequestConfig{
-			Method: "POST",
-			URL:    "/api/v1/auth/register",
-			Body: map[string]interface{}{
-				"phone":    "0987654322",
-				"password": "password123",
+			// Try to register with same phone
+			body := map[string]interface{}{
+				"phone":    "0987654321",
+				"password": "Password123!",
 				"name":     "Another User",
-			},
+				"role":     "customer",
+			}
+			jsonBody, _ := json.Marshal(body)
+
+			req := httptest.NewRequest("POST", "/api/v1/auth/register", bytes.NewBuffer(jsonBody))
+			req.Header.Set("Content-Type", "application/json")
+
+			w := httptest.NewRecorder()
+			router.ServeHTTP(w, req)
+
+			assert.Equal(t, http.StatusBadRequest, w.Code)
+
+			var response map[string]interface{}
+			err := json.Unmarshal(w.Body.Bytes(), &response)
+			assert.NoError(t, err)
+			assert.Contains(t, response, "error")
+			assert.Equal(t, "Số điện thoại đã được đăng ký", response["error"])
 		})
 
-		assert.Equal(t, http.StatusBadRequest, resp.Code)
-		logger.LogTestResult(nil, nil)
-	})
+		t.Run("InvalidPhone", func(t *testing.T) {
+			BeginTx(t)
+			defer RollbackTx(t)
 
-	t.Run("invalid_phone_number", func(t *testing.T) {
-		logger.LogTestStart("Try to register with invalid phone number")
-		logger.LogStep("Making request to /api/v1/auth/register with invalid phone")
-
-		resp := MakeRequest(RequestConfig{
-			Method: "POST",
-			URL:    "/api/v1/auth/register",
-			Body: map[string]interface{}{
+			body := map[string]interface{}{
 				"phone":    "invalid",
-				"password": "password123",
-				"name":     "Invalid User",
-			},
+				"password": "Password123!",
+				"name":     "Test User",
+			}
+			jsonBody, _ := json.Marshal(body)
+
+			req := httptest.NewRequest("POST", "/api/v1/auth/register", bytes.NewBuffer(jsonBody))
+			req.Header.Set("Content-Type", "application/json")
+
+			w := httptest.NewRecorder()
+			router.ServeHTTP(w, req)
+
+			assert.Equal(t, http.StatusBadRequest, w.Code)
+
+			var response map[string]interface{}
+			err := json.Unmarshal(w.Body.Bytes(), &response)
+			assert.NoError(t, err)
+			assert.Contains(t, response, "error")
+			assert.Equal(t, "Số điện thoại không hợp lệ (phải bắt đầu bằng số 0 và có 10 số)", response["error"])
 		})
 
-		assert.Equal(t, http.StatusBadRequest, resp.Code)
-		logger.LogTestResult(nil, nil)
+		t.Run("InvalidPassword", func(t *testing.T) {
+			BeginTx(t)
+			defer RollbackTx(t)
+
+			body := map[string]interface{}{
+				"phone":    "0987654322",
+				"password": "weak",
+				"name":     "Test User",
+			}
+			jsonBody, _ := json.Marshal(body)
+
+			req := httptest.NewRequest("POST", "/api/v1/auth/register", bytes.NewBuffer(jsonBody))
+			req.Header.Set("Content-Type", "application/json")
+
+			w := httptest.NewRecorder()
+			router.ServeHTTP(w, req)
+
+			assert.Equal(t, http.StatusBadRequest, w.Code)
+
+			var response map[string]interface{}
+			err := json.Unmarshal(w.Body.Bytes(), &response)
+			assert.NoError(t, err)
+			assert.Contains(t, response, "error")
+			assert.Contains(t, response["error"], "Mật khẩu phải")
+		})
+
+		t.Run("InvalidRole", func(t *testing.T) {
+			BeginTx(t)
+			defer RollbackTx(t)
+
+			body := map[string]interface{}{
+				"phone":    "0987654322",
+				"password": "Password123!",
+				"name":     "Test User",
+				"role":     "invalid",
+			}
+			jsonBody, _ := json.Marshal(body)
+
+			req := httptest.NewRequest("POST", "/api/v1/auth/register", bytes.NewBuffer(jsonBody))
+			req.Header.Set("Content-Type", "application/json")
+
+			w := httptest.NewRecorder()
+			router.ServeHTTP(w, req)
+
+			assert.Equal(t, http.StatusBadRequest, w.Code)
+
+			var response map[string]interface{}
+			err := json.Unmarshal(w.Body.Bytes(), &response)
+			assert.NoError(t, err)
+			assert.Contains(t, response, "error")
+			assert.Equal(t, "Vai trò không hợp lệ", response["error"])
+		})
 	})
 
-	t.Run("missing_required_fields", func(t *testing.T) {
-		logger.LogTestStart("Try to register with missing fields")
-		logger.LogStep("Making request to /api/v1/auth/register with missing fields")
+	t.Run("Login", func(t *testing.T) {
+		t.Run("Success", func(t *testing.T) {
+			BeginTx(t)
+			defer RollbackTx(t)
 
-		resp := MakeRequest(RequestConfig{
-			Method: "POST",
-			URL:    "/api/v1/auth/register",
-			Body: map[string]interface{}{
-				"phone": "0123456791",
-			},
+			// Register a user first
+			registerBody := map[string]interface{}{
+				"phone":    "0987654321",
+				"password": "Password123!",
+				"name":     "Test User",
+				"role":     "admin",
+			}
+			jsonRegisterBody, _ := json.Marshal(registerBody)
+			registerReq := httptest.NewRequest("POST", "/api/v1/auth/register", bytes.NewBuffer(jsonRegisterBody))
+			registerReq.Header.Set("Content-Type", "application/json")
+			router.ServeHTTP(httptest.NewRecorder(), registerReq)
+
+			// Try to login
+			body := map[string]interface{}{
+				"phone":    "0987654321",
+				"password": "Password123!",
+			}
+			jsonBody, _ := json.Marshal(body)
+
+			req := httptest.NewRequest("POST", "/api/v1/auth/login", bytes.NewBuffer(jsonBody))
+			req.Header.Set("Content-Type", "application/json")
+
+			w := httptest.NewRecorder()
+			router.ServeHTTP(w, req)
+
+			assert.Equal(t, http.StatusOK, w.Code)
+
+			var response map[string]interface{}
+			err := json.Unmarshal(w.Body.Bytes(), &response)
+			assert.NoError(t, err)
+			assert.Contains(t, response, "token")
 		})
 
-		assert.Equal(t, http.StatusBadRequest, resp.Code)
-		logger.LogTestResult(nil, nil)
-	})
-}
+		t.Run("InvalidCredentials", func(t *testing.T) {
+			BeginTx(t)
+			defer RollbackTx(t)
 
-func TestLogin(t *testing.T) {
-	// Clean up and setup test data before running tests
-	CleanupTestDB(t)
-	SetupTestData(t)
+			// Register a user first
+			registerBody := map[string]interface{}{
+				"phone":    "0987654321",
+				"password": "Password123!",
+				"name":     "Test User",
+				"role":     "admin",
+			}
+			jsonRegisterBody, _ := json.Marshal(registerBody)
+			registerReq := httptest.NewRequest("POST", "/api/v1/auth/register", bytes.NewBuffer(jsonRegisterBody))
+			registerReq.Header.Set("Content-Type", "application/json")
+			router.ServeHTTP(httptest.NewRecorder(), registerReq)
 
-	logger := NewTestLogger("Auth API Tests - Login")
+			// Try to login with wrong password
+			body := map[string]interface{}{
+				"phone":    "0987654321",
+				"password": "WrongPassword123!",
+			}
+			jsonBody, _ := json.Marshal(body)
 
-	t.Run("successful_admin_login", func(t *testing.T) {
-		logger.LogTestStart("Login as admin")
-		logger.LogStep("Making request to /api/v1/auth/login with admin credentials")
+			req := httptest.NewRequest("POST", "/api/v1/auth/login", bytes.NewBuffer(jsonBody))
+			req.Header.Set("Content-Type", "application/json")
 
-		resp := MakeRequest(RequestConfig{
-			Method: "POST",
-			URL:    "/api/v1/auth/login",
-			Body: map[string]interface{}{
-				"phone":    "0123456789",
-				"password": "admin123",
-			},
+			w := httptest.NewRecorder()
+			router.ServeHTTP(w, req)
+
+			assert.Equal(t, http.StatusUnauthorized, w.Code)
+
+			var response map[string]interface{}
+			err := json.Unmarshal(w.Body.Bytes(), &response)
+			assert.NoError(t, err)
+			assert.Contains(t, response, "error")
+			assert.Equal(t, "Thông tin đăng nhập không chính xác", response["error"])
 		})
-
-		assert.Equal(t, http.StatusOK, resp.Code)
-
-		var response map[string]interface{}
-		err := json.Unmarshal(resp.Body.Bytes(), &response)
-		assert.NoError(t, err)
-		assert.NotEmpty(t, response["token"])
-
-		logger.LogTestResult(response, nil)
-	})
-
-	t.Run("successful_customer_login", func(t *testing.T) {
-		logger.LogTestStart("Login as customer")
-		logger.LogStep("Making request to /api/v1/auth/login with customer credentials")
-
-		resp := MakeRequest(RequestConfig{
-			Method: "POST",
-			URL:    "/api/v1/auth/login",
-			Body: map[string]interface{}{
-				"phone":    "0123456786",
-				"password": "customer123",
-			},
-		})
-
-		assert.Equal(t, http.StatusOK, resp.Code)
-
-		var response map[string]interface{}
-		err := json.Unmarshal(resp.Body.Bytes(), &response)
-		assert.NoError(t, err)
-		assert.NotEmpty(t, response["token"])
-
-		logger.LogTestResult(response, nil)
-	})
-
-	t.Run("invalid_phone_number", func(t *testing.T) {
-		logger.LogTestStart("Try to login with invalid phone")
-		logger.LogStep("Making request to /api/v1/auth/login with invalid phone")
-
-		resp := MakeRequest(RequestConfig{
-			Method: "POST",
-			URL:    "/api/v1/auth/login",
-			Body: map[string]interface{}{
-				"phone":    "0000000000",
-				"password": "password123",
-			},
-		})
-
-		assert.Equal(t, http.StatusUnauthorized, resp.Code)
-		logger.LogTestResult(nil, nil)
 	})
 
-	t.Run("wrong_password", func(t *testing.T) {
-		logger.LogTestStart("Try to login with wrong password")
-		logger.LogStep("Making request to /api/v1/auth/login with wrong password")
+	t.Run("Logout", func(t *testing.T) {
+		BeginTx(t)
+		defer RollbackTx(t)
 
-		resp := MakeRequest(RequestConfig{
-			Method: "POST",
-			URL:    "/api/v1/auth/login",
-			Body: map[string]interface{}{
-				"phone":    "0123456789",
-				"password": "wrongpassword",
-			},
+		// Register and login first to get token
+		registerBody := map[string]interface{}{
+			"phone":    "0987654321",
+			"password": "Password123!",
+			"name":     "Test User",
+			"role":     "admin",
+		}
+		jsonRegisterBody, _ := json.Marshal(registerBody)
+		registerReq := httptest.NewRequest("POST", "/api/v1/auth/register", bytes.NewBuffer(jsonRegisterBody))
+		registerReq.Header.Set("Content-Type", "application/json")
+		router.ServeHTTP(httptest.NewRecorder(), registerReq)
+
+		loginBody := map[string]interface{}{
+			"phone":    "0987654321",
+			"password": "Password123!",
+		}
+		jsonBody, _ := json.Marshal(loginBody)
+
+		loginReq := httptest.NewRequest("POST", "/api/v1/auth/login", bytes.NewBuffer(jsonBody))
+		loginReq.Header.Set("Content-Type", "application/json")
+
+		w := httptest.NewRecorder()
+		router.ServeHTTP(w, loginReq)
+
+		var loginResponse map[string]interface{}
+		json.Unmarshal(w.Body.Bytes(), &loginResponse)
+		token := loginResponse["token"].(string)
+
+		t.Run("Success", func(t *testing.T) {
+			req := httptest.NewRequest("POST", "/api/v1/auth/logout", nil)
+			req.Header.Set("Authorization", "Bearer "+token)
+
+			w := httptest.NewRecorder()
+			router.ServeHTTP(w, req)
+
+			assert.Equal(t, http.StatusOK, w.Code)
+
+			var response map[string]interface{}
+			err := json.Unmarshal(w.Body.Bytes(), &response)
+			assert.NoError(t, err)
+			assert.Contains(t, response, "message")
+			assert.Equal(t, "Đăng xuất thành công", response["message"])
 		})
 
-		assert.Equal(t, http.StatusUnauthorized, resp.Code)
-		logger.LogTestResult(nil, nil)
-	})
+		t.Run("InvalidToken", func(t *testing.T) {
+			req := httptest.NewRequest("POST", "/api/v1/auth/logout", nil)
+			req.Header.Set("Authorization", "Bearer invalid")
 
-	t.Run("invalid_request_format", func(t *testing.T) {
-		logger.LogTestStart("Try to login with invalid request format")
-		logger.LogStep("Making request to /api/v1/auth/login with invalid format")
+			w := httptest.NewRecorder()
+			router.ServeHTTP(w, req)
 
-		resp := MakeRequest(RequestConfig{
-			Method: "POST",
-			URL:    "/api/v1/auth/login",
-			Body: map[string]interface{}{
-				"invalid": "format",
-			},
+			assert.Equal(t, http.StatusUnauthorized, w.Code)
+
+			var response map[string]interface{}
+			err := json.Unmarshal(w.Body.Bytes(), &response)
+			assert.NoError(t, err)
+			assert.Contains(t, response, "error")
+			assert.Equal(t, "Token không hợp lệ", response["error"])
 		})
 
-		assert.Equal(t, http.StatusBadRequest, resp.Code)
-		logger.LogTestResult(nil, nil)
-	})
-}
+		t.Run("NoToken", func(t *testing.T) {
+			req := httptest.NewRequest("POST", "/api/v1/auth/logout", nil)
 
-func TestLogout(t *testing.T) {
-	// Clean up and setup test data before running tests
-	CleanupTestDB(t)
-	SetupTestData(t)
+			w := httptest.NewRecorder()
+			router.ServeHTTP(w, req)
 
-	logger := NewTestLogger("Auth API Tests - Logout")
+			assert.Equal(t, http.StatusUnauthorized, w.Code)
 
-	t.Run("successful_logout", func(t *testing.T) {
-		logger.LogTestStart("Logout with valid token")
-		logger.LogStep("Making request to /api/v1/auth/logout")
-
-		resp := MakeRequest(RequestConfig{
-			Method: "POST",
-			URL:    "/api/v1/auth/logout",
-			Token:  adminToken,
+			var response map[string]interface{}
+			err := json.Unmarshal(w.Body.Bytes(), &response)
+			assert.NoError(t, err)
+			assert.Contains(t, response, "error")
+			assert.Equal(t, "Vui lòng đăng nhập", response["error"])
 		})
-
-		assert.Equal(t, http.StatusOK, resp.Code)
-
-		var response map[string]interface{}
-		err := json.Unmarshal(resp.Body.Bytes(), &response)
-		assert.NoError(t, err)
-		assert.Equal(t, "Successfully logged out", response["message"])
-
-		logger.LogTestResult(response, nil)
-	})
-
-	t.Run("logout_without_token", func(t *testing.T) {
-		logger.LogTestStart("Try to logout without token")
-		logger.LogStep("Making request to /api/v1/auth/logout without token")
-
-		resp := MakeRequest(RequestConfig{
-			Method: "POST",
-			URL:    "/api/v1/auth/logout",
-		})
-
-		assert.Equal(t, http.StatusUnauthorized, resp.Code)
-		logger.LogTestResult(nil, nil)
-	})
-
-	t.Run("logout_with_invalid_token", func(t *testing.T) {
-		logger.LogTestStart("Try to logout with invalid token")
-		logger.LogStep("Making request to /api/v1/auth/logout with invalid token")
-
-		resp := MakeRequest(RequestConfig{
-			Method: "POST",
-			URL:    "/api/v1/auth/logout",
-			Token:  "invalid_token",
-		})
-
-		assert.Equal(t, http.StatusUnauthorized, resp.Code)
-		logger.LogTestResult(nil, nil)
-	})
-
-	t.Run("logout_with_already_blacklisted_token", func(t *testing.T) {
-		logger.LogTestStart("Try to logout with already blacklisted token")
-		logger.LogStep("Making request to /api/v1/auth/logout with blacklisted token")
-
-		// First logout to blacklist the token
-		MakeRequest(RequestConfig{
-			Method: "POST",
-			URL:    "/api/v1/auth/logout",
-			Token:  customerToken,
-		})
-
-		// Try to use the same token again
-		resp := MakeRequest(RequestConfig{
-			Method: "POST",
-			URL:    "/api/v1/auth/logout",
-			Token:  customerToken,
-		})
-
-		assert.Equal(t, http.StatusUnauthorized, resp.Code)
-		logger.LogTestResult(nil, nil)
 	})
 }
