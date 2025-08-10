@@ -3,6 +3,7 @@ import AppNavigator from './src/navigation/AppNavigator';
 import { ThemeProvider } from './src/context/ThemeContext';
 import * as Font from 'expo-font';
 import { LanguageProvider } from '@i18n/LanguageProvider';
+import { StyleSheet, View } from 'react-native';
 
 export default function App() {
     const [fontsLoaded, setFontsLoaded] = useState(false);
@@ -21,10 +22,18 @@ export default function App() {
     }, []);
 
     return (
-        <LanguageProvider>
-            <ThemeProvider>
-                <AppNavigator />
-            </ThemeProvider>
-        </LanguageProvider>
+        <View style={styles.appBackground}>
+            <LanguageProvider>
+                <ThemeProvider>
+                    <AppNavigator />
+                </ThemeProvider>
+            </LanguageProvider>
+        </View>
     );
 }
+
+const styles = StyleSheet.create({
+    appBackground: {
+        flex: 1,
+    },
+});

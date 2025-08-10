@@ -17,6 +17,7 @@ export const coreTokens = {
         regular: 'Inter-Regular',
         medium: 'Inter-Medium',
         bold: 'Inter-Bold',
+        heavy: 'Inter-Bold', // Required by NavigationTheme
         sizes: {
             sm: 12,
             md: 14,

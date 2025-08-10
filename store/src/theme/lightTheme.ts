@@ -1,8 +1,11 @@
 import { coreTokens } from './coreTokens';
 import { lightColors } from './colors';
+import type { Theme } from './theme';
 
-export const lightTheme = {
+export const lightTheme: Theme = {
     ...coreTokens,
-    colors: lightColors,
     dark: false,
+    colors: {
+        ...lightColors,
+    },
 };
