@@ -5,7 +5,7 @@ WORKDIR /app
 
 # Install git and build dependencies
 RUN apk add --no-cache git
-
+RUN apk add --no-cache gcc musl-dev
 # For development, we'll mount the source code
 CMD ["go", "run", "main.go"]
 

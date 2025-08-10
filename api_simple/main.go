@@ -8,6 +8,7 @@ import (
 	"ticket-management/api_simple/handlers"
 	"ticket-management/api_simple/middleware"
 	"ticket-management/api_simple/models"
+	"ticket-management/api_simple/seeders"
 
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
@@ -17,8 +18,6 @@ func main() {
 	if err := godotenv.Load(); err != nil {
 		log.Fatal("Error loading .env file")
 	}
-
-	r := gin.Default()
 
 	// Initialize database
 	config.InitDB()
@@ -36,10 +35,17 @@ func main() {
 		log.Fatal("Failed to migrate database:", err)
 	}
 
+	// Run seeders if --seed flag is provided
+	if len(os.Args) > 1 && os.Args[1] == "--seed" {
+		seeders.Seed()
+		return
+	}
+
 	// Initialize Redis
 	config.InitRedis()
 
 	// Setup routes
+	r := gin.Default()
 	setupRoutes(r)
 
 	port := os.Getenv("SERVER_PORT")
@@ -58,6 +64,11 @@ func setupRoutes(r *gin.Engine) {
 	{
 		auth.POST("/register", handlers.Register)
 		auth.POST("/login", handlers.Login)
+
+		// Password reset flow
+		auth.POST("/forgot-password", handlers.ForgotPassword)
+		auth.POST("/verify-otp", handlers.VerifyOTP)
+		auth.POST("/reset-password", handlers.ResetPassword)
 	}
 
 	// Public booking routes
@@ -72,6 +83,13 @@ func setupRoutes(r *gin.Engine) {
 	protected := api.Group("/")
 	protected.Use(middleware.AuthMiddleware())
 	{
+		// Auth routes that require authentication
+		auth := protected.Group("/auth")
+		{
+			auth.POST("/logout", handlers.Logout)
+			auth.POST("/change-password", handlers.ChangePassword)
+		}
+
 		// Trip routes
 		trips := protected.Group("/trips")
 		{

@@ -80,10 +80,7 @@ func CreateBooking(c *gin.Context) {
 
 	tx.Commit()
 
-	c.JSON(http.StatusCreated, gin.H{
-		"booking_id": booking.ID,
-		"message":    "Booking created successfully. Please keep your booking ID for future reference.",
-	})
+	c.JSON(http.StatusCreated, booking)
 }
 
 func GetUserBookings(c *gin.Context) {
@@ -107,14 +104,15 @@ func GetUserBookings(c *gin.Context) {
 
 func GetBooking(c *gin.Context) {
 	id := c.Param("id")
-	phoneNumber := c.Query("phone")
+	phoneNumber := c.Query("phone_number")
 
 	var booking models.Booking
-	result := config.DB.Joins("User").
-		Where("bookings.id = ? AND users.phone = ?", id, phoneNumber).
+	result := config.DB.Preload("User").
 		Preload("Trip.Route").
 		Preload("Trip.Bus").
 		Preload("Seat").
+		Joins("JOIN users ON users.id = bookings.user_id").
+		Where("bookings.id = ? AND users.phone = ?", id, phoneNumber).
 		First(&booking)
 
 	if result.Error != nil {
@@ -127,12 +125,13 @@ func GetBooking(c *gin.Context) {
 
 func CancelBooking(c *gin.Context) {
 	id := c.Param("id")
-	phoneNumber := c.Query("phone")
+	phoneNumber := c.Query("phone_number")
 
 	tx := config.DB.Begin()
 
 	var booking models.Booking
-	if err := tx.Joins("User").
+	if err := tx.Preload("User").
+		Joins("JOIN users ON users.id = bookings.user_id").
 		Where("bookings.id = ? AND users.phone = ?", id, phoneNumber).
 		First(&booking).Error; err != nil {
 		tx.Rollback()
@@ -163,5 +162,8 @@ func CancelBooking(c *gin.Context) {
 
 	tx.Commit()
 
-	c.JSON(http.StatusOK, gin.H{"message": "Booking canceled successfully"})
+	c.JSON(http.StatusOK, gin.H{
+		"id":     booking.ID,
+		"status": booking.Status,
+	})
 }

@@ -4,6 +4,7 @@ import (
 	"net/http"
 
 	"ticket-management/api_simple/config"
+	"ticket-management/api_simple/filters"
 	"ticket-management/api_simple/models"
 
 	"github.com/gin-gonic/gin"
@@ -11,13 +12,49 @@ import (
 
 func GetUsers(c *gin.Context) {
 	var users []models.User
-	result := config.DB.Find(&users)
-	if result.Error != nil {
+	query := config.DB.Model(&models.User{})
+
+	// Create filter builder
+	filterBuilder := filters.NewFilterBuilder(filters.UserFilterFields)
+
+	// Build filters from request
+	filterList, err := filterBuilder.BuildFromContext(c)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	// Apply filters
+	query = filterBuilder.ApplyFilters(query, filterList)
+
+	// Handle pagination
+	pagination := &filters.Pagination{}
+	if err := c.ShouldBindQuery(pagination); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	// Apply pagination
+	query, err = filters.ApplyPagination(query, pagination)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to apply pagination"})
+		return
+	}
+
+	// Execute query
+	if err := query.Find(&users).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch users"})
 		return
 	}
 
-	c.JSON(http.StatusOK, users)
+	c.JSON(http.StatusOK, gin.H{
+		"data": users,
+		"pagination": gin.H{
+			"current_page": pagination.Page,
+			"page_size":    pagination.PageSize,
+			"total":        pagination.Total,
+		},
+	})
 }
 
 func GetAllBookings(c *gin.Context) {
@@ -91,6 +128,20 @@ func UpdateUserRole(c *gin.Context) {
 	}
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	// Validate role
+	validRoles := []models.Role{models.RoleAdmin, models.RoleStaff, models.RoleDriver, models.RoleCustomer}
+	isValidRole := false
+	for _, role := range validRoles {
+		if req.Role == role {
+			isValidRole = true
+			break
+		}
+	}
+	if !isValidRole {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid role"})
 		return
 	}
 

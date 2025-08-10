@@ -1,7 +1,6 @@
 package handlers
 
 import (
-	"fmt"
 	"net/http"
 	"time"
 
@@ -105,7 +104,7 @@ func CreateTrip(c *gin.Context) {
 	for i := 1; i <= bus.SeatCount; i++ {
 		seat := models.Seat{
 			TripID: trip.ID,
-			Number: fmt.Sprintf("%d", i),
+			Number: i,
 			Status: "vacant",
 		}
 		if err := tx.Create(&seat).Error; err != nil {
