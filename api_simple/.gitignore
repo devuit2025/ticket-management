@@ -1,0 +1,23 @@
+# Environment variables
+.env
+
+# Binary files
+main
+__debug_bin
+
+# IDE specific files
+.idea
+.vscode
+
+# OS specific files
+.DS_Store
+
+# Go specific
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+*.test
+*.out
+go.work 
