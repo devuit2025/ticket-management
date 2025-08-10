@@ -44,7 +44,7 @@ Edit the `.env` file with your configuration.
 4. Create PostgreSQL database:
 
 ```sql
-CREATE DATABASE ticket_management;
+CREATE DATABASE ticket-management;
 ```
 
 5. Run the application:

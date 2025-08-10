@@ -5,6 +5,8 @@ import (
 	"log"
 	"os"
 
+	"ticket-management/api_simple/models"
+
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 )
@@ -40,4 +42,4 @@ func InitDB() {
 	}
 
 	DB = db
-} 
+}

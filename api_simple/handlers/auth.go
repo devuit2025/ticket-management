@@ -3,21 +3,21 @@ package handlers
 import (
 	"net/http"
 
-	"github.com/devuit2025/ticket_management/api_simple/config"
-	"github.com/devuit2025/ticket_management/api_simple/middleware"
-	"github.com/devuit2025/ticket_management/api_simple/models"
+	"ticket-management/api_simple/config"
+	"ticket-management/api_simple/middleware"
+	"ticket-management/api_simple/models"
+
 	"github.com/gin-gonic/gin"
 )
 
 type RegisterRequest struct {
-	Email    string `json:"email" binding:"required,email"`
+	Phone    string `json:"phone" binding:"required,min=10,max=11"`
 	Password string `json:"password" binding:"required,min=6"`
 	Name     string `json:"name" binding:"required"`
-	Phone    string `json:"phone" binding:"required"`
 }
 
 type LoginRequest struct {
-	Email    string `json:"email" binding:"required,email"`
+	Phone    string `json:"phone" binding:"required,min=10,max=11"`
 	Password string `json:"password" binding:"required"`
 }
 
@@ -28,18 +28,17 @@ func Register(c *gin.Context) {
 		return
 	}
 
-	// Check if email exists
+	// Check if phone exists
 	var existingUser models.User
-	if result := config.DB.Where("email = ?", req.Email).First(&existingUser); result.Error == nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Email already exists"})
+	if result := config.DB.Where("phone = ?", req.Phone).First(&existingUser); result.Error == nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Phone number already exists"})
 		return
 	}
 
 	user := models.User{
-		Email:    req.Email,
+		Phone:    req.Phone,
 		Password: req.Password,
 		Name:     req.Name,
-		Phone:    req.Phone,
 		Role:     models.RoleCustomer,
 	}
 
@@ -58,9 +57,8 @@ func Register(c *gin.Context) {
 		"token": token,
 		"user": gin.H{
 			"id":    user.ID,
-			"email": user.Email,
-			"name":  user.Name,
 			"phone": user.Phone,
+			"name":  user.Name,
 			"role":  user.Role,
 		},
 	})
@@ -74,13 +72,13 @@ func Login(c *gin.Context) {
 	}
 
 	var user models.User
-	if result := config.DB.Where("email = ?", req.Email).First(&user); result.Error != nil {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid email or password"})
+	if result := config.DB.Where("phone = ?", req.Phone).First(&user); result.Error != nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid phone number or password"})
 		return
 	}
 
 	if err := user.ComparePassword(req.Password); err != nil {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid email or password"})
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid phone number or password"})
 		return
 	}
 
@@ -94,9 +92,8 @@ func Login(c *gin.Context) {
 		"token": token,
 		"user": gin.H{
 			"id":    user.ID,
-			"email": user.Email,
-			"name":  user.Name,
 			"phone": user.Phone,
+			"name":  user.Name,
 			"role":  user.Role,
 		},
 	})

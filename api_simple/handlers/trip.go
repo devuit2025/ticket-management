@@ -5,8 +5,9 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/devuit2025/ticket_management/api_simple/config"
-	"github.com/devuit2025/ticket_management/api_simple/models"
+	"ticket-management/api_simple/config"
+	"ticket-management/api_simple/models"
+
 	"github.com/gin-gonic/gin"
 )
 

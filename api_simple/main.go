@@ -3,9 +3,12 @@ package main
 import (
 	"log"
 	"os"
-	"ticket-management/middleware"
 
-	"github.com/devuit2025/ticket_management/api_simple/handlers"
+	"ticket-management/api_simple/config"
+	"ticket-management/api_simple/handlers"
+	"ticket-management/api_simple/middleware"
+	"ticket-management/api_simple/models"
+
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
 )
@@ -18,10 +21,23 @@ func main() {
 	r := gin.Default()
 
 	// Initialize database
-	initDB()
+	config.InitDB()
+
+	// Auto Migrate the models
+	if err := config.DB.AutoMigrate(
+		&models.User{},
+		&models.Route{},
+		&models.Bus{},
+		&models.Trip{},
+		&models.Seat{},
+		&models.Booking{},
+		&models.Payment{},
+	); err != nil {
+		log.Fatal("Failed to migrate database:", err)
+	}
 
 	// Initialize Redis
-	initRedis()
+	config.InitRedis()
 
 	// Setup routes
 	setupRoutes(r)
@@ -37,24 +53,25 @@ func main() {
 func setupRoutes(r *gin.Engine) {
 	api := r.Group("/api/v1")
 
-	// Auth routes
+	// Public routes
 	auth := api.Group("/auth")
 	{
 		auth.POST("/register", handlers.Register)
 		auth.POST("/login", handlers.Login)
 	}
 
+	// Public booking routes
+	bookings := api.Group("/bookings")
+	{
+		bookings.POST("", handlers.CreateBooking)
+		bookings.GET("/:id", handlers.GetBooking)
+		bookings.PUT("/:id/cancel", handlers.CancelBooking)
+	}
+
 	// Protected routes
 	protected := api.Group("/")
 	protected.Use(middleware.AuthMiddleware())
 	{
-		// User routes
-		users := protected.Group("/users")
-		{
-			users.GET("/me", handlers.GetProfile)
-			users.PUT("/me", handlers.UpdateProfile)
-		}
-
 		// Trip routes
 		trips := protected.Group("/trips")
 		{
@@ -63,15 +80,6 @@ func setupRoutes(r *gin.Engine) {
 			trips.POST("", middleware.AdminMiddleware(), handlers.CreateTrip)
 			trips.PUT("/:id", middleware.AdminMiddleware(), handlers.UpdateTrip)
 			trips.DELETE("/:id", middleware.AdminMiddleware(), handlers.DeleteTrip)
-		}
-
-		// Booking routes
-		bookings := protected.Group("/bookings")
-		{
-			bookings.POST("", handlers.CreateBooking)
-			bookings.GET("", handlers.GetUserBookings)
-			bookings.GET("/:id", handlers.GetBooking)
-			bookings.PUT("/:id/cancel", handlers.CancelBooking)
 		}
 
 		// Admin routes

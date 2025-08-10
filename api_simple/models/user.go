@@ -1,8 +1,6 @@
 package models
 
 import (
-	"time"
-
 	"golang.org/x/crypto/bcrypt"
 	"gorm.io/gorm"
 )
@@ -10,33 +8,31 @@ import (
 type Role string
 
 const (
-	RoleCustomer Role = "customer"
-	RoleStaff    Role = "staff"
 	RoleAdmin    Role = "admin"
+	RoleStaff    Role = "staff"
 	RoleDriver   Role = "driver"
+	RoleCustomer Role = "customer"
 )
 
 type User struct {
-	ID        uint           `json:"id" gorm:"primaryKey"`
-	Email     string         `json:"email" gorm:"unique;not null"`
-	Password  string         `json:"-" gorm:"not null"`
-	Name      string         `json:"name" gorm:"not null"`
-	Phone     string         `json:"phone" gorm:"unique"`
-	Role      Role           `json:"role" gorm:"type:varchar(20);default:'customer'"`
-	CreatedAt time.Time      `json:"created_at"`
-	UpdatedAt time.Time      `json:"updated_at"`
-	DeletedAt gorm.DeletedAt `json:"-" gorm:"index"`
+	gorm.Model
+	Phone    string `json:"phone" gorm:"unique;not null"`
+	Password string `json:"-"`
+	Name     string `json:"name"`
+	Role     Role   `json:"role" gorm:"default:'customer'"`
 }
 
-func (u *User) BeforeCreate(tx *gorm.DB) error {
-	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(u.Password), bcrypt.DefaultCost)
-	if err != nil {
-		return err
+func (u *User) BeforeSave(tx *gorm.DB) error {
+	if u.Password != "" {
+		hashedPassword, err := bcrypt.GenerateFromPassword([]byte(u.Password), bcrypt.DefaultCost)
+		if err != nil {
+			return err
+		}
+		u.Password = string(hashedPassword)
 	}
-	u.Password = string(hashedPassword)
 	return nil
 }
 
 func (u *User) ComparePassword(password string) error {
 	return bcrypt.CompareHashAndPassword([]byte(u.Password), []byte(password))
-} 
+}

@@ -6,9 +6,10 @@ import (
 	"strings"
 	"time"
 
+	"ticket-management/api_simple/models"
+
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v5"
-	"github.com/devuit2025/models"
 )
 
 func AuthMiddleware() gin.HandlerFunc {
@@ -80,4 +81,4 @@ func GenerateToken(user *models.User) (string, error) {
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 	return token.SignedString([]byte(os.Getenv("JWT_SECRET")))
-} 
+}

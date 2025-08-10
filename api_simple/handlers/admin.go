@@ -3,8 +3,9 @@ package handlers
 import (
 	"net/http"
 
-	"github.com/devuit2025/ticket_management/api_simple/config"
-	"github.com/devuit2025/ticket_management/api_simple/models"
+	"ticket-management/api_simple/config"
+	"ticket-management/api_simple/models"
+
 	"github.com/gin-gonic/gin"
 )
 
@@ -38,11 +39,11 @@ func GetAllBookings(c *gin.Context) {
 
 type Statistics struct {
 	TotalRevenue     float64 `json:"total_revenue"`
-	CompletedTrips   int     `json:"completed_trips"`
-	PendingTrips     int     `json:"pending_trips"`
-	TotalBookings    int     `json:"total_bookings"`
-	PendingBookings  int     `json:"pending_bookings"`
-	CanceledBookings int     `json:"canceled_bookings"`
+	CompletedTrips   int64   `json:"completed_trips"`
+	PendingTrips     int64   `json:"pending_trips"`
+	TotalBookings    int64   `json:"total_bookings"`
+	PendingBookings  int64   `json:"pending_bookings"`
+	CanceledBookings int64   `json:"canceled_bookings"`
 }
 
 func GetStatistics(c *gin.Context) {
