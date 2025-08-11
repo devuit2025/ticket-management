@@ -2,158 +2,96 @@ package tests
 
 import (
 	"context"
-	"testing"
-	"time"
-
+	"fmt"
+	"log"
+	"os"
 	"ticket-management/api_simple/config"
 	"ticket-management/api_simple/handlers"
 	"ticket-management/api_simple/middleware"
 	"ticket-management/api_simple/models"
+	"ticket-management/api_simple/seeders"
+
+	"testing"
 
 	"github.com/alicebob/miniredis/v2"
 	"github.com/gin-gonic/gin"
-	"github.com/golang-jwt/jwt/v5"
 	"github.com/redis/go-redis/v9"
-	"gorm.io/driver/sqlite"
+	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 )
 
-// TestDB represents a test database with transaction support
-type TestDB struct {
-	*gorm.DB
-	tx *gorm.DB
-}
-
 var (
-	testDB *TestDB
-	mr     *miniredis.Miniredis
+	TestDB          *gorm.DB
+	TestRedisClient *redis.Client
+	TestRedisServer *miniredis.Miniredis
+	originalTestDB  *gorm.DB
 )
 
-// generateTestToken generates a token that expires in 24 hours
-func generateTestToken(userID uint, role models.Role) (string, error) {
-	claims := jwt.MapClaims{
-		"user_id": userID,
-		"role":    role,
-		"exp":     time.Now().Add(7 * 24 * time.Hour).Unix(), // 7 days for testing
-	}
-	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-	return token.SignedString([]byte(config.JWTSecret))
-}
-
-func init() {
-	// Use SQLite in-memory database for testing
-	db, err := gorm.Open(sqlite.Open("file::memory:?cache=shared"), &gorm.Config{})
-	if err != nil {
-		panic("failed to connect database")
-	}
-
-	// Auto migrate
-	err = db.AutoMigrate(
-		&models.User{},
-		&models.Route{},
-		&models.Bus{},
-		&models.Trip{},
-		&models.Seat{},
-		&models.Booking{},
-	)
-	if err != nil {
-		panic("failed to migrate database")
-	}
-
-	// Initialize TestDB
-	testDB = &TestDB{DB: db}
-	config.DB = db
-
-	// Initialize miniredis
-	mr, err = miniredis.Run()
-	if err != nil {
-		panic(err)
-	}
-
-	// Initialize Redis client with miniredis
-	config.RedisClient = redis.NewClient(&redis.Options{
-		Addr: mr.Addr(),
-		DB:   0,
-	})
-
-	// Set global context
-	config.Ctx = context.Background()
-
-	// Set JWT secret
-	config.JWTSecret = "test_secret"
-}
-
-// BeginTx starts a new transaction for testing
-func BeginTx(t *testing.T) {
-	// Reset miniredis
-	mr.FlushAll()
-
-	tx := testDB.Begin()
-	if tx.Error != nil {
-		t.Fatalf("Failed to begin transaction: %v", tx.Error)
-	}
-	testDB.tx = tx
-	config.DB = tx // Replace global DB with transaction
-}
-
-// RollbackTx rolls back the current transaction
-func RollbackTx(t *testing.T) {
-	if testDB.tx != nil {
-		err := testDB.tx.Rollback().Error
-		if err != nil {
-			t.Errorf("Failed to rollback transaction: %v", err)
-		}
-		testDB.tx = nil
-		config.DB = testDB.DB // Restore global DB
-	}
-}
-
-// SetupTestRouter returns a new router instance for testing
+// SetupTestRouter initializes test router with all necessary middleware and routes
 func SetupTestRouter() *gin.Engine {
+	// Setup test database and Redis
+	SetupTestDB()
+	SetupTestRedis()
+
+	// Override global config with test config
+	config.DB = TestDB
+	config.RedisClient = TestRedisClient
+
+	// Set JWT secret for tests if not already set
+	if config.JWTSecret == "" {
+		config.JWTSecret = "test-jwt-secret-key-for-unit-testing"
+	}
+
+	// Setup router
 	gin.SetMode(gin.TestMode)
-	router := gin.Default()
+	router := gin.New()
+	router.Use(gin.Recovery())
 
-	// Setup routes
+	// API routes
 	api := router.Group("/api/v1")
-	setupRoutes(api)
-
-	return router
-}
-
-// setupRoutes sets up all routes for testing
-func setupRoutes(api *gin.RouterGroup) {
-	// Public routes
-	api.POST("/auth/register", handlers.Register)
-	api.POST("/auth/login", handlers.Login)
-	api.POST("/auth/forgot-password", handlers.ForgotPassword)
-	api.POST("/auth/verify-otp", handlers.VerifyOTP)
-	api.POST("/auth/reset-password", handlers.ResetPassword)
-
-	api.GET("/routes", handlers.GetRoutes)
-	api.GET("/routes/popular", handlers.GetPopularRoutes)
-	api.GET("/routes/:id", handlers.GetRoute)
-
-	api.GET("/buses", handlers.GetBuses)
-	api.GET("/buses/:id", handlers.GetBus)
-
-	api.GET("/trips", handlers.SearchTrips)
-	api.GET("/trips/available", handlers.GetAvailableTrips)
-	api.GET("/trips/:id", handlers.GetTrip)
-	api.GET("/trips/:id/seats", handlers.GetTripSeats)
-	api.GET("/trips/:id/seats/available", handlers.GetAvailableSeats)
-	api.POST("/trips/:id/seats/check", handlers.CheckSeatStatus)
-	api.POST("/trips/:id/seats/lock", handlers.LockSeats)
-	api.POST("/trips/:id/seats/unlock", handlers.UnlockSeats)
-
-	// Protected routes
-	protected := api.Group("/")
-	protected.Use(middleware.AuthMiddleware())
 	{
-		protected.POST("/auth/logout", handlers.Logout)
-		protected.POST("/auth/change-password", handlers.ChangePassword)
+		// Public routes (no auth required)
+		api.POST("/auth/register", handlers.Register)
+		api.POST("/auth/login", handlers.Login)
+		api.POST("/auth/forgot-password", handlers.ForgotPassword)
+		api.POST("/auth/verify-otp", handlers.VerifyOTP)
+		api.POST("/auth/reset-password", handlers.ResetPassword)
 
-		// Admin routes
-		admin := protected.Group("/admin")
+		api.GET("/routes", handlers.GetRoutes)
+		api.GET("/routes/popular", handlers.GetPopularRoutes)
+		api.GET("/routes/:id", handlers.GetRoute)
+
+		api.GET("/buses", handlers.GetBuses)
+		api.GET("/buses/:id", handlers.GetBus)
+
+		api.GET("/trips", handlers.SearchTrips)
+		api.GET("/trips/available", handlers.GetAvailableTrips)
+		api.GET("/trips/:id", handlers.GetTrip)
+		api.GET("/trips/:id/seats", handlers.GetTripSeats)
+		api.GET("/trips/:id/seats/available", handlers.GetAvailableSeats)
+		api.POST("/trips/:id/seats/check", handlers.CheckSeatStatus)
+		api.POST("/trips/:id/seats/lock", handlers.LockSeats)
+		api.POST("/trips/:id/seats/unlock", handlers.UnlockSeats)
+
+		// Booking routes (public)
+		api.POST("/bookings", handlers.CreateBooking)
+		api.GET("/bookings/:code", handlers.GetBookingByCode)
+
+		// Protected routes (require auth)
+		protected := api.Group("/")
+		protected.Use(middleware.AuthMiddleware())
+		{
+			protected.POST("/auth/logout", handlers.Logout)
+			protected.POST("/auth/change-password", handlers.ChangePassword)
+
+			// Booking routes (authenticated)
+			protected.GET("/bookings", handlers.GetUserBookings)
+			protected.PUT("/bookings/:id/cancel", handlers.CancelBooking)
+		}
+
+		// Admin routes (require auth + admin role)
+		admin := api.Group("/admin")
+		admin.Use(middleware.AuthMiddleware())
 		admin.Use(middleware.AdminMiddleware())
 		{
 			// Route management
@@ -172,117 +110,173 @@ func setupRoutes(api *gin.RouterGroup) {
 			admin.DELETE("/trips/:id", handlers.DeleteTrip)
 			admin.POST("/trips/:id/seats", handlers.CreateSeats)
 
+			// Booking management
+			admin.GET("/bookings", handlers.GetAllBookings)
+			admin.PUT("/bookings/:id/confirm", handlers.ConfirmBooking)
+			admin.PUT("/bookings/:id/payment", handlers.UpdateBookingPayment)
+
 			// User management
 			admin.GET("/users", handlers.GetUsers)
-			admin.GET("/bookings", handlers.GetAllBookings)
 			admin.GET("/statistics", handlers.GetStatistics)
 		}
 	}
+
+	return router
 }
 
-// CleanupTestDB drops and recreates all tables
+// BeginTx starts a new transaction for testing
+func BeginTx(t *testing.T) {
+	if TestDB == nil {
+		SetupTestDB()
+	}
+
+	// Store original DB reference if not already stored
+	if originalTestDB == nil {
+		originalTestDB = TestDB
+	}
+
+	// Start a new transaction
+	TestDB = TestDB.Begin()
+
+	// Override global config to use transaction
+	config.DB = TestDB
+}
+
+// RollbackTx rolls back the current transaction
+func RollbackTx(t *testing.T) {
+	if TestDB != nil && TestDB != originalTestDB {
+		TestDB.Rollback()
+		// Restore original DB connection
+		TestDB = originalTestDB
+		config.DB = TestDB
+	}
+}
+
+// SetupTestDB initializes test database using PostgreSQL
+func SetupTestDB() {
+	// Use environment variables for database connection, fallback to localhost for local development
+	host := os.Getenv("DB_HOST")
+	if host == "" {
+		host = "localhost"
+	}
+	port := os.Getenv("DB_PORT")
+	if port == "" {
+		port = "5432"
+	}
+	user := os.Getenv("DB_USER")
+	if user == "" {
+		user = "postgres"
+	}
+	password := os.Getenv("DB_PASSWORD")
+	if password == "" {
+		password = "postgres"
+	}
+	dbname := os.Getenv("DB_NAME")
+	if dbname == "" {
+		dbname = "ticket_management_test"
+	}
+
+	// Use PostgreSQL for tests to match production environment
+	dsn := fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%s sslmode=disable TimeZone=Asia/Ho_Chi_Minh",
+		host, user, password, dbname, port)
+
+	var err error
+	TestDB, err = gorm.Open(postgres.Open(dsn), &gorm.Config{})
+	if err != nil {
+		log.Fatal("Failed to connect to test database:", err)
+	}
+	log.Println("Test database connected successfully")
+
+	// Auto migrate test models
+	err = TestDB.AutoMigrate(
+		&models.User{},
+		&models.Route{},
+		&models.Bus{},
+		&models.Trip{},
+		&models.Seat{},
+		&models.Booking{},
+	)
+	if err != nil {
+		log.Fatal("Failed to migrate test database:", err)
+	}
+	log.Println("Test database migrated successfully")
+
+	// Always clean up and reseed for fresh test data
+	log.Println("Cleaning up test database...")
+	TestDB.Exec("DELETE FROM bookings")
+	TestDB.Exec("DELETE FROM seats")
+	TestDB.Exec("DELETE FROM trips")
+	TestDB.Exec("DELETE FROM buses")
+	TestDB.Exec("DELETE FROM routes")
+	TestDB.Exec("DELETE FROM users")
+
+	log.Println("Starting to seed test database...")
+	err = seeders.TestSeed(TestDB)
+	if err != nil {
+		log.Fatal("Failed to seed test database:", err)
+	}
+	log.Println("Test database seeded successfully")
+}
+
+// SetupTestRedis initializes test Redis using miniredis
+func SetupTestRedis() {
+	var err error
+	TestRedisServer, err = miniredis.Run()
+	if err != nil {
+		log.Fatal("Failed to start test Redis server:", err)
+	}
+
+	TestRedisClient = redis.NewClient(&redis.Options{
+		Addr: TestRedisServer.Addr(),
+		DB:   0,
+	})
+
+	// Test the connection
+	_, err = TestRedisClient.Ping(context.Background()).Result()
+	if err != nil {
+		log.Fatal("Failed to connect to test Redis:", err)
+	}
+}
+
+// CleanupTestDB closes test database connection and cleans up test data
 func CleanupTestDB(t *testing.T) {
-	// Drop all tables
-	err := testDB.DB.Migrator().DropTable(
-		&models.User{},
-		&models.Route{},
-		&models.Bus{},
-		&models.Trip{},
-		&models.Seat{},
-		&models.Booking{},
-	)
-	if err != nil {
-		t.Fatalf("Failed to drop tables: %v", err)
-	}
+	if TestDB != nil {
+		// Clean up test data instead of removing database file
+		TestDB.Exec("DELETE FROM bookings")
+		TestDB.Exec("DELETE FROM seats")
+		TestDB.Exec("DELETE FROM trips")
+		TestDB.Exec("DELETE FROM buses")
+		TestDB.Exec("DELETE FROM routes")
+		TestDB.Exec("DELETE FROM users")
 
-	// Auto migrate to recreate tables
-	err = testDB.DB.AutoMigrate(
-		&models.User{},
-		&models.Route{},
-		&models.Bus{},
-		&models.Trip{},
-		&models.Seat{},
-		&models.Booking{},
-	)
-	if err != nil {
-		t.Fatalf("Failed to migrate tables: %v", err)
+		sqlDB, err := TestDB.DB()
+		if err == nil {
+			sqlDB.Close()
+		}
 	}
 }
 
-// SetupTestData creates test data for testing
-func SetupTestData(t *testing.T) {
-	// Create test users
-	users := []models.User{
-		{
-			Phone:    "0987654321",
-			Password: "Password123!",
-			Name:     "Admin",
-			Role:     models.RoleAdmin,
-		},
-		{
-			Phone:    "0987654322",
-			Password: "Password123!",
-			Name:     "Customer",
-			Role:     models.RoleCustomer,
-		},
-		{
-			Phone:    "0987654323",
-			Password: "Password123!",
-			Name:     "Driver",
-			Role:     models.RoleDriver,
-		},
+// CleanupTestRedis closes test Redis connection and server
+func CleanupTestRedis() {
+	if TestRedisClient != nil {
+		TestRedisClient.Close()
 	}
-	for _, user := range users {
-		if err := config.DB.Create(&user).Error; err != nil {
-			t.Fatalf("Failed to create test user: %v", err)
-		}
+	if TestRedisServer != nil {
+		TestRedisServer.Close()
+	}
+}
+
+// TestDBConnection is a simple test to verify database connection
+func TestDBConnection(t *testing.T) {
+	SetupTestDB()
+	defer CleanupTestDB(t)
+
+	// Try to query the database
+	var count int64
+	err := TestDB.Model(&models.User{}).Count(&count).Error
+	if err != nil {
+		t.Fatalf("Failed to query test database: %v", err)
 	}
 
-	// Create test routes
-	routes := []models.Route{
-		{
-			Origin:      "Hà Nội",
-			Destination: "Sapa",
-			Distance:    320,
-			Duration:    "5h30m",
-			BasePrice:   350000,
-			IsActive:    true,
-		},
-		{
-			Origin:      "Hà Nội",
-			Destination: "Hải Phòng",
-			Distance:    120,
-			Duration:    "2h30m",
-			BasePrice:   150000,
-			IsActive:    true,
-		},
-	}
-	for _, route := range routes {
-		if err := config.DB.Create(&route).Error; err != nil {
-			t.Fatalf("Failed to create test route: %v", err)
-		}
-	}
-
-	// Create test buses
-	buses := []models.Bus{
-		{
-			PlateNumber: "29B-12345",
-			Type:        "Giường nằm",
-			SeatCount:   40,
-			FloorCount:  2,
-			IsActive:    true,
-		},
-		{
-			PlateNumber: "29B-12346",
-			Type:        "Ghế ngồi",
-			SeatCount:   45,
-			FloorCount:  1,
-			IsActive:    true,
-		},
-	}
-	for _, bus := range buses {
-		if err := config.DB.Create(&bus).Error; err != nil {
-			t.Fatalf("Failed to create test bus: %v", err)
-		}
-	}
+	t.Logf("Database connection test successful. User count: %d", count)
 }

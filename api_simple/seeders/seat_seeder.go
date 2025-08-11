@@ -2,11 +2,12 @@ package seeders
 
 import (
 	"fmt"
-	"ticket-management/api_simple/config"
 	"ticket-management/api_simple/models"
+
+	"gorm.io/gorm"
 )
 
-func SeedSeats(tripID uint, basePrice float64) error {
+func SeedSeats(db *gorm.DB, tripID uint, basePrice float64) error {
 	// Create seats for floor 1 (downstairs)
 	for i := 1; i <= 20; i++ {
 		seatNumber := fmt.Sprintf("A%02d", i)
@@ -33,7 +34,7 @@ func SeedSeats(tripID uint, basePrice float64) error {
 			Price:  price,
 		}
 
-		if err := config.DB.Create(&seat).Error; err != nil {
+		if err := db.Create(&seat).Error; err != nil {
 			return err
 		}
 	}
@@ -64,7 +65,7 @@ func SeedSeats(tripID uint, basePrice float64) error {
 			Price:  price,
 		}
 
-		if err := config.DB.Create(&seat).Error; err != nil {
+		if err := db.Create(&seat).Error; err != nil {
 			return err
 		}
 	}

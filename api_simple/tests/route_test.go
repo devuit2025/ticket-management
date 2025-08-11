@@ -3,6 +3,7 @@ package tests
 import (
 	"bytes"
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"net/url"
@@ -16,7 +17,7 @@ import (
 )
 
 func getAdminToken(t *testing.T, router *gin.Engine, phone string) string {
-	// Register admin user first
+	// Create a new admin user with the specified phone number
 	registerBody := map[string]interface{}{
 		"phone":    phone,
 		"password": "Password123!",
@@ -26,9 +27,53 @@ func getAdminToken(t *testing.T, router *gin.Engine, phone string) string {
 	jsonRegisterBody, _ := json.Marshal(registerBody)
 	registerReq := httptest.NewRequest("POST", "/api/v1/auth/register", bytes.NewBuffer(jsonRegisterBody))
 	registerReq.Header.Set("Content-Type", "application/json")
-	router.ServeHTTP(httptest.NewRecorder(), registerReq)
 
-	// Login to get token
+	// Check registration response
+	registerW := httptest.NewRecorder()
+	router.ServeHTTP(registerW, registerReq)
+
+	// If registration fails due to existing phone, try to login with the existing user
+	if registerW.Code == http.StatusBadRequest {
+		// Try to login with the existing user (might be a different role)
+		loginBody := map[string]interface{}{
+			"phone":    phone,
+			"password": "Password123!",
+		}
+		jsonBody, _ := json.Marshal(loginBody)
+		loginReq := httptest.NewRequest("POST", "/api/v1/auth/login", bytes.NewBuffer(jsonBody))
+		loginReq.Header.Set("Content-Type", "application/json")
+
+		w := httptest.NewRecorder()
+		router.ServeHTTP(w, loginReq)
+
+		var loginResponse map[string]interface{}
+		json.Unmarshal(w.Body.Bytes(), &loginResponse)
+
+		// Check if login was successful
+		if token, exists := loginResponse["token"]; exists && token != nil {
+			return token.(string)
+		}
+
+		// If login also failed, try with the seeded admin user
+		loginBody = map[string]interface{}{
+			"phone":    "0987654321", // Use seeded admin user
+			"password": "admin123",
+		}
+		jsonBody, _ = json.Marshal(loginBody)
+		loginReq = httptest.NewRequest("POST", "/api/v1/auth/login", bytes.NewBuffer(jsonBody))
+		loginReq.Header.Set("Content-Type", "application/json")
+
+		w = httptest.NewRecorder()
+		router.ServeHTTP(w, loginReq)
+
+		json.Unmarshal(w.Body.Bytes(), &loginResponse)
+
+		if token, exists := loginResponse["token"]; exists && token != nil {
+			return token.(string)
+		}
+	}
+
+	// If registration was successful, login to get token
 	loginBody := map[string]interface{}{
 		"phone":    phone,
 		"password": "Password123!",
@@ -42,7 +87,14 @@ func getAdminToken(t *testing.T, router *gin.Engine, phone string) string {
 
 	var loginResponse map[string]interface{}
 	json.Unmarshal(w.Body.Bytes(), &loginResponse)
-	return loginResponse["token"].(string)
+
+	// Check if token exists and is not nil
+	token, exists := loginResponse["token"]
+	if !exists || token == nil {
+		t.Fatal("Failed to get admin token from login response")
+	}
+
+	return token.(string)
 }
 
 func TestRoute(t *testing.T) {
@@ -51,9 +103,6 @@ func TestRoute(t *testing.T) {
 
 	t.Run("CreateRoute", func(t *testing.T) {
 		t.Run("Success", func(t *testing.T) {
-			BeginTx(t)
-			defer RollbackTx(t)
-
 			// Get token with unique phone number
 			adminToken := getAdminToken(t, router, "0987654321")
 
@@ -83,9 +132,6 @@ func TestRoute(t *testing.T) {
 		})
 
 		t.Run("DuplicateRoute", func(t *testing.T) {
-			BeginTx(t)
-			defer RollbackTx(t)
-
 			// Get token with unique phone number
 			adminToken := getAdminToken(t, router, "0987654322")
 
@@ -130,9 +176,6 @@ func TestRoute(t *testing.T) {
 		})
 
 		t.Run("InvalidDistance", func(t *testing.T) {
-			BeginTx(t)
-			defer RollbackTx(t)
-
 			// Get token with unique phone number
 			adminToken := getAdminToken(t, router, "0987654323")
 
@@ -162,9 +205,6 @@ func TestRoute(t *testing.T) {
 		})
 
 		t.Run("InvalidBasePrice", func(t *testing.T) {
-			BeginTx(t)
-			defer RollbackTx(t)
-
 			// Get token with unique phone number
 			adminToken := getAdminToken(t, router, "0987654324")
 
@@ -196,9 +236,6 @@ func TestRoute(t *testing.T) {
 
 	t.Run("GetRoutes", func(t *testing.T) {
 		t.Run("Success", func(t *testing.T) {
-			BeginTx(t)
-			defer RollbackTx(t)
-
 			// Create test routes
 			routes := []models.Route{
 				{
@@ -238,9 +275,6 @@ func TestRoute(t *testing.T) {
 		})
 
 		t.Run("WithFilters", func(t *testing.T) {
-			BeginTx(t)
-			defer RollbackTx(t)
-
 			// Create test routes
 			routes := []models.Route{
 				{
@@ -286,9 +320,6 @@ func TestRoute(t *testing.T) {
 	})
 
 	t.Run("GetPopularRoutes", func(t *testing.T) {
-		BeginTx(t)
-		defer RollbackTx(t)
-
 		// Create test routes
 		routes := []models.Route{
 			{
@@ -329,9 +360,6 @@ func TestRoute(t *testing.T) {
 
 	t.Run("GetRoute", func(t *testing.T) {
 		t.Run("Success", func(t *testing.T) {
-			BeginTx(t)
-			defer RollbackTx(t)
-
 			// Create test route first
 			route := models.Route{
 				Origin:      "Hà Nội",
@@ -344,7 +372,9 @@ func TestRoute(t *testing.T) {
 			err := config.DB.Create(&route).Error
 			assert.NoError(t, err)
 
-			req := httptest.NewRequest("GET", "/api/v1/routes/1", nil)
+			// Use the actual route ID from the database
+			routeID := route.ID
+			req := httptest.NewRequest("GET", "/api/v1/routes/"+fmt.Sprintf("%d", routeID), nil)
 
 			w := httptest.NewRecorder()
 			router.ServeHTTP(w, req)
@@ -360,9 +390,6 @@ func TestRoute(t *testing.T) {
 		})
 
 		t.Run("NotFound", func(t *testing.T) {
-			BeginTx(t)
-			defer RollbackTx(t)
-
 			req := httptest.NewRequest("GET", "/api/v1/routes/999", nil)
 
 			w := httptest.NewRecorder()
@@ -380,9 +407,6 @@ func TestRoute(t *testing.T) {
 
 	t.Run("UpdateRoute", func(t *testing.T) {
 		t.Run("Success", func(t *testing.T) {
-			BeginTx(t)
-			defer RollbackTx(t)
-
 			// Get token with unique phone number
 			adminToken := getAdminToken(t, router, "0987654325")
 
@@ -398,13 +422,15 @@ func TestRoute(t *testing.T) {
 			err := config.DB.Create(&route).Error
 			assert.NoError(t, err)
 
+			// Use the actual route ID from the database
+			routeID := route.ID
 			body := map[string]interface{}{
 				"base_price": 380000,
 				"is_active":  true,
 			}
 			jsonBody, _ := json.Marshal(body)
 
-			req := httptest.NewRequest("PUT", "/api/v1/admin/routes/1", bytes.NewBuffer(jsonBody))
+			req := httptest.NewRequest("PUT", "/api/v1/admin/routes/"+fmt.Sprintf("%d", routeID), bytes.NewBuffer(jsonBody))
 			req.Header.Set("Content-Type", "application/json")
 			req.Header.Set("Authorization", "Bearer "+adminToken)
 
@@ -421,9 +447,6 @@ func TestRoute(t *testing.T) {
 		})
 
 		t.Run("NotFound", func(t *testing.T) {
-			BeginTx(t)
-			defer RollbackTx(t)
-
 			// Get token with unique phone number
 			adminToken := getAdminToken(t, router, "0987654326")
 
@@ -450,9 +473,6 @@ func TestRoute(t *testing.T) {
 		})
 
 		t.Run("InvalidBasePrice", func(t *testing.T) {
-			BeginTx(t)
-			defer RollbackTx(t)
-
 			// Get token with unique phone number
 			adminToken := getAdminToken(t, router, "0987654327")
 
@@ -468,13 +488,15 @@ func TestRoute(t *testing.T) {
 			err := config.DB.Create(&route).Error
 			assert.NoError(t, err)
 
+			// Use the actual route ID from the database
+			routeID := route.ID
 			body := map[string]interface{}{
 				"base_price": -1,
 				"is_active":  true,
 			}
 			jsonBody, _ := json.Marshal(body)
 
-			req := httptest.NewRequest("PUT", "/api/v1/admin/routes/1", bytes.NewBuffer(jsonBody))
+			req := httptest.NewRequest("PUT", "/api/v1/admin/routes/"+fmt.Sprintf("%d", routeID), bytes.NewBuffer(jsonBody))
 			req.Header.Set("Content-Type", "application/json")
 			req.Header.Set("Authorization", "Bearer "+adminToken)
 
@@ -493,9 +515,6 @@ func TestRoute(t *testing.T) {
 
 	t.Run("DeleteRoute", func(t *testing.T) {
 		t.Run("Success", func(t *testing.T) {
-			BeginTx(t)
-			defer RollbackTx(t)
-
 			// Get token with unique phone number
 			adminToken := getAdminToken(t, router, "0987654328")
 
@@ -511,7 +530,9 @@ func TestRoute(t *testing.T) {
 			err := config.DB.Create(&route).Error
 			assert.NoError(t, err)
 
-			req := httptest.NewRequest("DELETE", "/api/v1/admin/routes/1", nil)
+			// Use the actual route ID from the database
+			routeID := route.ID
+			req := httptest.NewRequest("DELETE", "/api/v1/admin/routes/"+fmt.Sprintf("%d", routeID), nil)
 			req.Header.Set("Authorization", "Bearer "+adminToken)
 
 			w := httptest.NewRecorder()
@@ -527,9 +548,6 @@ func TestRoute(t *testing.T) {
 		})
 
 		t.Run("NotFound", func(t *testing.T) {
-			BeginTx(t)
-			defer RollbackTx(t)
-
 			// Get token with unique phone number
 			adminToken := getAdminToken(t, router, "0987654329")
 

@@ -52,7 +52,7 @@ func main() {
 	// Start server
 	port := os.Getenv("PORT")
 	if port == "" {
-		port = "8080"
+		port = "8081"
 	}
 	router.Run(fmt.Sprintf(":%s", port))
 }

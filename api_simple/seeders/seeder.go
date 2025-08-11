@@ -51,7 +51,7 @@ func Seed() {
 
 	// Seed seats for each trip
 	for _, trip := range trips {
-		if err := SeedSeats(trip.ID, trip.Price); err != nil {
+		if err := SeedSeats(config.DB, trip.ID, trip.Price); err != nil {
 			log.Fatal("Error seeding seats:", err)
 		}
 	}
