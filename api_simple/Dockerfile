@@ -3,10 +3,20 @@ FROM golang:1.23-alpine AS builder
 
 WORKDIR /app
 
-# Install git and build dependencies
-RUN apk add --no-cache git
+# Set Go proxy
+ENV GOPROXY=https://goproxy.cn,direct
 
-# For development, we'll mount the source code
+# Install git and build dependencies
+RUN apk add --no-cache git gcc musl-dev
+
+# Copy go.mod and go.sum first to leverage Docker cache
+COPY go.mod go.sum ./
+RUN go mod download
+
+# Copy the source code
+COPY . .
+
+# For development, we'll run the code directly
 CMD ["go", "run", "main.go"]
 
 # Production stage
@@ -19,7 +29,7 @@ COPY --from=builder /app/main .
 COPY .env .
 
 # Expose port
-EXPOSE 8080
+EXPOSE 8081
 
 # Run the application
 CMD ["./main"] 

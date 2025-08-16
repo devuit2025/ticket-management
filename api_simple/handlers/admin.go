@@ -5,77 +5,99 @@ import (
 
 	"ticket-management/api_simple/config"
 	"ticket-management/api_simple/models"
+	"ticket-management/api_simple/repository"
+	"ticket-management/api_simple/utils"
 
 	"github.com/gin-gonic/gin"
 )
 
+// GetUsers returns list of users with optional filters
 func GetUsers(c *gin.Context) {
-	var users []models.User
-	result := config.DB.Find(&users)
-	if result.Error != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch users"})
+	userRepo := repository.NewUserRepository(config.DB)
+
+	// Get query parameters
+	phone := c.Query("phone")
+	role := c.Query("role")
+
+	// Build filter
+	filter := make(map[string]interface{})
+	if phone != "" {
+		filter["phone"] = phone
+	}
+	if role != "" {
+		filter["role"] = role
+	}
+
+	users, err := userRepo.FindAll(filter)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": utils.ErrServerError})
 		return
 	}
 
-	c.JSON(http.StatusOK, users)
+	c.JSON(http.StatusOK, gin.H{
+		"users": users,
+		"total": len(users),
+	})
 }
 
-func GetAllBookings(c *gin.Context) {
-	var bookings []models.Booking
-	result := config.DB.Preload("User").
-		Preload("Trip.Route").
-		Preload("Trip.Bus").
-		Preload("Seat").
-		Preload("Payment").
-		Find(&bookings)
-
-	if result.Error != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch bookings"})
-		return
-	}
-
-	c.JSON(http.StatusOK, bookings)
-}
-
-type Statistics struct {
-	TotalRevenue     float64 `json:"total_revenue"`
-	CompletedTrips   int64   `json:"completed_trips"`
-	PendingTrips     int64   `json:"pending_trips"`
-	TotalBookings    int64   `json:"total_bookings"`
-	PendingBookings  int64   `json:"pending_bookings"`
-	CanceledBookings int64   `json:"canceled_bookings"`
-}
-
+// GetStatistics returns system statistics
 func GetStatistics(c *gin.Context) {
-	var stats Statistics
+	// Get repositories
+	userRepo := repository.NewUserRepository(config.DB)
+	routeRepo := repository.NewRouteRepository(config.DB)
+	tripRepo := repository.NewTripRepository(config.DB)
+	bookingRepo := repository.NewBookingRepository(config.DB)
 
-	// Calculate total revenue from completed payments
-	config.DB.Model(&models.Payment{}).
-		Where("status = ?", models.PaymentStatusCompleted).
-		Select("COALESCE(SUM(amount), 0)").
-		Scan(&stats.TotalRevenue)
+	// Get total users
+	users, err := userRepo.FindAll(nil)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": utils.ErrServerError})
+		return
+	}
 
-	// Count trips by status
-	config.DB.Model(&models.Trip{}).
-		Where("status = ?", models.TripStatusCompleted).
-		Count(&stats.CompletedTrips)
+	// Count users by role
+	userStats := make(map[string]int)
+	for _, user := range users {
+		userStats[string(user.Role)]++
+	}
 
-	config.DB.Model(&models.Trip{}).
-		Where("status IN ?", []models.TripStatus{models.TripStatusUpcoming, models.TripStatusInProgress}).
-		Count(&stats.PendingTrips)
+	// Get total routes
+	routes, err := routeRepo.FindAll(nil)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": utils.ErrServerError})
+		return
+	}
 
-	// Count bookings by status
-	config.DB.Model(&models.Booking{}).Count(&stats.TotalBookings)
+	// Get total trips
+	trips, err := tripRepo.FindAll(nil)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": utils.ErrServerError})
+		return
+	}
 
-	config.DB.Model(&models.Booking{}).
-		Where("status = ?", models.BookingStatusPending).
-		Count(&stats.PendingBookings)
+	// Get total bookings
+	bookings, total, err := bookingRepo.FindAll(nil, 1, 1)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": utils.ErrServerError})
+		return
+	}
 
-	config.DB.Model(&models.Booking{}).
-		Where("status = ?", models.BookingStatusCanceled).
-		Count(&stats.CanceledBookings)
+	// Get total revenue
+	var totalRevenue float64
+	for _, booking := range bookings {
+		if booking.Status == models.BookingStatusConfirmed && booking.PaymentStatus == models.PaymentStatusPaid {
+			totalRevenue += booking.TotalAmount
+		}
+	}
 
-	c.JSON(http.StatusOK, stats)
+	c.JSON(http.StatusOK, gin.H{
+		"total_users":    len(users),
+		"users_by_role":  userStats,
+		"total_routes":   len(routes),
+		"total_trips":    len(trips),
+		"total_bookings": total,
+		"total_revenue":  totalRevenue,
+	})
 }
 
 func UpdateUserRole(c *gin.Context) {
@@ -91,6 +113,20 @@ func UpdateUserRole(c *gin.Context) {
 	}
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	// Validate role
+	validRoles := []models.Role{models.RoleAdmin, models.RoleStaff, models.RoleDriver, models.RoleCustomer}
+	isValidRole := false
+	for _, role := range validRoles {
+		if req.Role == role {
+			isValidRole = true
+			break
+		}
+	}
+	if !isValidRole {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid role"})
 		return
 	}
 

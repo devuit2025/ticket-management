@@ -134,7 +134,7 @@ exit
 
 ```bash
 # Đăng ký tài khoản
-curl -X POST http://localhost:8080/api/v1/auth/register \
+curl -X POST http://localhost:8081/api/v1/auth/register \
 -H "Content-Type: application/json" \
 -d '{
   "email": "example@email.com",
@@ -144,7 +144,7 @@ curl -X POST http://localhost:8080/api/v1/auth/register \
 }'
 
 # Đăng nhập
-curl -X POST http://localhost:8080/api/v1/auth/login \
+curl -X POST http://localhost:8081/api/v1/auth/login \
 -H "Content-Type: application/json" \
 -d '{
   "email": "example@email.com",
@@ -156,11 +156,11 @@ curl -X POST http://localhost:8080/api/v1/auth/login \
 
 ```bash
 # Lấy danh sách users (yêu cầu token admin)
-curl http://localhost:8080/api/v1/admin/users \
+curl http://localhost:8081/api/v1/admin/users \
 -H "Authorization: Bearer YOUR_TOKEN_HERE"
 
 # Lấy thống kê (yêu cầu token admin)
-curl http://localhost:8080/api/v1/admin/statistics \
+curl http://localhost:8081/api/v1/admin/statistics \
 -H "Authorization: Bearer YOUR_TOKEN_HERE"
 ```
 

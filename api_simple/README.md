@@ -53,7 +53,65 @@ CREATE DATABASE ticket-management;
 go run main.go
 ```
 
-The server will start at `http://localhost:8080`
+The server will start at `http://localhost:8081`
+
+## Testing
+
+### Running Tests
+
+1. **Navigate to the api_simple directory:**
+
+```bash
+cd api_simple
+```
+
+2. **Run tests using Docker:**
+
+```bash
+# Access the Docker container
+docker exec -it api_simple-app-1 sh
+
+# Run all tests
+go test ./tests
+```
+
+3. **Run tests locally (if you have Go installed):**
+
+```bash
+go test ./tests
+```
+
+### Test Structure
+
+The test files are located in the `tests/` directory and follow Go's standard testing conventions.
+
+### Important Notes for Testing
+
+- **After code updates:** If you make any code changes, you need to rebuild the Docker container
+- **Wait time:** After rebuilding, wait 5-10 seconds to ensure the server starts completely before running tests
+- **Test isolation:** Each test should be independent and not rely on the state of other tests
+
+### Common Test Issues and Solutions
+
+1. **Database connection errors:**
+
+   - Ensure PostgreSQL is running
+   - Check database credentials in `.env`
+   - Verify database exists
+
+2. **Redis connection errors:**
+
+   - Ensure Redis is running
+   - Check Redis configuration in `.env`
+
+3. **Test failures due to server not ready:**
+
+   - Wait longer after rebuilding (5-10 seconds)
+   - Check server logs for startup errors
+
+4. **Permission errors:**
+   - Ensure you have proper access to the Docker container
+   - Check file permissions in the project directory
 
 ## API Endpoints
 
@@ -96,12 +154,22 @@ The server will start at `http://localhost:8080`
 ├── controllers/        # Request handlers
 ├── middleware/         # Middleware functions
 ├── models/            # Database models
+├── tests/             # Test files
 ├── .env               # Environment variables
 ├── go.mod             # Go modules file
 ├── go.sum             # Go modules checksum
 ├── main.go            # Application entry point
 └── README.md          # Project documentation
 ```
+
+## Development Workflow
+
+1. **Make code changes**
+2. **Rebuild Docker container** (if using Docker)
+3. **Wait 5-10 seconds** for server to start completely
+4. **Run tests** to verify changes
+5. **Fix any test failures**
+6. **Repeat if necessary**
 
 ## Contributing
 

@@ -1,63 +1,66 @@
 package models
 
 import (
+	"errors"
 	"time"
 
 	"gorm.io/gorm"
 )
 
-type TripStatus string
-
-const (
-	TripStatusUpcoming   TripStatus = "upcoming"
-	TripStatusInProgress TripStatus = "in_progress"
-	TripStatusCompleted  TripStatus = "completed"
-	TripStatusCanceled   TripStatus = "canceled"
-)
-
 type Trip struct {
-	ID           uint           `json:"id" gorm:"primaryKey"`
-	RouteID      uint           `json:"route_id"`
-	Route        Route          `json:"route"`
-	BusID        uint           `json:"bus_id"`
-	Bus          Bus            `json:"bus"`
-	DriverID     uint           `json:"driver_id"`
-	Driver       User           `json:"driver"`
-	DepartureTime time.Time     `json:"departure_time"`
-	Status       TripStatus     `json:"status" gorm:"type:varchar(20);default:'upcoming'"`
-	Price        float64        `json:"price"`
-	CreatedAt    time.Time      `json:"created_at"`
-	UpdatedAt    time.Time      `json:"updated_at"`
-	DeletedAt    gorm.DeletedAt `json:"-" gorm:"index"`
+	gorm.Model
+	RouteID       uint      `json:"route_id"`
+	Route         *Route    `json:"route,omitempty"`
+	BusID         uint      `json:"bus_id"`
+	Bus           *Bus      `json:"bus,omitempty"`
+	DriverID      uint      `json:"driver_id"`
+	Driver        *User     `json:"driver,omitempty"`
+	DepartureTime time.Time `json:"departure_time"`
+	Price         float64   `json:"price"`
+	IsActive      bool      `json:"is_active" gorm:"default:true"`     // Trạng thái hoạt động
+	IsCompleted   bool      `json:"is_completed" gorm:"default:false"` // Đã hoàn thành chuyến
+	TotalSeats    int       `json:"total_seats"`                       // Tổng số ghế
+	BookedSeats   int       `json:"booked_seats"`                      // Số ghế đã đặt
+	Note          string    `json:"note"`                              // Ghi chú
 }
 
-type Route struct {
-	ID              uint           `json:"id" gorm:"primaryKey"`
-	Origin          string         `json:"origin" gorm:"not null"`
-	Destination     string         `json:"destination" gorm:"not null"`
-	EstimatedTime   int           `json:"estimated_time"` // in minutes
-	CreatedAt       time.Time      `json:"created_at"`
-	UpdatedAt       time.Time      `json:"updated_at"`
-	DeletedAt       gorm.DeletedAt `json:"-" gorm:"index"`
+// BeforeCreate hook to set default values
+func (t *Trip) BeforeCreate(tx *gorm.DB) error {
+	if t.Price == 0 {
+		// Get base price from route
+		var route Route
+		if err := tx.First(&route, t.RouteID).Error; err != nil {
+			return err
+		}
+		t.Price = route.BasePrice
+	}
+
+	// Get total seats from bus
+	var bus Bus
+	if err := tx.First(&bus, t.BusID).Error; err != nil {
+		return err
+	}
+	t.TotalSeats = bus.SeatCount
+
+	return nil
 }
 
-type Bus struct {
-	ID          uint           `json:"id" gorm:"primaryKey"`
-	PlateNumber string         `json:"plate_number" gorm:"unique;not null"`
-	Type        string         `json:"type" gorm:"not null"`
-	SeatCount   int           `json:"seat_count" gorm:"not null"`
-	CreatedAt   time.Time      `json:"created_at"`
-	UpdatedAt   time.Time      `json:"updated_at"`
-	DeletedAt   gorm.DeletedAt `json:"-" gorm:"index"`
+// Validate validates trip data
+func (t *Trip) Validate() error {
+	if t.RouteID == 0 {
+		return errors.New("route_id is required")
+	}
+	if t.BusID == 0 {
+		return errors.New("bus_id is required")
+	}
+	if t.DriverID == 0 {
+		return errors.New("driver_id is required")
+	}
+	if t.DepartureTime.Before(time.Now()) {
+		return errors.New("departure_time must be in the future")
+	}
+	if t.Price <= 0 {
+		return errors.New("price must be positive")
+	}
+	return nil
 }
-
-type Seat struct {
-	ID        uint           `json:"id" gorm:"primaryKey"`
-	TripID    uint           `json:"trip_id"`
-	Trip      Trip           `json:"trip"`
-	Number    string         `json:"number" gorm:"not null"`
-	Status    string         `json:"status" gorm:"type:varchar(20);default:'vacant'"` // vacant, reserved, paid, boarded
-	CreatedAt time.Time      `json:"created_at"`
-	UpdatedAt time.Time      `json:"updated_at"`
-	DeletedAt gorm.DeletedAt `json:"-" gorm:"index"`
-} 
