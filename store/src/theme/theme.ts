@@ -36,6 +36,7 @@ export interface Theme extends NavigationTheme {
             md: number;
             lg: number;
             xl: number;
+            xxl: number;
         };
     };
 }

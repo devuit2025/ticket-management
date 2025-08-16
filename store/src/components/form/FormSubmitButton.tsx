@@ -20,6 +20,10 @@ export const FormSubmitButton: React.FC<FormSubmitButtonProps> = ({
             style={[
                 styles.button,
                 {
+                    borderWidth: 0,
+                    borderRadius: theme.radius.md,
+                    paddingVertical: theme.spacing.sm,
+                    paddingHorizontal: theme.spacing.lg,
                     backgroundColor: isSubmitting
                         ? theme.colors.disabledBackground
                         : theme.colors.primary,
@@ -32,7 +36,18 @@ export const FormSubmitButton: React.FC<FormSubmitButtonProps> = ({
             {isSubmitting ? (
                 <ActivityIndicator color={theme.colors.onPrimary} />
             ) : (
-                <Text style={[styles.buttonText, { color: theme.colors.onPrimary }]}>{title}</Text>
+                <Text
+                    style={[
+                        styles.buttonText,
+                        {
+                            color: theme.colors.onPrimary,
+                            fontFamily: theme.fonts.regular,
+                            fontSize: theme.fonts.sizes.md,
+                        },
+                    ]}
+                >
+                    {title}
+                </Text>
             )}
         </TouchableOpacity>
     );
@@ -40,12 +55,11 @@ export const FormSubmitButton: React.FC<FormSubmitButtonProps> = ({
 
 const styles = StyleSheet.create({
     button: {
-        paddingVertical: 14,
-        borderRadius: 8,
+        // paddingVertical: 14,
+        // borderRadius: 8,
         alignItems: 'center',
     },
     buttonText: {
-        fontWeight: '600',
         fontSize: 16,
     },
 });

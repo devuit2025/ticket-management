@@ -11,7 +11,7 @@
             "@hooks/*": ["src/hooks/*"],
             "@navigation/*": ["src/navigation/*"],
             "@validations/*": ["src/validations/*"],
-
+            "@assets/*": ["/assets/*"],
             "@i18n/*": ["src/i18n/*"],
             "@types/*": ["src/types/*"],
             "@store/*": ["src/store/*"],

@@ -6,5 +6,8 @@ export const useTranslation = () => {
     return {
         translate: (key: string, config?: Record<string, unknown>) => i18n.t(key, config),
         locale: safeLocale,
+        setLanguage: (lang: string) => {
+            console.log('set language:', lang);
+        },
     };
 };

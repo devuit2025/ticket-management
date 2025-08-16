@@ -6,13 +6,16 @@ export const lightColors = {
     disabledBackground: '#E5E7EB',
 
     disabledText: '#9CA3AF',
-    text: '#1F2937',
-    placeholder: '#D1D5DB',
+    text: '#202020',
+    labelInput: '#454545ff',
+    icon: '#868686ff',
 
+    placeholder: '#D1D5DB',
     secondary: '#0B9BF5',
     onSecondary: '#FFFFFF',
-    card: '#F9FAFB',
+    card: '#ffffffff',
     border: '#D1D5DB',
+    devider: '#eee',
     error: '#DC2626',
     success: '#16A34A',
     warning: '#FBBF24',
@@ -32,7 +35,7 @@ export const darkColors = {
     disabledText: '#6B7280',
     text: '#E5E7EB',
     placeholder: '#D1D5DB',
-
+    icon: '#D1D5DB',
     secondary: '#0B9BF5',
     onSecondary: '#1F2937',
     card: '#1F2937',

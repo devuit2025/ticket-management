@@ -24,7 +24,7 @@ const Divider: React.FC<DividerProps> = ({
             style={[
                 {
                     height: thickness,
-                    backgroundColor: color || theme.colors.border,
+                    backgroundColor: theme.colors.devider,
                     marginVertical,
                     marginHorizontal,
                 },

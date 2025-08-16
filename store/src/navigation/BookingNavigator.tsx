@@ -11,39 +11,39 @@ const Stack = createNativeStackNavigator();
 
 export function BookingNavigator() {
     return (
-        <BookingProvider>
-            <Stack.Navigator
-                initialRouteName="SelectPickupDropoff"
-                screenOptions={{
-                    headerShown: false,
-                }}
-            >
-                <Stack.Screen
+        // <BookingProvider>
+        <Stack.Navigator
+            initialRouteName="PassengerInfo"
+            screenOptions={{
+                headerShown: false,
+            }}
+        >
+            {/* <Stack.Screen
                     name="SelectPickupDropoff"
                     component={SelectPickupDropoffScreen}
                     options={{ headerShown: false }}
-                />
-                <Stack.Screen
-                    name="PassengerInfo"
-                    component={PassengerInfoScreen}
-                    options={{ headerShown: false }}
-                />
-                <Stack.Screen
-                    name="ReviewBooking"
-                    component={ReviewBookingScreen}
-                    options={{ headerShown: false }}
-                />
-                <Stack.Screen
-                    name="PaymentMethod"
-                    component={PaymentMethodScreen}
-                    options={{ headerShown: false }}
-                />
-                <Stack.Screen
-                    name="BookingConfirmation"
-                    component={BookingConfirmationScreen}
-                    options={{ headerShown: false }}
-                />
-            </Stack.Navigator>
-        </BookingProvider>
+                /> */}
+            <Stack.Screen
+                name="PassengerInfo"
+                component={PassengerInfoScreen}
+                options={{ headerShown: false }}
+            />
+            <Stack.Screen
+                name="ReviewBooking"
+                component={ReviewBookingScreen}
+                options={{ headerShown: false }}
+            />
+            <Stack.Screen
+                name="PaymentMethod"
+                component={PaymentMethodScreen}
+                options={{ headerShown: false }}
+            />
+            <Stack.Screen
+                name="BookingConfirmation"
+                component={BookingConfirmationScreen}
+                options={{ headerShown: false }}
+            />
+        </Stack.Navigator>
+        // </BookingProvider>
     );
 }

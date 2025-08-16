@@ -4,6 +4,7 @@ import { ThemeProvider } from './src/context/ThemeContext';
 import * as Font from 'expo-font';
 import { LanguageProvider } from '@i18n/LanguageProvider';
 import { StyleSheet, View } from 'react-native';
+import './assets/App.css';
 
 export default function App() {
     const [fontsLoaded, setFontsLoaded] = useState(false);

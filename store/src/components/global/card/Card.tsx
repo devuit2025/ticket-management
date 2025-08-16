@@ -20,13 +20,13 @@ const Card: React.FC<CardProps> = ({
 
     const backgroundColor = theme.colors.card;
     const borderColor = theme.colors.border;
-    const shadow = {
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 1 },
-        shadowOpacity: 0.1,
-        shadowRadius: elevation,
-        elevation,
-    };
+    // const shadow = {
+    //     shadowColor: '#000',
+    //     shadowOffset: { width: 0, height: 1 },
+    //     shadowOpacity: 0.1,
+    //     shadowRadius: elevation,
+    //     elevation,
+    // };
 
     return (
         <View
@@ -36,7 +36,6 @@ const Card: React.FC<CardProps> = ({
                     padding: theme.spacing.md,
                     borderRadius: theme.radius.md,
                     ...(bordered ? { borderWidth: 1, borderColor } : {}),
-                    ...shadow,
                 },
                 style,
             ]}

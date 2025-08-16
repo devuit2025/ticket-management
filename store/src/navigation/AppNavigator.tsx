@@ -8,6 +8,8 @@ import { useTheme } from '@context/ThemeContext';
 import GlobalComponentsScreen from '@screens/dev/GlobalComponentsScreen';
 import { BookingNavigator } from '@navigation/BookingNavigator';
 import BottomTabs from './BottomTabs';
+import { BookingProvider } from '@context/BookingContext';
+import { LoginScreen } from '@screens/onboarding';
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
@@ -15,27 +17,30 @@ export default function AppNavigator() {
     const { theme } = useTheme();
 
     return (
-        <NavigationContainer>
-            <Stack.Navigator
-                initialRouteName="Home"
-                screenOptions={{
-                    headerShown: false,
-                }}
-            >
-                <Stack.Screen name="Home" component={BottomTabs} />
+        <BookingProvider>
+            <NavigationContainer>
+                <Stack.Navigator
+                    initialRouteName="Login"
+                    screenOptions={{
+                        headerShown: false,
+                    }}
+                >
+                    <Stack.Screen name="Home" component={BottomTabs} />
 
-                <Stack.Screen
-                    name="Booking"
-                    component={BookingNavigator}
-                    options={{ headerShown: false }}
-                />
+                    {/* <Stack.Screen
+                        name="Booking"
+                        component={BookingNavigator}
+                        options={{ headerShown: false }}
+                    /> */}
+                    <Stack.Screen
+                        name="GlobalComponents"
+                        component={GlobalComponentsScreen}
+                        options={{ title: 'Component Showcase' }}
+                    />
 
-                <Stack.Screen
-                    name="GlobalComponents"
-                    component={GlobalComponentsScreen}
-                    options={{ title: 'Component Showcase' }}
-                />
-            </Stack.Navigator>
-        </NavigationContainer>
+                    <Stack.Screen name="Login" component={LoginScreen} />
+                </Stack.Navigator>
+            </NavigationContainer>
+        </BookingProvider>
     );
 }

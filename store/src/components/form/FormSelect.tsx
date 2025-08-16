@@ -4,6 +4,7 @@ import { Controller } from 'react-hook-form';
 import { useTheme } from '@context/ThemeContext';
 import type { FormSelectProps, Options } from '@types';
 import Icon from '@components/global/icon/Icon';
+import Typography from '@components/global/typography/Typography';
 
 export const FormSelect: React.FC<FormSelectProps> = ({
     name,
@@ -24,18 +25,25 @@ export const FormSelect: React.FC<FormSelectProps> = ({
     );
 
     return (
-        <View style={[{ marginBottom: theme.spacing.md }, containerStyle]}>
+        <View
+            style={[
+                {
+                    marginBottom: theme.spacing.md,
+                    borderWidth: 1,
+                    borderColor: error ? theme.colors.error : theme.colors.border,
+                    borderRadius: theme.radius.sm,
+                    padding: theme.spacing.sm,
+                },
+                containerStyle,
+            ]}
+        >
             {label ? (
-                <Text
-                    style={{
-                        fontWeight: '600',
-                        fontSize: 14,
-                        marginBottom: theme.spacing.xs,
-                        color: theme.colors.text,
-                    }}
+                <Typography
+                    variant="caption"
+                    style={{ marginBottom: theme.spacing.xs, color: theme.colors.labelInput }}
                 >
                     {label}
-                </Text>
+                </Typography>
             ) : null}
 
             <Controller
@@ -48,23 +56,20 @@ export const FormSelect: React.FC<FormSelectProps> = ({
                             <TouchableOpacity
                                 onPress={() => setModalVisible(true)}
                                 style={{
-                                    borderWidth: 1,
-                                    borderColor: error ? theme.colors.error : theme.colors.border,
                                     backgroundColor: theme.colors.inputBackground,
-                                    borderRadius: theme.radius.sm,
-                                    padding: theme.spacing.sm,
                                     flexDirection: 'row',
                                     alignItems: 'center',
                                 }}
                             >
-                                {iconName && (
+                                {/* {iconName && (
                                     <Icon
                                         name={iconName}
                                         style={{ marginRight: theme.spacing.xs }}
                                     />
-                                )}
+                                )} */}
 
-                                <Text
+                                <Typography
+                                    variant="body"
                                     style={{
                                         color: selected
                                             ? theme.colors.text
@@ -72,7 +77,16 @@ export const FormSelect: React.FC<FormSelectProps> = ({
                                     }}
                                 >
                                     {selected ? selected.label : placeholder || 'Select...'}
-                                </Text>
+                                </Typography>
+                                {/* <Text
+                                    style={{
+                                        color: selected
+                                            ? theme.colors.text
+                                            : theme.colors.placeholder,
+                                    }}
+                                >
+                                    {selected ? selected.label : placeholder || 'Select...'}
+                                </Text> */}
                             </TouchableOpacity>
 
                             <Modal visible={modalVisible} animationType="fade" transparent>

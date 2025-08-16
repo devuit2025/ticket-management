@@ -13,6 +13,7 @@ import DateTimePicker from '@react-native-community/datetimepicker';
 import { useTheme } from '@context/ThemeContext';
 import Icon from '@components/global/icon/Icon';
 import type { FormDatePickerProps } from '@types';
+import Typography from '@components/global/typography/Typography';
 
 export const FormDatePicker: React.FC<FormDatePickerProps> = ({
     name,
@@ -27,18 +28,34 @@ export const FormDatePicker: React.FC<FormDatePickerProps> = ({
     const [showPicker, setShowPicker] = useState(false);
 
     return (
-        <View style={[{ marginBottom: theme.spacing.md }, containerStyle]}>
+        <View
+            style={[
+                {
+                    marginBottom: theme.spacing.md,
+                    borderWidth: 1,
+                    borderColor: error ? theme.colors.error : theme.colors.border,
+                    borderRadius: theme.radius.sm,
+                    padding: theme.spacing.sm,
+                },
+                containerStyle,
+            ]}
+        >
             {label ? (
-                <Text
+                <View
                     style={{
-                        fontWeight: '600',
-                        fontSize: 14,
-                        marginBottom: theme.spacing.xs,
-                        color: theme.colors.text,
+                        flexDirection: 'row',
+                        alignItems: 'center',
                     }}
                 >
-                    {label}
-                </Text>
+                    <Typography
+                        variant="caption"
+                        style={{ marginBottom: theme.spacing.xs, color: theme.colors.labelInput }}
+                    >
+                        {label}
+                    </Typography>
+
+                    {iconName && <Icon name={iconName} style={{ marginLeft: theme.spacing.xs }} />}
+                </View>
             ) : null}
 
             <Controller
@@ -59,22 +76,10 @@ export const FormDatePicker: React.FC<FormDatePickerProps> = ({
                             <TouchableOpacity
                                 onPress={() => setShowPicker(true)}
                                 style={{
-                                    borderWidth: 1,
-                                    borderColor: error ? theme.colors.error : theme.colors.border,
-                                    backgroundColor: theme.colors.inputBackground,
-                                    borderRadius: theme.radius.sm,
-                                    padding: theme.spacing.sm,
                                     flexDirection: 'row',
                                     alignItems: 'center',
                                 }}
                             >
-                                {iconName && (
-                                    <Icon
-                                        name={iconName}
-                                        style={{ marginRight: theme.spacing.xs }}
-                                    />
-                                )}
-
                                 <Text
                                     style={{
                                         color: value ? theme.colors.text : theme.colors.placeholder,
