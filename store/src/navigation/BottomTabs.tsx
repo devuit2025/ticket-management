@@ -1,14 +1,12 @@
 import React from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 
-import { HomeScreen } from '@screens/home';
 import HistoryScreen from '@screens/orders/MyTicketsScreen';
 import CheckoutScreen from '@screens/booking/ReviewBookingScreen';
 import NotificationScreen from '@screens/support/NotificationsScreen';
 import AccountScreen from '@screens/profile/MyAccountScreen';
 
 import HeaderLeft from '@components/navigation/HeaderLeft';
-import ProfileIcon from '@components/navigation/ProfileIcon';
 import Icon from '@components/global/icon/Icon';
 import { useTheme } from '@context/ThemeContext';
 import { SelectPickupDropoffScreen } from '@screens/booking';
@@ -40,6 +38,13 @@ function createScreenOptions({ route, navigation }: { route: any; navigation: an
         headerTitle: '',
         headerLeft: () => <HeaderLeft navigation={navigation} routeName={route.name} />,
         headerRight: () => <HeaderRightLanguageSwitcher />,
+        headerStyle: {
+            backgroundColor: 'transparent', // Transparent background
+            elevation: 0, // Remove shadow on Android
+            shadowOpacity: 0, // Remove shadow on iOS
+            borderBottomWidth: 0,
+        },
+        headerTransparent: true,
         tabBarIcon: ({
             focused,
             color,
@@ -72,7 +77,6 @@ export default function BottomTabs() {
     return (
         <Tab.Navigator screenOptions={createScreenOptions}>
             <Tab.Screen name="Home" component={SelectPickupDropoffScreen} />
-            {/* <Tab.Screen name="Home" component={HomeScreen} /> */}
             <Tab.Screen name="History" component={HistoryScreen} />
             <Tab.Screen name="Checkout" component={CheckoutScreen} />
             <Tab.Screen name="Notifications" component={NotificationScreen} />

@@ -1,10 +1,10 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 
-const BookingConfirmationScreen = () => {
+const SelectSeatScreen = () => {
     return (
         <View style={styles.container}>
-            <Text>BookingConfirmationScreen</Text>
+            <Text>Select Seat</Text>
         </View>
     );
 };
@@ -17,4 +17,4 @@ const styles = StyleSheet.create({
     },
 });
 
-export default BookingConfirmationScreen;
+export default SelectSeatScreen;

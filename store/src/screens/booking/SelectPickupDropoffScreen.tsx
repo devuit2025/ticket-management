@@ -12,14 +12,26 @@ import Typography from '@components/global/typography/Typography';
 import { ScrollView, StyleSheet, View } from 'react-native';
 import Divider from '@components/global/divider/Divider';
 import Gap from '@components/global/gap/Gap';
+import { useTheme } from '@context/ThemeContext';
+import Container from '@components/global/container/Container';
+import { NavigationProp, RouteProp } from '@react-navigation/native';
 
 const locations: Options[] = [
     { label: 'Hanoi', value: 'hanoi' },
     { label: 'Ho Chi Minh City', value: 'hcmc' },
 ];
 
-export default function SelectPickupDropoffScreen() {
+interface SelectPickupDropoffScreenProps {
+    navigation: NavigationProp<Record<string, object | undefined>>;
+    route: RouteProp<Record<string, object | undefined>, string>;
+}
+
+export default function SelectPickupDropoffScreen({
+    navigation,
+    route,
+}: SelectPickupDropoffScreenProps) {
     const { translate } = useTranslation();
+    const { theme } = useTheme();
 
     const ticketLabel = translate('booking.ticket');
     const ticketNumbers: Options[] = Array.from({ length: 10 }, (_, i) => ({
@@ -28,6 +40,7 @@ export default function SelectPickupDropoffScreen() {
     }));
 
     const { bookingData, setBookingData } = useBooking();
+
     const {
         control,
         handleSubmit,
@@ -52,110 +65,171 @@ export default function SelectPickupDropoffScreen() {
         dayBack: '2025-08-25', // optional
     };
 
+    const handleSearchBus = () => {
+        console.log('search bus');
+        navigation.navigate('Booking');
+    };
+
     return (
-        <MainLayout withPadding>
+        <View style={{ flex: 1 }}>
+            {/* Overlay */}
+            <View
+                style={{
+                    position: 'absolute', // sit above the parent View
+                    top: 0,
+                    left: 0,
+                    right: 0,
+                    bottom: 0, // fill the parent
+                    backgroundColor: theme.colors.primary, // semi-transparent overlay
+                    zIndex: -1, // ensure it's above the background View
+                }}
+            />
             <ScrollView
                 style={[
                     {
-                        // scrollbarWidth: 'none',
-                        // msOverflowStyle: 'none',
+                        paddingTop: 80,
+                        scrollbarWidth: 'none',
+                        msOverflowStyle: 'none',
                     },
                 ]}
             >
-                <Card>
-                    <FormSelect
-                        name="from"
-                        control={control}
-                        label={translate('booking.pickupLocation')}
-                        placeholder={translate('booking.pickupLocationPlaceholder')}
-                        options={locations}
-                        value={bookingData.from}
-                        onChange={(val: string) => handleChange('from', val)}
-                        error={errors.from?.message}
-                        textAlign="left"
-                        iconName="location-outline"
-                    />
+                <Container
+                    style={{
+                        zIndex: 2,
+                    }}
+                >
+                    <View
+                        style={{
+                            marginBottom: 15,
+                        }}
+                    >
+                        <Typography
+                            variant="h1"
+                            weight="bold"
+                            color={theme.colors.onPrimary}
+                            style={{ marginBottom: 0 }}
+                        >
+                            Welcome to Phuong Trang Tickets
+                        </Typography>
+                        <Typography variant="body" color={theme.colors.onPrimary}>
+                            Tell us where you go and when
+                        </Typography>
+                    </View>
+                    <Card>
+                        <FormSelect
+                            name="from"
+                            control={control}
+                            label={translate('booking.pickupLocation')}
+                            placeholder={translate('booking.pickupLocationPlaceholder')}
+                            options={locations}
+                            value={bookingData.from}
+                            onChange={(val: string) => handleChange('from', val)}
+                            error={errors.from?.message}
+                            textAlign="left"
+                            iconName="location-outline"
+                        />
 
-                    <FormSelect
-                        name="to"
-                        control={control}
-                        label={translate('booking.dropoffLocation')}
-                        placeholder={translate('booking.dropoffLocationPlaceholder')}
-                        options={locations}
-                        value={bookingData.to}
-                        onChange={(val: string) => handleChange('to', val)}
-                        error={errors.to?.message}
-                        textAlign="left"
-                        iconName="location-outline"
-                    />
+                        <FormSelect
+                            name="to"
+                            control={control}
+                            label={translate('booking.dropoffLocation')}
+                            placeholder={translate('booking.dropoffLocationPlaceholder')}
+                            options={locations}
+                            value={bookingData.to}
+                            onChange={(val: string) => handleChange('to', val)}
+                            error={errors.to?.message}
+                            textAlign="left"
+                            iconName="location-outline"
+                        />
 
-                    <FormDatePicker
-                        name="day"
-                        control={control}
-                        label={translate('booking.travelDate')}
-                        placeholder={translate('booking.travelDatePlaceholder')}
-                        value={bookingData.day}
-                        onChange={(val: string) => handleChange('day', val)}
-                        error={errors.day?.message}
-                        textAlign="left"
-                        iconName="calendar-outline"
-                    />
+                        <FormDatePicker
+                            name="day"
+                            control={control}
+                            label={translate('booking.travelDate')}
+                            placeholder={translate('booking.travelDatePlaceholder')}
+                            value={bookingData.day}
+                            onChange={(val: string) => handleChange('day', val)}
+                            error={errors.day?.message}
+                            textAlign="left"
+                            iconName="calendar-outline"
+                        />
 
-                    <FormDatePicker
-                        name="dayBack"
-                        control={control}
-                        label={
-                            translate('booking.travelDate') + ' ' + translate('booking.roundTrip')
-                        }
-                        placeholder={translate('booking.travelDatePlaceholder')}
-                        value={bookingData.dayBack}
-                        onChange={(val: string) => handleChange('dayBack', val)}
-                        error={errors.dayBack?.message}
-                        textAlign="left"
-                        iconName="calendar-outline"
-                    />
+                        <FormDatePicker
+                            name="dayBack"
+                            control={control}
+                            label={
+                                translate('booking.travelDate') +
+                                ' ' +
+                                translate('booking.roundTrip')
+                            }
+                            placeholder={translate('booking.travelDatePlaceholder')}
+                            value={bookingData.dayBack}
+                            onChange={(val: string) => handleChange('dayBack', val)}
+                            error={errors.dayBack?.message}
+                            textAlign="left"
+                            iconName="calendar-outline"
+                        />
 
-                    {/* <FormSelect
-                        name="numberOfTickets"
-                        control={control}
-                        label={translate('booking.numberOfTickets')}
-                        placeholder={translate('booking.numberOfTicketsPlaceholder')}
-                        options={ticketNumbers}
-                        value={bookingData.numberOfTickets}
-                        onChange={(val: string) => handleChange('numberOfTickets', val)}
-                        error={errors.numberOfTickets?.message}
-                        textAlign="left"
-                        iconName="ticket-outline"
-                    /> */}
+                        {/* <FormSelect
+                            name="numberOfTickets"
+                            control={control}
+                            label={translate('booking.numberOfTickets')}
+                            placeholder={translate('booking.numberOfTicketsPlaceholder')}
+                            options={ticketNumbers}
+                            value={bookingData.numberOfTickets}
+                            onChange={(val: string) => handleChange('numberOfTickets', val)}
+                            error={errors.numberOfTickets?.message}
+                            textAlign="left"
+                            iconName="ticket-outline"
+                        /> */}
 
-                    <FormSubmitButton title={translate('booking.searchBus')} />
-                </Card>
+                        <FormSubmitButton
+                            title={translate('booking.searchBus')}
+                            onPress={handleSearchBus}
+                        />
+                    </Card>
+                </Container>
 
                 <Gap />
 
                 <View>
-                    <Typography
-                        variant="h2"
-                        color="black"
-                        weight="bold"
-                        style={{ marginBottom: 10 }}
-                    >
-                        {translate('booking.recentSearch')}
-                    </Typography>
-                    <Card style={styles.card}>
-                        <Typography variant="h3" weight="bold">
-                            {recentSearch.from} → {recentSearch.to}
+                    <View
+                        style={{
+                            position: 'absolute', // sit above the parent View
+                            top: -300,
+                            left: 0,
+                            right: 0,
+                            bottom: 0, // fill the parent
+                            backgroundColor: theme.colors.background, // semi-transparent overlay
+                            zIndex: -1, // ensure it's above the background View
+                            borderTopLeftRadius: 15,
+                            borderTopRightRadius: 15,
+                        }}
+                    />
+                    <Container>
+                        <Typography
+                            variant="h2"
+                            color="black"
+                            weight="bold"
+                            style={{ marginBottom: 10 }}
+                        >
+                            {translate('booking.recentSearch')}
                         </Typography>
-                        <Typography variant="body" style={{ marginTop: 4 }}>
-                            {translate('booking.travelDate')}: {recentSearch.day}
-                            {recentSearch.dayBack
-                                ? ` · ${translate('booking.roundTrip')}: ${recentSearch.dayBack}`
-                                : ''}
-                        </Typography>
-                    </Card>
+                        <Card style={styles.card}>
+                            <Typography variant="h3" weight="bold">
+                                {recentSearch.from} → {recentSearch.to}
+                            </Typography>
+                            <Typography variant="body" style={{ marginTop: 4 }}>
+                                {translate('booking.travelDate')}: {recentSearch.day}
+                                {recentSearch.dayBack
+                                    ? ` · ${translate('booking.roundTrip')}: ${recentSearch.dayBack}`
+                                    : ''}
+                            </Typography>
+                        </Card>
+                    </Container>
                 </View>
             </ScrollView>
-        </MainLayout>
+        </View>
     );
 }
 

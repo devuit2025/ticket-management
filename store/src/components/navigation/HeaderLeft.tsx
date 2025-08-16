@@ -16,7 +16,6 @@ const HeaderLeft: React.FC<HeaderLeftProps> = ({ navigation, routeName }) => {
 
     const openMenu = () => setMenuVisible(true);
     const closeMenu = () => {
-        console.log('close menu');
         setMenuVisible(false);
     };
 
@@ -24,7 +23,12 @@ const HeaderLeft: React.FC<HeaderLeftProps> = ({ navigation, routeName }) => {
         return (
             <View style={{ flexDirection: 'row', alignItems: 'center', paddingHorizontal: 12 }}>
                 <TouchableOpacity onPress={openMenu} style={{ padding: 6 }}>
-                    <Icon name="menu-outline" size="xxl" color={theme.colors.icon} />
+                    <Icon
+                        name="menu-outline"
+                        backgroundStyle="white-circle"
+                        size="xxl"
+                        color={theme.colors.icon}
+                    />
                 </TouchableOpacity>
 
                 <MenuDrawer visible={menuVisible} onClose={closeMenu} navigation={navigation} />

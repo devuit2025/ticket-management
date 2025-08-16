@@ -1,6 +1,7 @@
 export const lightColors = {
-    primary: '#007AFF',
+    primary: '#0065F8',
     onPrimary: '#FFFFFF',
+    info: '#00CAFF',
 
     background: '#F6F6F6',
     disabledBackground: '#E5E7EB',
@@ -19,7 +20,6 @@ export const lightColors = {
     error: '#DC2626',
     success: '#16A34A',
     warning: '#FBBF24',
-    info: '#3B82F6',
     surface: '#D1D5DB',
     inputBackground: '#FFFFFF',
     notification: 'rgb(255, 59, 48)',

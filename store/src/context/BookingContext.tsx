@@ -9,7 +9,13 @@ interface BookingContextValue {
 const BookingContext = createContext<BookingContextValue | undefined>(undefined);
 
 export const BookingProvider = ({ children }: { children: ReactNode }) => {
-    const [bookingData, setBookingData] = useState<BookingData>({});
+    const [bookingData, setBookingData] = useState<BookingData>({
+        from: 'hcmc',
+        to: null,
+        day: null,
+        dayBack: null,
+        numberOfTickets: null,
+    });
 
     return (
         <BookingContext.Provider value={{ bookingData, setBookingData }}>

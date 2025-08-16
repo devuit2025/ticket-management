@@ -1,48 +1,42 @@
 import React from 'react';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import SelectPickupDropoffScreen from '@screens/booking/SelectPickupDropoffScreen';
-import PassengerInfoScreen from '@screens/booking/PassengerInfoScreen';
-import ReviewBookingScreen from '@screens/booking/ReviewBookingScreen';
-import PaymentMethodScreen from '@screens/booking/PaymentMethodScreen';
-import BookingConfirmationScreen from '@screens/booking/BookingConfirmationScreen';
-import { BookingProvider } from '@context/BookingContext';
+import {
+    BookingSuccessScreen,
+    PaymentScreen,
+    ReviewBookingScreen,
+    SelectBusScreen,
+    SelectSeatScreen,
+} from '@screens/booking';
 
-const Stack = createNativeStackNavigator();
+export type BookingStackParamList = {
+    SelectBus: undefined;
+    SelectSeat: undefined;
+    ReviewBooking: undefined;
+    Payment: undefined;
+    BookingSuccess: undefined;
+};
+
+const Stack = createNativeStackNavigator<BookingStackParamList>();
 
 export function BookingNavigator() {
     return (
         // <BookingProvider>
-        <Stack.Navigator
-            initialRouteName="PassengerInfo"
-            screenOptions={{
-                headerShown: false,
-            }}
-        >
+        <Stack.Navigator initialRouteName="SelectBus">
             {/* <Stack.Screen
-                    name="SelectPickupDropoff"
-                    component={SelectPickupDropoffScreen}
-                    options={{ headerShown: false }}
-                /> */}
-            <Stack.Screen
-                name="PassengerInfo"
-                component={PassengerInfoScreen}
-                options={{ headerShown: false }}
+                name="SelectBusScreen"
+                component={SelectBusScreen}
+                options={{ headerShown: true }}
             />
-            <Stack.Screen
-                name="ReviewBooking"
-                component={ReviewBookingScreen}
-                options={{ headerShown: false }}
-            />
-            <Stack.Screen
-                name="PaymentMethod"
-                component={PaymentMethodScreen}
-                options={{ headerShown: false }}
-            />
-            <Stack.Screen
-                name="BookingConfirmation"
-                component={BookingConfirmationScreen}
-                options={{ headerShown: false }}
-            />
+
+            <Stack.Screen name="SelectSeatScreen" component={SelectSeatScreen} />
+            <Stack.Screen name="ReviewBookingScreen" component={ReviewBookingScreen} />
+            <Stack.Screen name="PaymentScreen" component={PaymentScreen} />
+            <Stack.Screen name="BookingSuccessScreen" component={BookingSuccessScreen} /> */}
+            <Stack.Screen name="SelectBus" component={SelectBusScreen} />
+            <Stack.Screen name="SelectSeat" component={SelectSeatScreen} />
+            <Stack.Screen name="ReviewBooking" component={ReviewBookingScreen} />
+            <Stack.Screen name="Payment" component={PaymentScreen} />
+            <Stack.Screen name="BookingSuccess" component={BookingSuccessScreen} />
         </Stack.Navigator>
         // </BookingProvider>
     );

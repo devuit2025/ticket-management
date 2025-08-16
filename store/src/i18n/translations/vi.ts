@@ -3,6 +3,7 @@ export default {
         welcome: 'Chào mừng',
         logout: 'Đăng xuất',
         language: 'Ngôn ngữ',
+        backTo: 'Quay lại trang',
     },
     login: {
         title: 'Đăng nhập', // Main screen title
@@ -11,11 +12,54 @@ export default {
         emailPlaceholder: 'Nhập email của bạn', // Placeholder inside email input
         password: 'Mật khẩu', // Label for password input
         passwordPlaceholder: 'Nhập mật khẩu của bạn', // Placeholder for password input
-        button: 'Đăng nhập', // Submit button text
+        signIn: 'Đăng nhập', // Submit button text
         noAccount: 'Chưa có tài khoản?', // Footer text
         signUp: 'Đăng ký', // Link to sign-up page
         forgotPassword: 'Quên mật khẩu?', // Optional link for password reset
+
+        // Phone login
+        phoneTitle: 'Đăng nhập bằng số điện thoại',
+        phone: 'Số điện thoại',
+        phonePlaceholder: 'Nhập số điện thoại của bạn',
+        sendOtp: 'Gửi mã OTP',
+
+        // OTP verification
+        verifyOtp: 'Xác thực OTP',
+        otp: 'Mã OTP',
+        otpPlaceholder: 'Nhập mã gồm 6 chữ số',
+        verify: 'Xác nhận',
+        otpSent: 'Chúng tôi đã gửi mã OTP đến số điện thoại của bạn',
+        resendOtp: 'Gửi lại mã OTP',
+        changePhone: 'Đổi số điện thoại',
     },
+    register: {
+        title: 'Đăng ký', // Screen title
+        subtitle: 'Tạo tài khoản để bắt đầu', // Subtitle under title
+        fullName: 'Họ và tên', // Label for full name input
+        fullNamePlaceholder: 'Nhập họ và tên của bạn', // Placeholder inside full name input
+        email: 'Email', // Label for email input
+        emailPlaceholder: 'Nhập email của bạn', // Placeholder inside email input
+        phone: 'Số điện thoại', // Label for phone input
+        phonePlaceholder: 'Nhập số điện thoại của bạn', // Placeholder inside phone input
+        password: 'Mật khẩu', // Label for password input
+        passwordPlaceholder: 'Nhập mật khẩu của bạn', // Placeholder inside password input
+        confirmPassword: 'Xác nhận mật khẩu', // Label for confirm password input
+        confirmPasswordPlaceholder: 'Nhập lại mật khẩu', // Placeholder for confirm password
+        button: 'Đăng ký', // Submit button text
+        haveAccount: 'Bạn đã có tài khoản?', // Footer text
+        login: 'Đăng nhập', // Link to login page
+        socialLogin: 'Đăng ký bằng mạng xã hội', // Optional: social login text
+    },
+    forgotPassword: {
+        title: 'Quên mật khẩu', // Screen title
+        subtitle: 'Nhập email hoặc số điện thoại để đặt lại mật khẩu', // Instruction text
+        emailOrPhone: 'Email hoặc Số điện thoại', // Label for input
+        emailOrPhonePlaceholder: 'Nhập email hoặc số điện thoại của bạn', // Placeholder
+        button: 'Gửi OTP', // Submit button
+        rememberPassword: 'Bạn đã nhớ mật khẩu?', // Footer text
+        login: 'Đăng nhập', // Link to login screen
+    },
+
     booking: {
         title: 'Đặt vé',
         ticket: 'Vé',

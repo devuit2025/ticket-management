@@ -42,14 +42,13 @@ export const MainLayout = ({
             style={[
                 {
                     flex: 1,
-                    backgroundColor: theme.colors.background,
                 },
             ]}
         >
-            <StatusBar
+            {/* <StatusBar
                 barStyle={theme.dark ? 'light-content' : 'dark-content'}
                 backgroundColor={theme.colors.background}
-            />
+            /> */}
 
             <KeyboardAvoidingView
                 behavior={Platform.OS === 'ios' ? 'padding' : undefined}

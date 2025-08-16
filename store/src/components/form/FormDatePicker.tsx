@@ -53,8 +53,6 @@ export const FormDatePicker: React.FC<FormDatePickerProps> = ({
                     >
                         {label}
                     </Typography>
-
-                    {iconName && <Icon name={iconName} style={{ marginLeft: theme.spacing.xs }} />}
                 </View>
             ) : null}
 
@@ -80,13 +78,30 @@ export const FormDatePicker: React.FC<FormDatePickerProps> = ({
                                     alignItems: 'center',
                                 }}
                             >
-                                <Text
+                                {iconName && (
+                                    <Icon
+                                        name={iconName}
+                                        style={{ marginRight: theme.spacing.xs }}
+                                    />
+                                )}
+
+                                {/* <Text
+                                    wi
                                     style={{
                                         color: value ? theme.colors.text : theme.colors.placeholder,
                                     }}
                                 >
                                     {displayValue}
-                                </Text>
+                                </Text> */}
+                                <Typography
+                                    variant="body"
+                                    weight="bold"
+                                    style={{
+                                        color: value ? theme.colors.text : theme.colors.placeholder,
+                                    }}
+                                >
+                                    {displayValue}
+                                </Typography>
                             </TouchableOpacity>
 
                             {showPicker &&

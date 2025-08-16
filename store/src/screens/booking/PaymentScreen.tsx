@@ -1,10 +1,10 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 
-const PassengerInfoScreen = () => {
+const PaymentScreen = () => {
     return (
         <View style={styles.container}>
-            <Text>PassengerInfoScreen</Text>
+            <Text>PaymentScreen</Text>
         </View>
     );
 };
@@ -17,4 +17,4 @@ const styles = StyleSheet.create({
     },
 });
 
-export default PassengerInfoScreen;
+export default PaymentScreen;

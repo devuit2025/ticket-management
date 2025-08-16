@@ -92,7 +92,7 @@ const styles = StyleSheet.create({
         width: 60,
         paddingHorizontal: 10,
         paddingVertical: 6,
-        backgroundColor: '#f0f0f0',
+        backgroundColor: 'white',
         borderRadius: 8,
     },
     label: { fontSize: 14, marginLeft: 6 },

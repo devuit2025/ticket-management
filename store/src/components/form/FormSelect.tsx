@@ -15,6 +15,8 @@ export const FormSelect: React.FC<FormSelectProps> = ({
     placeholder,
     containerStyle,
     iconName,
+    value: propValue, // external value
+    onChange: propOnChange, // external change handler
 }) => {
     const { theme } = useTheme();
     const [modalVisible, setModalVisible] = useState(false);
@@ -37,20 +39,29 @@ export const FormSelect: React.FC<FormSelectProps> = ({
                 containerStyle,
             ]}
         >
-            {label ? (
+            {label && (
                 <Typography
                     variant="caption"
                     style={{ marginBottom: theme.spacing.xs, color: theme.colors.labelInput }}
                 >
                     {label}
                 </Typography>
-            ) : null}
+            )}
 
             <Controller
                 control={control}
                 name={name}
                 render={({ field: { onChange, value } }) => {
-                    const selected = options.find((o) => o.value === value);
+                    const currentValue = propValue ?? value; // use prop value if provided
+                    const selected = options.find((o) => o.value === currentValue);
+
+                    const handleSelect = (val: string) => {
+                        onChange(val); // update react-hook-form
+                        propOnChange?.(val); // update external state if provided
+                        setModalVisible(false);
+                        setSearchTerm('');
+                    };
+
                     return (
                         <>
                             <TouchableOpacity
@@ -61,15 +72,15 @@ export const FormSelect: React.FC<FormSelectProps> = ({
                                     alignItems: 'center',
                                 }}
                             >
-                                {/* {iconName && (
+                                {iconName && (
                                     <Icon
                                         name={iconName}
                                         style={{ marginRight: theme.spacing.xs }}
                                     />
-                                )} */}
-
+                                )}
                                 <Typography
                                     variant="body"
+                                    weight="bold"
                                     style={{
                                         color: selected
                                             ? theme.colors.text
@@ -78,15 +89,6 @@ export const FormSelect: React.FC<FormSelectProps> = ({
                                 >
                                     {selected ? selected.label : placeholder || 'Select...'}
                                 </Typography>
-                                {/* <Text
-                                    style={{
-                                        color: selected
-                                            ? theme.colors.text
-                                            : theme.colors.placeholder,
-                                    }}
-                                >
-                                    {selected ? selected.label : placeholder || 'Select...'}
-                                </Text> */}
                             </TouchableOpacity>
 
                             <Modal visible={modalVisible} animationType="fade" transparent>
@@ -119,11 +121,7 @@ export const FormSelect: React.FC<FormSelectProps> = ({
                                             keyExtractor={(item) => String(item.value)}
                                             renderItem={({ item }) => (
                                                 <TouchableOpacity
-                                                    onPress={() => {
-                                                        onChange(item.value);
-                                                        setModalVisible(false);
-                                                        setSearchTerm('');
-                                                    }}
+                                                    onPress={() => handleSelect(item.value)}
                                                     style={{
                                                         padding: theme.spacing.sm,
                                                         borderBottomWidth: 1,
@@ -154,9 +152,14 @@ export const FormSelect: React.FC<FormSelectProps> = ({
                     );
                 }}
             />
+
             {error && (
                 <Text
-                    style={{ marginTop: theme.spacing.xs, color: theme.colors.error, fontSize: 12 }}
+                    style={{
+                        marginTop: theme.spacing.xs,
+                        color: theme.colors.error,
+                        fontSize: 12,
+                    }}
                 >
                     {error}
                 </Text>
