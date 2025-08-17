@@ -197,6 +197,7 @@ export default function SelectPickupDropoffScreen({
                         style={{
                             position: 'absolute', // sit above the parent View
                             top: -300,
+                            height: 1000,
                             left: 0,
                             right: 0,
                             bottom: 0, // fill the parent

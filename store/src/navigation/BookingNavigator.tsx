@@ -21,7 +21,7 @@ const Stack = createNativeStackNavigator<BookingStackParamList>();
 export function BookingNavigator() {
     return (
         // <BookingProvider>
-        <Stack.Navigator initialRouteName="SelectBus">
+        <Stack.Navigator initialRouteName="SelectSeat">
             {/* <Stack.Screen
                 name="SelectBusScreen"
                 component={SelectBusScreen}

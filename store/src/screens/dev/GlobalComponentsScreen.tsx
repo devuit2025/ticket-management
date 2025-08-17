@@ -3,10 +3,11 @@ import { ScrollView, View, Text, StyleSheet, TextInput as RNTextInput } from 're
 
 // Import your global components
 import Button from '@components/global/button/Button';
+import Card from '@components/global/card/Card';
+
 import TextInput from '@components/global/textinput/TextInput';
 import Typography from '@components/global/typography/Typography';
 import Icon from '@components/global/icon/Icon';
-import Card from '@components/global/card/Card';
 import Modal from '@components/global/modal/Modal';
 import Divider from '@components/global/divider/Divider';
 import Avatar from '@components/global/avatar/Avatar';
