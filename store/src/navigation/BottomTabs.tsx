@@ -2,7 +2,7 @@ import React from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 
 import HistoryScreen from '@screens/orders/MyTicketsScreen';
-import CheckoutScreen from '@screens/booking/ReviewBookingScreen';
+import CheckoutScreen from '@screens/booking/ReviewBookingScreen old';
 import NotificationScreen from '@screens/support/NotificationsScreen';
 import AccountScreen from '@screens/profile/MyAccountScreen';
 
@@ -11,6 +11,7 @@ import Icon from '@components/global/icon/Icon';
 import { useTheme } from '@context/ThemeContext';
 import { SelectPickupDropoffScreen } from '@screens/booking';
 import HeaderRightLanguageSwitcher from '@components/navigation/HeaderRightLanguageSwitcher';
+import { StyleSheet } from 'react-native';
 
 const Tab = createBottomTabNavigator();
 
@@ -34,17 +35,19 @@ function getTabIconName(routeName: string) {
 function createScreenOptions({ route, navigation }: { route: any; navigation: any }) {
     const { theme } = useTheme();
 
+    const showHeader = route.name !== 'Home'; // Only show header if NOT Home
+
     return {
         headerTitle: '',
         headerLeft: () => <HeaderLeft navigation={navigation} routeName={route.name} />,
         headerRight: () => <HeaderRightLanguageSwitcher />,
         headerStyle: {
-            backgroundColor: 'transparent', // Transparent background
-            elevation: 0, // Remove shadow on Android
-            shadowOpacity: 0, // Remove shadow on iOS
-            borderBottomWidth: 0,
+            backgroundColor: showHeader ? theme.colors.card : 'transparent',
+            elevation: showHeader ? 4 : 0,
+            shadowOpacity: showHeader ? 0.25 : 0,
+            borderBottomWidth: showHeader ? StyleSheet.hairlineWidth : 0,
         },
-        headerTransparent: true,
+        headerTransparent: !showHeader,
         tabBarIcon: ({
             focused,
             color,

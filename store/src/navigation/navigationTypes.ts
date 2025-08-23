@@ -1,7 +1,10 @@
 export type RootStackParamList = {
-    Booking: undefined;
+    Login: undefined;
+    PhoneLogin: undefined;
+    OtpVerification: undefined;
+    Register: undefined;
+    ForgotPassword: undefined;
     GlobalComponents: undefined;
     Home: undefined;
-    Login: undefined;
-    Profile: undefined;
+    Booking: undefined;
 };

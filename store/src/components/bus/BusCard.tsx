@@ -66,7 +66,7 @@ const BusCard: React.FC<BusCardProps> = ({
                 {/* Select button */}
                 {/* <Button style={styles.button} onPress={onSelect}>
         </Button> */}
-                <Button title="Select Seat" />
+                <Button title="Select Seat" onPress={onSelect} />
             </View>
         </Card>
     );

@@ -227,6 +227,18 @@ export default function SelectPickupDropoffScreen({
                                     : ''}
                             </Typography>
                         </Card>
+
+                        <Card style={styles.card}>
+                            <Typography variant="h3" weight="bold">
+                                {recentSearch.from} → {recentSearch.to}
+                            </Typography>
+                            <Typography variant="body" style={{ marginTop: 4 }}>
+                                {translate('booking.travelDate')}: {recentSearch.day}
+                                {recentSearch.dayBack
+                                    ? ` · ${translate('booking.roundTrip')}: ${recentSearch.dayBack}`
+                                    : ''}
+                            </Typography>
+                        </Card>
                     </Container>
                 </View>
             </ScrollView>

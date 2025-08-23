@@ -73,7 +73,7 @@ export default {
         // Booking form fields
         searchBus: 'Tìm kiếm tuyến',
         numberOfTickets: 'Số vé',
-        numberOfTicketsPlaceholder: 'Chọn Số vé',
+        numberOfTicketsPlaceholder: 'Chọn số vé',
         fullName: 'Họ và tên',
         fullNamePlaceholder: 'Nhập họ và tên',
         phoneNumber: 'Số điện thoại',
@@ -93,5 +93,17 @@ export default {
         tripType: 'Loại chuyến đi',
         oneWay: 'Một chiều',
         roundTrip: 'Khứ hồi',
+
+        // Review booking screen
+        reviewBooking: 'Xem lại đặt vé',
+        customerInformation: 'Thông tin khách hàng',
+        destinationInformation: 'Thông tin điểm đến',
+        seatInformation: 'Thông tin ghế',
+        pickupDropoffInformation: 'Điểm đón và điểm đến',
+        paymentButton: 'Thanh toán',
+        bookingSuccess: 'Đặt vé thành công',
+        downloadTicket: 'Tải vé về',
+        backToHome: 'Quay về trang chủ',
+        bookingSuccessMessage: 'Cảm ơn bạn đã sử dụng dịch vụ. Vé của bạn đã được đặt thành công!',
     },
 };

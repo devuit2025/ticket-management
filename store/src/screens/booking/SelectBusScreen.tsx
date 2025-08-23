@@ -19,6 +19,11 @@ export default function SelectBusScreen({ navigation }: Props) {
     const { bookingData } = useBooking();
     const { theme } = useTheme();
 
+    const goToSeatSelect = () => {
+        console.log('go to seat');
+        navigation.navigate('SelectSeat');
+    };
+
     const [selected, setSelected] = useState('2025-08-17');
     const [fruit, setFruit] = useState<string | undefined>(undefined);
     const [color, setColor] = useState<string | undefined>(undefined);
@@ -105,7 +110,7 @@ export default function SelectBusScreen({ navigation }: Props) {
                             availableSeats={5}
                             startLocation="Ho Chi Minh City (Mien Dong Station)"
                             endLocation="Da Nang (Central Station)"
-                            onSelect={() => console.log('Selected bus ' + i)}
+                            onSelect={goToSeatSelect}
                         />
                     ))}
                 </Container>
