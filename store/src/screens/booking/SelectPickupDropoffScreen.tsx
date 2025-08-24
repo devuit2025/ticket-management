@@ -30,7 +30,7 @@ export default function SelectPickupDropoffScreen({
     navigation,
     route,
 }: SelectPickupDropoffScreenProps) {
-    const { translate } = useTranslation();
+const { translate } = useTranslation();
     const { theme } = useTheme();
 
     const ticketLabel = translate('booking.ticket');

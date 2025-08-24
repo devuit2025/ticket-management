@@ -6,8 +6,6 @@ import {
     TextInput,
     StyleSheet,
     TextInputProps,
-    StyleProp,
-    ViewStyle,
 } from 'react-native';
 import { useTheme } from '@context/ThemeContext';
 
@@ -16,7 +14,6 @@ interface FormInputProps extends TextInputProps {
     label: string;
     control: Control<any>;
     error?: string;
-    containerStyle?: StyleProp<ViewStyle>;
 }
 
 export const FormInput: React.FC<FormInputProps> = ({
@@ -24,13 +21,12 @@ export const FormInput: React.FC<FormInputProps> = ({
     label,
     control,
     error,
-    containerStyle,
     ...rest
 }) => {
     const { theme } = useTheme();
 
     return (
-        <View style={[styles.wrapper, { marginBottom: theme.spacing.md }, containerStyle]}>
+        <View style={[styles.wrapper, { marginBottom: theme.spacing.md }]}>
             {label ? (
                 <Text
                     style={[

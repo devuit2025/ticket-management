@@ -26,7 +26,7 @@ export default function AppNavigator() {
         <BookingProvider>
             <NavigationContainer>
                 <Stack.Navigator
-                    initialRouteName="Home"
+                    initialRouteName="Register"
                     screenOptions={{
                         headerShown: false,
                     }}

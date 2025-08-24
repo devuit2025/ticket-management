@@ -15,8 +15,8 @@ export const FormSelect: React.FC<FormSelectProps> = ({
     placeholder,
     containerStyle,
     iconName,
-    value: propValue, // external value
-    onChange: propOnChange, // external change handler
+    value: propValue, 
+    onChange: propOnChange,
 }) => {
     const { theme } = useTheme();
     const [modalVisible, setModalVisible] = useState(false);
