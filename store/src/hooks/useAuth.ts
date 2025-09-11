@@ -60,10 +60,13 @@ export const useAuth = () => {
     );
 
     // --- Logout ---
-    const logout = useCallback(async (navigation?: any) => {
-        await dispatch(logoutAction()).unwrap();
-        await AsyncStorage.removeItem(TOKEN_KEY);
-    }, [dispatch]);
+    const logout = useCallback(
+        async (navigation?: any) => {
+            await dispatch(logoutAction()).unwrap();
+            await AsyncStorage.removeItem(TOKEN_KEY);
+        },
+        [dispatch]
+    );
 
     // --- Clear error ---
     const clearAuthError = useCallback(() => {

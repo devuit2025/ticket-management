@@ -5,6 +5,7 @@ import (
 	"log"
 	"os"
 
+	"github.com/gin-contrib/cors"
 	"ticket-management/api_simple/config"
 	"ticket-management/api_simple/handlers"
 	"ticket-management/api_simple/jobs"
@@ -14,6 +15,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
+	"time"
 )
 
 func main() {
@@ -46,6 +48,16 @@ func main() {
 
 	// Initialize router
 	router := gin.Default()
+	
+	// CORS middleware
+	router.Use(cors.New(cors.Config{
+		AllowOrigins: []string{"http://localhost:8081"},
+		AllowMethods: []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
+		AllowHeaders: []string{"Origin", "Content-Type", "Authorization"},
+		ExposeHeaders: []string{"Content-Length"},
+		AllowCredentials: true,
+		MaxAge: 12 * time.Hour,
+	}))
 
 	// Setup routes
 	api := router.Group("/api/v1")
@@ -54,8 +66,9 @@ func main() {
 	// Start server
 	port := os.Getenv("PORT")
 	if port == "" {
-		port = "8081"
+		port = "8082"
 	}
+
 	router.Run(fmt.Sprintf(":%s", port))
 }
 

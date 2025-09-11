@@ -56,5 +56,9 @@ func Seed() {
 		}
 	}
 
+	if err := seedMultipleTrips(); err != nil {
+		log.Fatal("Error seeding trips:", err)
+	}
+
 	log.Println("Seeding completed successfully!")
 }

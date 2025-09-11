@@ -24,10 +24,10 @@ client.interceptors.request.use(
 
         const token = await AsyncStorage.getItem('AUTH_TOKEN');
         if (token) {
-        config.headers = {
-            ...config.headers,
-            Authorization: `Bearer ${token}`,
-        };
+            config.headers = {
+                ...config.headers,
+                Authorization: `Bearer ${token}`,
+            };
         }
 
         return config;
@@ -36,7 +36,6 @@ client.interceptors.request.use(
         apiHandlerRef.current?.stopLoading?.();
         return Promise.reject(error);
     }
-
 );
 
 // Response interceptor
