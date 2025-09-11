@@ -9,11 +9,11 @@ const i18n = new I18n({
     vi,
 });
 
-const fallbackLocale = 'en';
+const fallbackLocale = 'vi';
 const locales = Localization.getLocales?.();
 const deviceLocale = locales?.[0]?.languageTag ?? fallbackLocale;
 
-i18n.locale = deviceLocale.startsWith('vi') ? 'vi' : 'en';
+i18n.locale = deviceLocale.startsWith('vi') ? 'vi' : 'vi'; //Testing
 i18n.enableFallback = true;
 
 export default i18n;

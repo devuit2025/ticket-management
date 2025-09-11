@@ -16,7 +16,9 @@
             "@types/*": ["src/types/*"],
             "@store/*": ["src/store/*"],
             "@theme/*": ["src/theme/*"],
-            "@utils/*": ["src/utils/*"]
+            "@utils/*": ["src/utils/*"],
+            "@api/*": ["src/api/*"],
+            "@components/*": ["src/components/*"]
         }
     }
 }

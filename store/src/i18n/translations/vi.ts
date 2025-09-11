@@ -4,6 +4,12 @@ export default {
         logout: 'Đăng xuất',
         language: 'Ngôn ngữ',
         backTo: 'Quay lại trang',
+
+        required: 'là bắt buộc', // e.g., "Họ và tên là bắt buộc"
+        min: 'phải có ít nhất {count} ký tự', // e.g., "Mật khẩu phải có ít nhất 6 ký tự"
+        invalid: 'không hợp lệ', // e.g., "Email không hợp lệ"
+        phoneDigits: 'phải có 10–15 chữ số', // phone validation
+        passwordMismatch: 'không khớp với mật khẩu', // confirm password mismatch
     },
     login: {
         title: 'Đăng nhập', // Main screen title

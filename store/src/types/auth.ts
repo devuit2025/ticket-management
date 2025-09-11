@@ -1,0 +1,66 @@
+// src/types/auth.ts
+
+// --- Request payloads ---
+export interface LoginRequest {
+    email: string;
+    password: string;
+}
+
+export interface RegisterRequest {
+    fullName: string;
+    email: string;
+    password: string;
+    phone?: string;
+}
+
+// --- Response payloads ---
+export interface User {
+    id: string;
+    fullName: string;
+    email: string;
+    phone?: string;
+    // add more fields as returned by your API
+}
+
+export interface LoginResponse {
+    token: string; // JWT or auth token
+    user: User;
+}
+
+export interface RegisterResponse {
+    user: User;
+    token: string;
+}
+
+// --- Password reset / forgot password payloads ---
+export interface ForgotPasswordRequest {
+    email: string;
+}
+
+export interface ResetPasswordRequest {
+    token: string;
+    newPassword: string;
+}
+
+export interface PhoneLoginRequest {
+    phone: string;
+    otp: string;
+}
+
+export interface PhoneLoginResponse {
+    token: string;
+    user: User;
+}
+
+export interface SocialLoginRequest {
+    accessToken: string;
+}
+
+export interface RequestOtpRequest {
+    phone: string;
+}
+
+export interface RequestOtpResponse {
+    success: boolean;
+    message?: string;
+}

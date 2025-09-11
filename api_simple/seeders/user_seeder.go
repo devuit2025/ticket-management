@@ -8,6 +8,12 @@ import (
 func seedUsers() error {
 	users := []models.User{
 		{
+			Phone:    "0966666666",
+			Password: "123123",
+			Name:     "Long Customer",
+			Role:     models.RoleCustomer,
+		},
+		{
 			Phone:    "0987654321",
 			Password: "Password123!",
 			Name:     "Admin",

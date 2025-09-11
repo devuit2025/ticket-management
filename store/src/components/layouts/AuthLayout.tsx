@@ -3,26 +3,24 @@ import React from 'react';
 import { ScrollView, StyleSheet } from 'react-native';
 
 interface AuthLayoutProps {
-  children: React.ReactNode;
+    children: React.ReactNode;
 }
 
 const AuthLayout: React.FC<AuthLayoutProps> = ({ children }) => {
-  return (
-    <ScrollView contentContainerStyle={styles.container}>
-        <Card>
-      {children}
-      </Card>
-    </ScrollView>
-  );
+    return (
+        <ScrollView contentContainerStyle={styles.container}>
+            <Card>{children}</Card>
+        </ScrollView>
+    );
 };
 
 const styles = StyleSheet.create({
-  container: {
-    flexGrow: 1,
-    justifyContent: 'center',
-    backgroundColor: '#00CAFF',
-    padding: 20,
-  },
+    container: {
+        flexGrow: 1,
+        justifyContent: 'center',
+        backgroundColor: '#00CAFF',
+        padding: 20,
+    },
 });
 
 export default AuthLayout;

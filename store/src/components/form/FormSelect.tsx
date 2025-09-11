@@ -15,7 +15,7 @@ export const FormSelect: React.FC<FormSelectProps> = ({
     placeholder,
     containerStyle,
     iconName,
-    value: propValue, 
+    value: propValue,
     onChange: propOnChange,
 }) => {
     const { theme } = useTheme();

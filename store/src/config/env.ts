@@ -1,2 +1,1 @@
-// Replace with your environment variables
-export const API_URL = 'https://api.example.com';
+export const API_URL = 'http://localhost:8082/api/v1';

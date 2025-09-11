@@ -24,7 +24,9 @@ func main() {
 
 	// Initialize database
 	config.InitDB()
-	config.InitRedis()
+
+
+	// config.InitRedis()
 
 	// Auto migrate database
 	config.DB.AutoMigrate(

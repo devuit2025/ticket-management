@@ -168,24 +168,27 @@ func Login(c *gin.Context) {
 }
 
 func Logout(c *gin.Context) {
+	// Temporary comment this
+	
 	// Get token from Authorization header
-	token := c.GetHeader("Authorization")
-	if token == "" {
-		c.JSON(http.StatusBadRequest, gin.H{"error": utils.ErrTokenRequired})
-		return
-	}
+	
+	// token := c.GetHeader("Authorization")
+	// if token == "" {
+	// 	c.JSON(http.StatusBadRequest, gin.H{"error": utils.ErrTokenRequired})
+	// 	return
+	// }
 
-	// Remove "Bearer " prefix if present
-	if len(token) > 7 && token[:7] == "Bearer " {
-		token = token[7:]
-	}
+	// // Remove "Bearer " prefix if present
+	// if len(token) > 7 && token[:7] == "Bearer " {
+	// 	token = token[7:]
+	// }
 
 	// Add token to blacklist in Redis
-	err := middleware.BlacklistToken(token)
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": utils.ErrServerError})
-		return
-	}
+	// err := middleware.BlacklistToken(token)
+	// if err != nil {
+	// 	c.JSON(http.StatusInternalServerError, gin.H{"error": utils.ErrServerError})
+	// 	return
+	// }
 
 	c.JSON(http.StatusOK, gin.H{"message": "Đăng xuất thành công"})
 }

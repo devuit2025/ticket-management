@@ -2,8 +2,10 @@ import React, { useRef, useEffect } from 'react';
 import { View, Animated, StyleSheet } from 'react-native';
 import MenuItem from './MenuItem';
 import Divider from '@components/global/divider/Divider';
+import { useAuth } from '@hooks/useAuth';
 
-const MenuSection: React.FC = () => {
+const MenuSection: React.FC = ({ navigation }) => {
+    const { logout } = useAuth()
     const animValues = useRef(new Array(7).fill(null).map(() => new Animated.Value(0))).current;
 
     useEffect(() => {
@@ -14,6 +16,15 @@ const MenuSection: React.FC = () => {
             )
         ).start();
     }, []);
+
+    const handleLogout = async () => {
+        await logout()
+        console.log(navigation)
+        navigation?.reset({
+            index: 0,
+            routes: [{ name: 'Login' }],
+        });
+    }
 
     const renderAnimatedItem = (anim: Animated.Value, content: JSX.Element, key: string) => {
         const animStyle = {
@@ -93,7 +104,7 @@ const MenuSection: React.FC = () => {
                 <MenuItem
                     label="Logout"
                     iconName="log-out-outline"
-                    onPress={() => console.log('Logout')}
+                    onPress={() => handleLogout()}
                 />,
                 'logout'
             )}

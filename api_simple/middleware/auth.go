@@ -8,7 +8,6 @@ import (
 	"ticket-management/api_simple/config"
 	"ticket-management/api_simple/models"
 	"ticket-management/api_simple/repository"
-	"ticket-management/api_simple/utils"
 
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v5"
@@ -58,18 +57,19 @@ func AuthMiddleware() gin.HandlerFunc {
 			return
 		}
 
+		// Tempotary comment this
 		// Check if token is blacklisted
-		isBlacklisted, err := IsTokenBlacklisted(tokenString)
-		if err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": utils.ErrServerError})
-			c.Abort()
-			return
-		}
-		if isBlacklisted {
-			c.JSON(http.StatusUnauthorized, gin.H{"error": "Token đã hết hạn"})
-			c.Abort()
-			return
-		}
+		// isBlacklisted, err := IsTokenBlacklisted(tokenString)
+		// if err != nil {
+		// 	c.JSON(http.StatusInternalServerError, gin.H{"error": utils.ErrServerError})
+		// 	c.Abort()
+		// 	return
+		// }
+		// if isBlacklisted {
+		// 	c.JSON(http.StatusUnauthorized, gin.H{"error": "Token đã hết hạn"})
+		// 	c.Abort()
+		// 	return
+		// }
 
 		// Parse and validate token
 		token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
