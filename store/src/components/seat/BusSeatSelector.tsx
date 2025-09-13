@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
+import { ScrollView, Dimensions } from 'react-native';
 
 type SeatStatus = 'available' | 'booked' | 'selected';
 
@@ -63,15 +64,17 @@ const BusSeatSelector: React.FC<BusSeatSelectorProps> = ({
         );
     };
 
+    const windowHeight = Dimensions.get('window').height;
+
     return (
         <View style={styles.container}>
             {/* Header Info */}
-            <View style={styles.header}>
+            {/* <View style={styles.header}>
                 <Text style={styles.date}>{startDate}</Text>
                 <Text style={styles.time}>{timeInfo}</Text>
-            </View>
+            </View> */}
 
-            <View style={styles.divider} />
+            {/* <View style={styles.divider} /> */}
 
             {/* Driver + Door */}
             <View style={styles.driverRow}>
@@ -84,7 +87,7 @@ const BusSeatSelector: React.FC<BusSeatSelectorProps> = ({
             </View>
 
             {/* Seat Rows */}
-            {rows.map((row, rowIndex) => {
+            {/* {rows.map((row, rowIndex) => {
                 let index = 0;
                 return (
                     <View key={rowIndex} style={styles.row}>
@@ -99,7 +102,31 @@ const BusSeatSelector: React.FC<BusSeatSelectorProps> = ({
                         })}
                     </View>
                 );
-            })}
+            })} */}
+
+            {/* Seat Rows inside ScrollView */}
+            <ScrollView
+                // style={{ flex: 1 }}
+                style={{ maxHeight: windowHeight * 0.45 }} // or adjust percentage
+                contentContainerStyle={{ paddingVertical: 12 }}
+            >
+                {rows.map((row, rowIndex) => {
+                    let index = 0;
+                    return (
+                        <View key={rowIndex} style={styles.row}>
+                            {layoutGroups.map((group, gIndex) => {
+                                const groupSeats = row.slice(index, index + group);
+                                index += group;
+                                return (
+                                    <View key={gIndex} style={styles.group}>
+                                        {groupSeats.map((seatId) => renderSeat(seatId))}
+                                    </View>
+                                );
+                            })}
+                        </View>
+                    );
+                })}
+            </ScrollView>
 
             {/* Legend */}
             <View style={styles.legendContainer}>

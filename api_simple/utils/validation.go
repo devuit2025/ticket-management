@@ -2,7 +2,7 @@ package utils
 
 import (
 	"regexp"
-	"unicode"
+	// "unicode"
 )
 
 // Validation constants
@@ -47,23 +47,23 @@ func ValidatePassword(password string) (bool, string) {
 		return false, ErrPasswordTooLong
 	}
 
-	var hasUpper, hasLower, hasNumber, hasSpecial bool
-	for _, char := range password {
-		switch {
-		case unicode.IsUpper(char):
-			hasUpper = true
-		case unicode.IsLower(char):
-			hasLower = true
-		case unicode.IsNumber(char):
-			hasNumber = true
-		case unicode.IsPunct(char) || unicode.IsSymbol(char):
-			hasSpecial = true
-		}
-	}
+	// var hasUpper, hasLower, hasNumber, hasSpecial bool
+	// for _, char := range password {
+	// 	switch {
+	// 	case unicode.IsUpper(char):
+	// 		hasUpper = true
+	// 	case unicode.IsLower(char):
+	// 		hasLower = true
+	// 	case unicode.IsNumber(char):
+	// 		hasNumber = true
+	// 	case unicode.IsPunct(char) || unicode.IsSymbol(char):
+	// 		hasSpecial = true
+	// 	}
+	// }
 
-	if !(hasUpper && hasLower && hasNumber && hasSpecial) {
-		return false, ErrPasswordRequirements
-	}
+	// if !(hasUpper && hasLower && hasNumber && hasSpecial) {
+	// 	return false, ErrPasswordRequirements
+	// }
 
 	return true, ""
 }

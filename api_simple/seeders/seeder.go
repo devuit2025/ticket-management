@@ -43,6 +43,10 @@ func Seed() {
 		log.Fatal("Error seeding trips:", err)
 	}
 
+	if err := seedMultipleTrips(); err != nil {
+		log.Fatal("Error seeding trips:", err)
+	}
+
 	// Get all trips
 	var trips []models.Trip
 	if err := config.DB.Find(&trips).Error; err != nil {
@@ -54,10 +58,6 @@ func Seed() {
 		if err := SeedSeats(config.DB, trip.ID, trip.Price); err != nil {
 			log.Fatal("Error seeding seats:", err)
 		}
-	}
-
-	if err := seedMultipleTrips(); err != nil {
-		log.Fatal("Error seeding trips:", err)
 	}
 
 	log.Println("Seeding completed successfully!")

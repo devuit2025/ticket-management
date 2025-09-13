@@ -1,5 +1,3 @@
-import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import Card from '@components/global/card/Card';
 import Container from '@components/global/container/Container';
 import BusSeatSelector from '@components/seat/BusSeatSelector';
@@ -7,55 +5,43 @@ import { useBooking } from '@context/BookingContext';
 import { useTheme } from '@context/ThemeContext';
 import { BookingStackParamList } from '@navigation/BookingNavigator';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { getTripSeats, GetTripSeatsResponse } from '@api/trips';
+import React, { useState } from 'react';
+import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 
 type Props = NativeStackScreenProps<BookingStackParamList, 'SelectSeat'>;
-
-type SeatStatus = 'available' | 'booked' | 'locked';
 
 const SelectSeatScreen = ({ navigation }: Props) => {
     const { bookingData, setBookingData } = useBooking();
     const { theme } = useTheme();
     const [selectedSeats, setSelectedSeats] = useState<string[]>([]);
-    const [seatMap, setSeatMap] = useState<Record<string, SeatStatus>>({});
-    const [seatNumberToId, setSeatNumberToId] = useState<Record<string, number>>({}); // map seat number -> seat ID
 
-    const tripId = bookingData?.daySelectedTrip?.id;
+    const tripId = bookingData.daySelectedTrip.id;
 
-    useEffect(() => {
-        const fetchSeats = async () => {
-            try {
-                const data: GetTripSeatsResponse = await getTripSeats(tripId);
-                const numberToId: Record<string, number> = {};
-
-                // Transform API response into seatMap
-                const map: Record<string, SeatStatus> = {};
-                data.floors.forEach((floor) => {
-                    floor.seats.forEach((seat) => {
-                        map[seat.number] = seat.status as SeatStatus;
-                        numberToId[seat.number] = seat.ID; // store seat ID mapping
-                    });
-                });
-
-                setSeatMap(map);
-                setSeatNumberToId(numberToId);
-            } catch (error) {
-                console.error('Failed to fetch seats:', error);
-            }
-        };
-
-        fetchSeats();
-    }, [tripId]);
+    const seatMap = {
+        A01: 'booked',
+        A02: 'available',
+        A03: 'available',
+        A04: 'booked',
+        A05: 'available',
+        B01: 'available',
+        B02: 'available',
+        B03: 'available',
+        B04: 'available',
+        B05: 'booked',
+        C01: 'available',
+        C02: 'available',
+        C03: 'available',
+        C04: 'available',
+        C05: 'available',
+    };
 
     const handleSelected = (selected: string[]) => {
         setSelectedSeats(selected);
-
-        const ids = selected.map((seatNumber) => seatNumberToId[seatNumber]).filter(Boolean);
-        setBookingData((prev) => ({ ...prev, daySelectedSeatIds: ids }));
+        console.log(selected);
     };
 
     const handleReviewBooking = () => {
-        setBookingData((prev) => ({ ...prev, selectedSeats }));
+        console.log('heere');
         navigation.navigate('ReviewBooking');
     };
 
@@ -66,7 +52,7 @@ const SelectSeatScreen = ({ navigation }: Props) => {
                     <BusSeatSelector
                         startDate="2025-08-20"
                         timeInfo="Wed, 14:30"
-                        layout="2-2"
+                        layout="2-1-2"
                         seatMap={seatMap}
                         onSelect={handleSelected}
                     />
@@ -74,7 +60,7 @@ const SelectSeatScreen = ({ navigation }: Props) => {
             </Container>
 
             {/* Bottom Fixed Bar */}
-            <View style={[styles.bottomBar, { backgroundColor: theme.colors.card }]}>
+            <View style={[styles.bottomBar, { backgroundColor: 'theme.colors.card' }]}>
                 <View>
                     <Text style={[styles.seatText, { color: theme.colors.text }]}>
                         {selectedSeats.length} seat{selectedSeats.length !== 1 ? 's' : ''} selected

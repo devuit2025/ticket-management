@@ -8,15 +8,9 @@ import { useTranslation } from '@i18n/useTranslation';
 import Container from '@components/global/container/Container';
 import Typography from '@components/global/typography/Typography';
 import QRCode from 'react-native-qrcode-svg';
-import { BusInfoCard } from '@components/bus/BusInfoCard';
-import { SeatPricingCard } from '@components/seat/SeatPricingCard';
-
 import ViewShot from 'react-native-view-shot';
-import * as FileSystem from 'expo-file-system';
 import * as Sharing from 'expo-sharing';
-import { DestinationCard } from '@components/global/card/DestinationCard';
-import { PickupDropoffCard } from '@components/global/card/PickupDropoffCard';
-import { PassengerCard } from '@components/global/card/PassengerCard';
+import BookingReviewInfoSections from '@components/booking/BookingReviewInfoSections';
 
 type Props = NativeStackScreenProps<BookingStackParamList, 'BookingConfirmation'>;
 
@@ -25,43 +19,10 @@ export default function BookingConfirmationScreen({ navigation }: Props) {
     const { translate } = useTranslation();
     const { bookingData } = useBooking();
     const viewRef = useRef<any>(null);
+    console.log(bookingData);
+    const qrInfo = bookingData;
 
-    // Mocked data
-    const customer = {
-        fullName: 'Example Name',
-        phone: '0986522131',
-        email: 'example@gmail.com',
-        type: 'Adult',
-    };
-
-    const destination = {
-        from: 'Ho Chi Minh City (Mien Dong Station)',
-        to: 'Da Nang (Central Station)',
-        duration: '12h 30m',
-    };
-
-    const busInfo = {
-        operator: 'Happy Bus Co.',
-        type: 'Limousine 34',
-        licensePlate: '51A-12345',
-        amenities: ['Wi-Fi', 'AC', 'Power Outlet'],
-        startDay: '2025-08-20',
-        startTime: '14:30',
-        endDay: '2025-08-21',
-        endTime: '06:00',
-        totalSeats: 34,
-        pricePerSeat: '350,000 VND',
-        totalPrice: '1,050,000 VND',
-        bookingRef: 'ABC123456',
-    };
-
-    const seats = ['A02', 'A03', 'B01'];
-    const fees = [
-        { label: 'Service Fee', value: '50,000 VND' },
-        { label: 'Discount', value: '-100,000 VND' },
-    ];
-
-    const handleBackHome = () => navigation.popToTop();
+    const handleBackHome = () => navigation.navigate('Home');
 
     const handleDownloadTicket = async () => {
         if (Platform.OS === 'web') {
@@ -83,7 +44,7 @@ export default function BookingConfirmationScreen({ navigation }: Props) {
                         {/* ===== Booking Success + QR Code ===== */}
                         <View style={styles.successContainer}>
                             <QRCode
-                                value={busInfo.bookingRef}
+                                value={qrInfo.bookingRef}
                                 size={150}
                                 color={theme.colors.primary}
                             />
@@ -100,20 +61,7 @@ export default function BookingConfirmationScreen({ navigation }: Props) {
                         </View>
 
                         {/* ===== Booking Details ===== */}
-                        <BusInfoCard busInfo={busInfo} duration={destination.duration} />
-                        <DestinationCard from={destination.from} to={destination.to} />
-                        <PickupDropoffCard
-                            pickup="123 Main Street, HCM"
-                            dropoff="45 Central Rd, Da Nang"
-                        />
-                        <PassengerCard customer={customer} />
-                        <SeatPricingCard
-                            seats={seats}
-                            pricePerSeat={busInfo.pricePerSeat}
-                            fees={fees}
-                            totalPrice={busInfo.totalPrice}
-                            primaryColor={theme.colors.primary}
-                        />
+                        <BookingReviewInfoSections></BookingReviewInfoSections>
                     </ViewShot>
 
                     {/* Download Ticket Button */}

@@ -1,10 +1,12 @@
+import { normalizeLocation } from '@utils/stringUtils';
 import client from './client';
 
-// --- Route Types ---
 export interface Route {
     id: number;
     origin: string;
+    originValue: string;
     destination: string;
+    destinationValue: string;
     distance: number;
     duration: string;
     base_price: number;
@@ -37,5 +39,12 @@ export const getRoutes = async (params?: GetRoutesParams): Promise<GetRoutesResp
     const response = await client.get<GetRoutesResponse>('/routes', {
         params,
     });
-    return response;
+
+    const routesWithValue = response.routes.map((r) => ({
+        ...r,
+        originValue: normalizeLocation(r.origin),
+        destinationValue: normalizeLocation(r.destination),
+    }));
+
+    return routesWithValue;
 };

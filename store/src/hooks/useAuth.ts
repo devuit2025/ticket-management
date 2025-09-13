@@ -19,11 +19,43 @@ export const useAuth = () => {
     const dispatch: AppDispatch = useDispatch();
     const { currentUser, token, isLoading, error } = useSelector((state: RootState) => state.user);
 
+    const USER_KEY = 'CURRENT_USER';
+
+    const storeCurrentUser = async (user: any) => {
+        try {
+            await AsyncStorage.setItem(USER_KEY, JSON.stringify(user));
+        } catch (err) {
+            console.error('Failed to store user', err);
+        }
+    };
+
+    const getCurrentUser = async () => {
+        try {
+            const userString = await AsyncStorage.getItem(USER_KEY);
+            if (userString) {
+                return JSON.parse(userString);
+            }
+            return null;
+        } catch (err) {
+            console.error('Failed to get user', err);
+            return null;
+        }
+    };
+
+    const removeCurrentUser = async () => {
+        try {
+            await AsyncStorage.removeItem(USER_KEY);
+        } catch (err) {
+            console.error('Failed to remove user', err);
+        }
+    };
+
     // --- Email login ---
     const login = useCallback(
         async (data: LoginRequest) => {
             const result = await dispatch(loginAction(data)).unwrap();
             await AsyncStorage.setItem(TOKEN_KEY, result.token);
+            await storeCurrentUser(result.user);
             return result;
         },
         [dispatch]
@@ -64,6 +96,7 @@ export const useAuth = () => {
         async (navigation?: any) => {
             await dispatch(logoutAction()).unwrap();
             await AsyncStorage.removeItem(TOKEN_KEY);
+            await removeCurrentUser();
         },
         [dispatch]
     );
@@ -74,7 +107,6 @@ export const useAuth = () => {
     }, [dispatch]);
 
     return {
-        currentUser,
         token,
         isLoading,
         error,
@@ -84,5 +116,6 @@ export const useAuth = () => {
         googleLogin,
         logout,
         clearAuthError,
+        getCurrentUser,
     };
 };

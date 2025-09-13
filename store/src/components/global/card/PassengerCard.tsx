@@ -23,7 +23,7 @@ export const PassengerCard: React.FC<PassengerCardProps> = ({ customer }) => (
         </Typography>
         <InfoRow label="Full Name" value={customer.fullName} />
         <InfoRow label="Phone" value={customer.phone} />
-        <InfoRow label="Email" value={customer.email} />
+        {/* <InfoRow label="Email" value={customer.email} /> */}
         <InfoRow label="Passenger Type" value={customer.type} />
         {customer.specialRequests && (
             <InfoRow label="Special Requests" value={customer.specialRequests} />

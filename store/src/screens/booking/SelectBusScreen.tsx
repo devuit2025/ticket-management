@@ -1,135 +1,90 @@
-import React, { useState } from 'react';
-import { View, ScrollView, Text, StyleSheet } from 'react-native';
-import { useBooking } from '@context/BookingContext';
+import React, { useState, useEffect } from 'react';
+import { View, ScrollView } from 'react-native';
 import { useTheme } from '@context/ThemeContext';
+import { useTranslation } from '@i18n/useTranslation';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { BookingStackParamList } from '@navigation/BookingNavigator';
 import Container from '@components/global/container/Container';
-import Card from '@components/global/card/Card';
-import HorizontalDateSelector from '@components/date/HorizontalDateSelector';
-import Select from '@components/global/select/Select';
 import Typography from '@components/global/typography/Typography';
-import { useTranslation } from '@i18n/useTranslation';
-import BusCard from '@components/bus/BusCard';
+import FilterCard from '@components/search/FilterCard';
+import BusList from '@components/bus/BusList';
+import SpinnerLoader from '@components/global/loader/SpinnerLoader';
+import { useBooking } from '@context/BookingContext';
 
 type Props = NativeStackScreenProps<BookingStackParamList, 'SelectBus'>;
 
 export default function SelectBusScreen({ navigation }: Props) {
-    const { translate } = useTranslation();
-    const { bookingData } = useBooking();
+    const { bookingData, setBookingData, trips, loading, fetchTripsForDay } = useBooking();
     const { theme } = useTheme();
+    const { translate } = useTranslation();
+    // console.log(bookingData)
+    const [selectedDate, setSelectedDate] = useState(bookingData.day);
 
-    const goToSeatSelect = () => {
-        console.log('go to seat');
+    // Sync local selectedDate with bookingData.day
+    useEffect(() => {
+        setBookingData((prev) => ({ ...prev, day: selectedDate }));
+    }, [selectedDate]);
+
+    // Initial fetch + reactive fetch whenever routeId or day changes
+    useEffect(() => {
+        // console.log('here')
+        if (!bookingData.routeId || !bookingData.day) return;
+
+        let isMounted = true; // to prevent state update if component unmounted
+
+        const fetchTrips = async () => {
+            await fetchTripsForDay(); // context handles loading internally
+        };
+
+        if (isMounted) fetchTrips();
+
+        return () => {
+            isMounted = false;
+        };
+    }, [bookingData.routeId, bookingData.day]);
+
+    const goToSeatSelect = (trip) => {
+        setBookingData((prev) => ({ ...prev, daySelectedTrip: trip }));
         navigation.navigate('SelectSeat');
     };
 
-    const [selected, setSelected] = useState('2025-08-17');
-    const [fruit, setFruit] = useState<string | undefined>(undefined);
-    const [color, setColor] = useState<string | undefined>(undefined);
-    const [animal, setAnimal] = useState<string | undefined>(undefined);
-
     return (
         <View style={{ flex: 1, backgroundColor: theme.colors.background }}>
-            {/* ✅ ScrollView wraps all content */}
             <ScrollView
                 contentContainerStyle={{ paddingBottom: 20 }}
                 showsVerticalScrollIndicator={false}
             >
                 <Container style={{ marginTop: 15 }}>
-                    {/* Filters Card */}
-                    <Card style={{ marginBottom: 15 }}>
-                        <HorizontalDateSelector value={selected} onChange={(d) => setSelected(d)} />
+                    {/* Filter */}
+                    <FilterCard
+                        selectedDate={selectedDate}
+                        onDateChange={setSelectedDate}
+                        // filters={[
+                        //     { label: 'Fruit', options: [{ label: 'Apple', value: 'apple' }, { label: 'Banana', value: 'banana' }] },
+                        //     { label: 'Color', options: [{ label: 'Red', value: 'red' }, { label: 'Blue', value: 'blue' }] },
+                        //     { label: 'Animal', options: [{ label: 'Cat', value: 'cat' }, { label: 'Dog', value: 'dog' }] },
+                        // ]}
+                        onFiltersChange={(selected) => console.log(selected)}
+                    />
 
-                        <View style={[styles.container, { marginTop: 15 }]}>
-                            {/* Column 1 */}
-                            <View style={styles.column}>
-                                <Text style={styles.label}>Fruit</Text>
-                                <Select
-                                    options={[
-                                        { label: 'Apple', value: 'apple' },
-                                        { label: 'Banana', value: 'banana' },
-                                        { label: 'Orange', value: 'orange' },
-                                    ]}
-                                    value={fruit}
-                                    onChange={setFruit}
-                                    placeholder="Choose fruit"
-                                />
-                            </View>
-
-                            {/* Column 2 */}
-                            <View style={styles.column}>
-                                <Text style={styles.label}>Color</Text>
-                                <Select
-                                    options={[
-                                        { label: 'Red', value: 'red' },
-                                        { label: 'Green', value: 'green' },
-                                        { label: 'Blue', value: 'blue' },
-                                    ]}
-                                    value={color}
-                                    onChange={setColor}
-                                    placeholder="Choose color"
-                                />
-                            </View>
-
-                            {/* Column 3 */}
-                            <View style={styles.column}>
-                                <Text style={styles.label}>Animal</Text>
-                                <Select
-                                    options={[
-                                        { label: 'Cat', value: 'cat' },
-                                        { label: 'Dog', value: 'dog' },
-                                        { label: 'Bird', value: 'bird' },
-                                    ]}
-                                    value={animal}
-                                    onChange={setAnimal}
-                                    placeholder="Choose animal"
-                                />
-                            </View>
-                        </View>
-                    </Card>
-
-                    {/* Recent Search */}
+                    {/* Title */}
                     <Typography
                         variant="h2"
                         color="black"
                         weight="bold"
                         style={{ marginBottom: 10 }}
                     >
-                        {translate('booking.recentSearch')}
+                        Search result
                     </Typography>
 
-                    {/* Example Bus List */}
-                    {Array.from({ length: 10 }).map((_, i) => (
-                        <BusCard
-                            key={i}
-                            startTime="08:00"
-                            endTime="14:00"
-                            price="350,000 VND"
-                            carType="Limousine"
-                            availableSeats={5}
-                            startLocation="Ho Chi Minh City (Mien Dong Station)"
-                            endLocation="Da Nang (Central Station)"
-                            onSelect={goToSeatSelect}
-                        />
-                    ))}
+                    {/* Loader or BusList */}
+                    {loading ? (
+                        <SpinnerLoader size="large" />
+                    ) : (
+                        <BusList onSelectBus={goToSeatSelect} data={trips} />
+                    )}
                 </Container>
             </ScrollView>
         </View>
     );
 }
-
-const styles = StyleSheet.create({
-    container: {
-        flexDirection: 'row',
-    },
-    column: {
-        flex: 1,
-        marginHorizontal: 5,
-    },
-    label: {
-        marginBottom: 6,
-        fontWeight: 'bold',
-        fontSize: 14,
-    },
-});

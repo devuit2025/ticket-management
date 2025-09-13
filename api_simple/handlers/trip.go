@@ -78,12 +78,12 @@ func SearchTrips(c *gin.Context) {
 	// Parse dates
 	var fromTime, toTime *time.Time
 	if fromDate != "" {
-		if t, err := time.Parse("2006-01-02", fromDate); err == nil {
+		if t, err := time.Parse(time.RFC3339, fromDate); err == nil {
 			fromTime = &t
 		}
 	}
 	if toDate != "" {
-		if t, err := time.Parse("2006-01-02", toDate); err == nil {
+		if t, err := time.Parse(time.RFC3339, toDate); err == nil {
 			toTime = &t
 		}
 	}

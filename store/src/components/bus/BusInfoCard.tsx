@@ -17,6 +17,7 @@ export const BusInfoCard = ({ busInfo, duration }) => (
             <InfoRow label="Amenities" value={busInfo.amenities.join(', ')} />
         )}
         <InfoRow label="Total Seats" value={busInfo.totalSeats.toString()} />
+        <InfoRow label="Day" value={busInfo.startDay} />
 
         {/* Timing */}
         <View style={styles.timingContainer}>
@@ -25,7 +26,7 @@ export const BusInfoCard = ({ busInfo, duration }) => (
                     Start
                 </Typography>
                 <Typography variant="body" weight="bold">
-                    {busInfo.startDay} {busInfo.startTime}
+                    {busInfo.startTime}
                 </Typography>
             </View>
             <View style={styles.timingColumn}>
@@ -33,7 +34,7 @@ export const BusInfoCard = ({ busInfo, duration }) => (
                     End
                 </Typography>
                 <Typography variant="body" weight="bold">
-                    {busInfo.endDay} {busInfo.endTime}
+                    {busInfo.endTime}
                 </Typography>
             </View>
             <View style={styles.timingColumn}>

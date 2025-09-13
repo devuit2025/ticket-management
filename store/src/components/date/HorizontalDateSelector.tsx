@@ -21,10 +21,11 @@ const HorizontalDateSelector: React.FC<HorizontalDateSelectorProps> = ({
     nextDays = 3,
 }) => {
     const flatListRef = useRef<FlatList<DateItem>>(null);
+    const normalizedValue = dayjs(value).format('YYYY-MM-DD');
 
     // Generate date range around "value"
     const dates: DateItem[] = useMemo(() => {
-        const center = dayjs(value);
+        const center = dayjs(normalizedValue);
         return Array.from({ length: prevDays + nextDays + 1 }, (_, i) => {
             const offset = i - prevDays;
             const date = center.add(offset, 'day');
@@ -34,7 +35,7 @@ const HorizontalDateSelector: React.FC<HorizontalDateSelectorProps> = ({
 
     // Always scroll to selected date
     useEffect(() => {
-        const index = dates.findIndex((d) => d.id === value);
+        const index = dates.findIndex((d) => d.id === normalizedValue);
         if (index !== -1 && flatListRef.current) {
             setTimeout(() => {
                 flatListRef.current?.scrollToIndex({
@@ -51,7 +52,7 @@ const HorizontalDateSelector: React.FC<HorizontalDateSelectorProps> = ({
     };
 
     const renderItem = ({ item }: { item: DateItem }) => {
-        const isSelected = item.id === value;
+        const isSelected = item.id === normalizedValue;
         return (
             <TouchableOpacity
                 style={[styles.card, isSelected && styles.cardSelected]}

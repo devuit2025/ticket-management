@@ -79,7 +79,7 @@ export const logout = async (): Promise<void> => {
 export const register = async (data: RegisterRequest): Promise<RegisterResponse> => {
     try {
         const response = await client.post<RegisterResponse>('/auth/register', data);
-        return response.data;
+        return response;
     } catch (error: any) {
         console.error('Register error:', error?.response?.error);
         throw error;

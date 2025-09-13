@@ -10,7 +10,7 @@ import { FormSubmitButton } from '@components/form/FormSubmitButton';
 
 interface RegisterFormValues {
     fullName: string;
-    email: string;
+    // email: string;
     phone: string;
     password: string;
     confirmPassword: string;
@@ -31,10 +31,10 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({ onSubmit, buttonTitl
             .string()
             .required(translate('register.fullName') + ' ' + translate('common.required'))
             .min(2, translate('register.fullName') + ' ' + translate('common.min', { count: 2 })),
-        email: yup
-            .string()
-            .email(translate('register.email') + ' ' + translate('common.invalid'))
-            .required(translate('register.email') + ' ' + translate('common.required')),
+        // email: yup
+        //     .string()
+        //     .email(translate('register.email') + ' ' + translate('common.invalid'))
+        //     .required(translate('register.email') + ' ' + translate('common.required')),
         phone: yup
             .string()
             .required(translate('register.phone') + ' ' + translate('common.required'))
@@ -82,7 +82,7 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({ onSubmit, buttonTitl
             />
 
             {/* Email */}
-            <FormInput
+            {/* <FormInput
                 name="email"
                 label={translate('register.email')}
                 placeholder={translate('register.emailPlaceholder')}
@@ -90,7 +90,7 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({ onSubmit, buttonTitl
                 autoCapitalize="none"
                 control={control}
                 error={errors.email?.message}
-            />
+            /> */}
 
             {/* Phone */}
             <FormInput

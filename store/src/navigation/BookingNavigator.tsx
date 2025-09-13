@@ -22,11 +22,31 @@ export function BookingNavigator() {
     return (
         // <BookingProvider>
         <Stack.Navigator initialRouteName="SelectBus">
-            <Stack.Screen name="SelectBus" component={SelectBusScreen} />
-            <Stack.Screen name="SelectSeat" component={SelectSeatScreen} />
-            <Stack.Screen name="ReviewBooking" component={ReviewBookingScreen} />
-            <Stack.Screen name="Payment" component={PaymentScreen} />
-            <Stack.Screen name="BookingConfirmation" component={BookingConfirmationScreen} />
+            <Stack.Screen
+                name="SelectBus"
+                component={SelectBusScreen}
+                options={{ headerTitle: 'Select Bus' }}
+            />
+            <Stack.Screen
+                name="SelectSeat"
+                component={SelectSeatScreen}
+                options={{ headerTitle: 'Select Seats' }}
+            />
+            <Stack.Screen
+                name="ReviewBooking"
+                component={ReviewBookingScreen}
+                options={{ headerTitle: 'Review Booking' }}
+            />
+            <Stack.Screen
+                name="Payment"
+                component={PaymentScreen}
+                options={{ headerTitle: 'Payment' }}
+            />
+            <Stack.Screen
+                name="BookingConfirmation"
+                component={BookingConfirmationScreen}
+                options={{ headerTitle: 'Booking Confirmation' }}
+            />
         </Stack.Navigator>
         // </BookingProvider>
     );

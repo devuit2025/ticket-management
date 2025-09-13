@@ -30,7 +30,7 @@ const AuthLoginOptions: React.FC<AuthLoginOptionsProps> = () => {
                 -- Or --
             </Typography>
 
-            <View style={styles.socialRow}>
+            {/* <View style={styles.socialRow}>
                 <TouchableOpacity style={styles.socialButton} onPress={handleLoginPhone}>
                     <Icon name="call-outline" size="xxl" color="#007AFF" />
                 </TouchableOpacity>
@@ -40,7 +40,7 @@ const AuthLoginOptions: React.FC<AuthLoginOptionsProps> = () => {
                 <TouchableOpacity style={styles.socialButton} onPress={handleLoginGoogle}>
                     <Icon name="google" type="mc" size="xxl" color="#DB4437" />
                 </TouchableOpacity>
-            </View>
+            </View> */}
         </>
     );
 };

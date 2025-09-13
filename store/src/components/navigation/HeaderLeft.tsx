@@ -19,22 +19,22 @@ const HeaderLeft: React.FC<HeaderLeftProps> = ({ navigation, routeName }) => {
         setMenuVisible(false);
     };
 
-    if (routeName === 'Home') {
-        return (
-            <View style={{ flexDirection: 'row', alignItems: 'center', paddingHorizontal: 12 }}>
-                <TouchableOpacity onPress={openMenu} style={{ padding: 6 }}>
-                    <Icon
-                        name="menu-outline"
-                        backgroundStyle="white-circle"
-                        size="xxl"
-                        color={theme.colors.icon}
-                    />
-                </TouchableOpacity>
+    // if (routeName === 'Home') {
+    return (
+        <View style={{ flexDirection: 'row', alignItems: 'center', paddingHorizontal: 12 }}>
+            <TouchableOpacity onPress={openMenu} style={{ padding: 6 }}>
+                <Icon
+                    name="menu-outline"
+                    backgroundStyle="white-circle"
+                    size="xxl"
+                    color={theme.colors.icon}
+                />
+            </TouchableOpacity>
 
-                <MenuDrawer visible={menuVisible} onClose={closeMenu} navigation={navigation} />
-            </View>
-        );
-    }
+            <MenuDrawer visible={menuVisible} onClose={closeMenu} navigation={navigation} />
+        </View>
+    );
+    // }
 
     return null; // or BackButton
 };

@@ -7,10 +7,10 @@ export interface LoginRequest {
 }
 
 export interface RegisterRequest {
-    fullName: string;
-    email: string;
+    name: string;
+    phone: string;
     password: string;
-    phone?: string;
+    role: string;
 }
 
 // --- Response payloads ---

@@ -71,7 +71,8 @@ func (r *TripRepository) FindAvailableTrips(routeID uint, date time.Time) ([]mod
 // SearchTrips searches trips with filters
 func (r *TripRepository) SearchTrips(filters map[string]interface{}, fromDate, toDate *time.Time) ([]models.Trip, error) {
 	var trips []models.Trip
-	query := r.db.Preload("Route").Preload("Bus").Preload("Driver")
+	// query := r.db.Preload("Route").Preload("Bus").Preload("Driver")
+	query := r.db.Debug().Preload("Route").Preload("Bus").Preload("Driver")
 
 	// Apply filters
 	if filters != nil {
