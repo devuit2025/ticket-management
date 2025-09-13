@@ -100,7 +100,7 @@ export const BookingProvider = ({ children }: { children: ReactNode }) => {
 
     // --- New createBooking method ---
     const createBooking = async (
-        guestInfo?: GuestInfo,
+        user?: GuestInfo,
         note?: string
     ): Promise<CreateBookingResponse> => {
         if (!bookingData.daySelectedTrip || !bookingData.selectedSeats?.length) {
@@ -112,7 +112,9 @@ export const BookingProvider = ({ children }: { children: ReactNode }) => {
             trip_id: bookingData.daySelectedTrip.id,
             seat_ids: bookingData.daySelectedSeatIds,
             payment_type: 'cash',
-            guest_info: guestInfo,
+            guest_info: user,
+            user_id: user.id,
+            user: user,
             note,
         };
 

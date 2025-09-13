@@ -15,6 +15,8 @@ import (
 )
 
 type CreateBookingRequest struct {
+	User		*models.User		`json:"user" binding:"required"`
+	UserId		*uint               `json:"user_id" binding:"required"`
 	TripID      uint               `json:"trip_id" binding:"required"`
 	SeatIDs     []int64            `json:"seat_ids" binding:"required,min=1"`
 	PaymentType models.PaymentType `json:"payment_type" binding:"required,oneof=cash"`
@@ -88,6 +90,8 @@ func CreateBooking(c *gin.Context) {
 
 	// Create booking
 	booking := &models.Booking{
+		UserID:        req.UserId,
+		User: req.User,
 		TripID:        req.TripID,
 		SeatIDs:       req.SeatIDs,
 		TotalAmount:   totalAmount,

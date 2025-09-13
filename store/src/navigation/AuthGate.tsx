@@ -1,25 +1,32 @@
 import React, { useEffect, useState } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { useSelector } from 'react-redux';
 import { RootState } from '@store';
 import { AppStack } from './AppStack';
 import { AuthStack } from './AuthStack';
-
+import { useSelector, useDispatch } from 'react-redux'; // import useDispatch
+import { setToken } from '@store/userSlice';
 export const AuthGate: React.FC = () => {
     const tokenFromStore = useSelector((state: RootState) => state.user.token);
-    const [token, setToken] = useState<string | null>(null);
+    const dispatch = useDispatch(); // get dispatch function
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        const checkToken = async () => {
+        const checkStorage = async () => {
             const storedToken = await AsyncStorage.getItem('AUTH_TOKEN');
-            setToken(storedToken || tokenFromStore || null);
+            if (!storedToken) {
+                dispatch(setToken('')); // ✅ this should now work
+            }
+            console.log(storedToken);
+            if (storedToken && !tokenFromStore) {
+                dispatch(setToken(storedToken)); // ✅ this should now work
+            } else {
+            }
             setLoading(false);
         };
-        checkToken();
-    }, [tokenFromStore]);
+        checkStorage();
+    }, [dispatch, tokenFromStore]);
 
     if (loading) return null; // optional splash screen
 
-    return token ? <AppStack /> : <AuthStack />;
+    return tokenFromStore ? <AppStack /> : <AuthStack />;
 };

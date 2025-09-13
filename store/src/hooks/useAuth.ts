@@ -9,6 +9,7 @@ import {
     googleLogin as googleLoginAction,
     logout as logoutAction,
     clearError,
+    setToken,
 } from '@store/userSlice';
 import type { AppDispatch, RootState } from '@store';
 import type { LoginRequest, PhoneLoginRequest } from '@types/auth';
@@ -95,6 +96,7 @@ export const useAuth = () => {
     const logout = useCallback(
         async (navigation?: any) => {
             await dispatch(logoutAction()).unwrap();
+            await dispatch(setToken(''));
             await AsyncStorage.removeItem(TOKEN_KEY);
             await removeCurrentUser();
         },

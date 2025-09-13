@@ -38,8 +38,17 @@ export default {
         seatPreferencePlaceholder: 'Select seat type',
 
         // Trip type
+        status: {
+            success: 'Success',
+            pending: 'Pending',
+            cancelled: 'Cancelled',
+            unpaid: 'Unpaid',
+            paid: 'Paid',
+        },
         tripType: 'Trip Type',
         oneWay: 'One Way',
         roundTrip: 'Round Trip',
+
+        totalPrice: 'Total Price',
     },
 };

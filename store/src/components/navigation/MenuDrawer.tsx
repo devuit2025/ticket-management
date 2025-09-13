@@ -5,6 +5,14 @@ import MenuSection from '@components/navigation/MenuSection';
 import ThemeToggle from '@components/navigation/ThemeToggle';
 import { NavigationProp } from '@react-navigation/native';
 import Divider from '@components/global/divider/Divider';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { RootStackParamList } from '@navigation/navigationTypes';
+
+type MenuSectionNavigationProp = NativeStackNavigationProp<RootStackParamList, 'MenuSection'>;
+
+interface Props {
+    navigation: MenuSectionNavigationProp;
+}
 
 const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
 
@@ -47,9 +55,9 @@ const MenuDrawer: React.FC<MenuDrawerProps> = ({ visible, onClose, navigation })
                 {/* <Pressable onPress={() => {}} style={{ flex: 1 }}> */}
                 <Animated.View style={[styles.drawer, { transform: [{ translateX: slideAnim }] }]}>
                     <UserHeader />
-                    <MenuSection />
-                    <Divider />
-                    <ThemeToggle />
+                    <MenuSection navigation={navigation} onClose={onClose} />
+                    {/* <Divider /> */}
+                    {/* <ThemeToggle /> */}
                 </Animated.View>
                 {/* </Pressable> */}
             </Pressable>

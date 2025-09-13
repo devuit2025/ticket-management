@@ -29,6 +29,7 @@ export default function ReviewBookingScreen({ navigation }: Props) {
                 setGuestInfo({
                     name: user.name,
                     phone: user.phone,
+                    id: user.id,
                 });
             }
         };

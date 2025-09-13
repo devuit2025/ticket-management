@@ -1,42 +1,85 @@
-import React from 'react';
-import { View, ScrollView, StyleSheet, TouchableOpacity } from 'react-native';
-import { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { BookingStackParamList } from '@navigation/BookingNavigator';
+import React, { useEffect, useState } from 'react';
+import { View, ScrollView, StyleSheet, TouchableOpacity, ActivityIndicator } from 'react-native';
 import { useTheme } from '@context/ThemeContext';
 import { useTranslation } from '@i18n/useTranslation';
 import Container from '@components/global/container/Container';
 import Card from '@components/global/card/Card';
 import Typography from '@components/global/typography/Typography';
-import Icon from '@components/global/icon/Icon';
 import { format } from 'date-fns';
-
-// type Props = NativeStackScreenProps<BookingStackParamList, 'BookingHistory'>;
+import { getUserBookings } from '@api/bookings'; // your client function
+import { getRoute } from '@api/routes';
 
 export default function BookingHistoryScreen({ navigation }) {
     const { theme } = useTheme();
     const { translate } = useTranslation();
 
-    // Mock data - replace with API data
-    const bookings = [
-        {
-            id: 'BK001',
-            from: 'Ho Chi Minh City',
-            to: 'Da Nang',
-            date: '2025-08-20',
-            time: '14:30',
-            status: 'Success',
-            totalPrice: '1,050,000 VND',
-        },
-        {
-            id: 'BK002',
-            from: 'Hanoi',
-            to: 'Hue',
-            date: '2025-08-18',
-            time: '09:00',
-            status: 'Cancelled',
-            totalPrice: '700,000 VND',
-        },
-    ];
+    const [bookings, setBookings] = useState<any[]>([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
+
+    useEffect(() => {
+        const fetchBookings = async () => {
+            try {
+                const res = await getUserBookings(1, 10);
+
+                // Map bookings with route info
+                const formattedBookings = await Promise.all(
+                    res.bookings.map(async (b) => {
+                        let from = 'Unknown';
+                        let to = 'Unknown';
+
+                        // Fetch route info if trip exists
+                        if (b.trip?.route_id) {
+                            try {
+                                const routeRes = await getRoute(b.trip.route_id);
+                                from = routeRes.origin || 'Unknown';
+                                to = routeRes.destination || 'Unknown';
+                            } catch (err) {
+                                console.error('Failed to fetch route', err);
+                            }
+                        }
+
+                        return {
+                            id: b.booking_code,
+                            from,
+                            to,
+                            date: new Date(b.trip?.departure_time),
+                            time: new Date(b.trip?.departure_time),
+                            status: b.status,
+                            totalPrice: `${b.total_amount.toLocaleString()} VND`,
+                        };
+                    })
+                );
+
+                setBookings(formattedBookings);
+            } catch (err: any) {
+                console.error(err);
+                setError('Failed to load bookings');
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchBookings();
+    }, []);
+
+    if (loading) {
+        return (
+            <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+                <ActivityIndicator size="large" color={theme.colors.primary} />
+            </View>
+        );
+    }
+
+    if (error) {
+        return (
+            <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+                <Typography variant="body" color="error">
+                    {error}
+                </Typography>
+            </View>
+        );
+    }
 
     return (
         <View style={{ flex: 1, backgroundColor: theme.colors.background }}>
@@ -59,14 +102,14 @@ export default function BookingHistoryScreen({ navigation }) {
                                         </Typography>
                                         <Typography variant="body" color="gray">
                                             {format(new Date(booking.date), 'dd/MM/yyyy')} at{' '}
-                                            {booking.time}
+                                            {format(new Date(booking.date), 'HH:mm')}
                                         </Typography>
                                     </View>
-                                    <Typography
+                                    {/* <Typography
                                         variant="body"
                                         weight="bold"
                                         color={
-                                            booking.status === 'Success'
+                                            booking.status === 'success'
                                                 ? theme.colors.success
                                                 : theme.colors.error
                                         }
@@ -74,7 +117,7 @@ export default function BookingHistoryScreen({ navigation }) {
                                         {translate(
                                             `booking.status.${booking.status.toLowerCase()}`
                                         )}
-                                    </Typography>
+                                    </Typography> */}
                                 </View>
                                 <View style={{ marginTop: 8 }}>
                                     <Typography variant="body" weight="medium">

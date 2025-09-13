@@ -88,6 +88,9 @@ const userSlice = createSlice({
         clearError(state) {
             state.error = null;
         },
+        setToken(state, action: PayloadAction<string>) {
+            state.token = action.payload;
+        },
     },
     extraReducers: (builder) => {
         // Login
@@ -165,5 +168,5 @@ const userSlice = createSlice({
     },
 });
 
-export const { clearError } = userSlice.actions;
+export const { clearError, setToken } = userSlice.actions;
 export default userSlice.reducer;

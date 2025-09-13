@@ -48,3 +48,10 @@ export const getRoutes = async (params?: GetRoutesParams): Promise<GetRoutesResp
 
     return routesWithValue;
 };
+
+// --- Get Routes ---
+export const getRoute = async (id): Promise<GetRoutesResponse> => {
+    const response = await client.get<GetRoutesResponse>(`/routes/${id}`, {});
+
+    return response;
+};

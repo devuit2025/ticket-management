@@ -5,6 +5,7 @@ export interface GuestInfo {
     name: string;
     email?: string;
     phone: string;
+    id: string;
     // any other guest info fields
 }
 
@@ -54,6 +55,11 @@ export const createBooking = async (data: CreateBookingRequest): Promise<CreateB
     }
 };
 
+export interface GetUserBookingsResponse {
+    bookings: Booking[];
+    total: number;
+}
+
 export const updatePayment = async (
     bookingId: number,
     data: UpdatePaymentRequest
@@ -63,6 +69,22 @@ export const updatePayment = async (
         return response;
     } catch (error: any) {
         console.error('Error updating payment:', error);
+        throw error;
+    }
+};
+
+// --- Client function ---
+export const getUserBookings = async (
+    page: number = 1,
+    limit: number = 10
+): Promise<GetUserBookingsResponse> => {
+    try {
+        const response = await client.get<GetUserBookingsResponse>('/bookings', {
+            params: { page, limit },
+        });
+        return response;
+    } catch (error: any) {
+        console.error('Error fetching user bookings:', error);
         throw error;
     }
 };

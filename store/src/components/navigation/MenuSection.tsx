@@ -3,8 +3,9 @@ import { View, Animated, StyleSheet } from 'react-native';
 import MenuItem from './MenuItem';
 import Divider from '@components/global/divider/Divider';
 import { useAuth } from '@hooks/useAuth';
+import { CommonActions } from '@react-navigation/native';
 
-const MenuSection: React.FC = ({ navigation }) => {
+const MenuSection: React.FC = ({ navigation, onClose }) => {
     const { logout } = useAuth();
     const animValues = useRef(new Array(7).fill(null).map(() => new Animated.Value(0))).current;
 
@@ -19,11 +20,6 @@ const MenuSection: React.FC = ({ navigation }) => {
 
     const handleLogout = async () => {
         await logout();
-        console.log(navigation);
-        navigation?.reset({
-            index: 0,
-            routes: [{ name: 'Login' }],
-        });
     };
 
     const renderAnimatedItem = (anim: Animated.Value, content: JSX.Element, key: string) => {
@@ -52,8 +48,10 @@ const MenuSection: React.FC = ({ navigation }) => {
                 <MenuItem
                     label="Home"
                     iconName="home-outline"
-                    onPress={() => console.log('Home')}
-                />,
+  onPress={() => {
+            navigation.navigate('Home');
+            onClose(); // Close the drawer after navigation
+        }}                />,
                 'home'
             )}
             {renderAnimatedItem(
@@ -61,11 +59,13 @@ const MenuSection: React.FC = ({ navigation }) => {
                 <MenuItem
                     label="My Bookings"
                     iconName="book-outline"
-                    onPress={() => console.log('Bookings')}
-                />,
+       onPress={() => {
+            navigation.navigate('History');
+            onClose(); // Close the drawer
+        }}                />,
                 'bookings'
             )}
-            {renderAnimatedItem(
+            {/* {renderAnimatedItem(
                 animValues[2],
                 <MenuItem
                     label="Tickets"
@@ -78,10 +78,10 @@ const MenuSection: React.FC = ({ navigation }) => {
                 animValues[3],
                 <MenuItem label="Map" iconName="map-outline" onPress={() => console.log('Map')} />,
                 'map'
-            )}
+            )} */}
 
             <Divider />
-            {renderAnimatedItem(
+            {/* {renderAnimatedItem(
                 animValues[4],
                 <MenuItem
                     label="Settings"
@@ -98,7 +98,7 @@ const MenuSection: React.FC = ({ navigation }) => {
                     onPress={() => console.log('Help')}
                 />,
                 'help'
-            )}
+            )} */}
             {renderAnimatedItem(
                 animValues[6],
                 <MenuItem

@@ -19,7 +19,7 @@ export default function LoginScreen({ navigation }: LoginScreenProps) {
 
     const onSubmit = async (data: LoginRequest) => {
         await login(data);
-        navigation.navigate('Home');
+        // navigation.navigate('Home');
     };
 
     return (
