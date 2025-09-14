@@ -14,12 +14,12 @@ import BookingReviewInfoSections from '@components/booking/BookingReviewInfoSect
 
 type Props = NativeStackScreenProps<BookingStackParamList, 'BookingConfirmation'>;
 
-export default function BookingConfirmationScreen({ navigation }: Props) {
+export default function BookingConfirmationScreen({ navigation, route }: Props) {
     const { theme } = useTheme();
     const { translate } = useTranslation();
     const { bookingData } = useBooking();
     const viewRef = useRef<any>(null);
-    console.log(bookingData);
+    const { bookingId } = route.params || {};
     const qrInfo = bookingData;
 
     const handleBackHome = () => navigation.navigate('Home');

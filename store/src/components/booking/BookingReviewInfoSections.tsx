@@ -18,7 +18,7 @@ export default function BookingReviewInfoSections({ navigation }) {
     const { translate } = useTranslation();
     const { bookingData } = useBooking();
 
-    if (!bookingData || !bookingData.daySelectedTrip) {
+    if (!bookingData || !bookingData.daySelectedTrip || !bookingData.selectedSeats) {
         return (
             <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
                 <Typography variant="h2">No booking data available</Typography>
@@ -88,10 +88,10 @@ export default function BookingReviewInfoSections({ navigation }) {
         endTime: arrival.format('HH:mm'),
         totalSeats: bus.seat_count,
         pricePerSeat: `${trip.price.toLocaleString()} VND`,
-        totalPrice: `${(trip.price * bookingData.selectedSeats.length).toLocaleString()} VND`,
+        totalPrice: `${(trip.price * (bookingData.selectedSeats?.length || 0)).toLocaleString()} VND`,
     };
 
-    const seats = bookingData.selectedSeats;
+    const seats = bookingData.selectedSeats || [];
     const fees = [{ label: 'Service Fee', value: '0 VND' }];
 
     return (

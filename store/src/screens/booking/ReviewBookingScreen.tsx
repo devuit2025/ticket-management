@@ -20,7 +20,9 @@ export default function ReviewBookingScreen({ navigation }: Props) {
     const { bookingData, createBooking } = useBooking();
 
     const [guestInfo, setGuestInfo] = useState<GuestInfo | undefined>(undefined);
+    const [selectedPayment, setSelectedPayment] = useState('counter');
     const { getCurrentUser } = useAuth();
+    
     // Load current user info on mount
     useEffect(() => {
         const fetchUser = async () => {
@@ -36,14 +38,6 @@ export default function ReviewBookingScreen({ navigation }: Props) {
         fetchUser();
     }, []);
 
-    if (!bookingData || !bookingData.daySelectedTrip) {
-        return (
-            <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-                <Typography variant="h2">No booking data available</Typography>
-            </View>
-        );
-    }
-
     const paymentMethods = [
         // { id: 'card', label: 'Credit / Debit Card', icon: 'card' },
         // { id: 'momo', label: 'Momo Wallet', icon: 'wallet' },
@@ -51,7 +45,13 @@ export default function ReviewBookingScreen({ navigation }: Props) {
         { id: 'counter', label: 'Pay at Counter', icon: 'cash' },
     ];
 
-    const [selectedPayment, setSelectedPayment] = useState('counter');
+    if (!bookingData || !bookingData.daySelectedTrip) {
+        return (
+            <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+                <Typography variant="h2">No booking data available</Typography>
+            </View>
+        );
+    }
 
     const handlePayment = async () => {
         /** Handle payment */

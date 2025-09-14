@@ -89,8 +89,11 @@ export default function BookingHistoryScreen({ navigation }) {
                         <TouchableOpacity
                             key={booking.id}
                             onPress={() =>
-                                navigation.navigate('BookingConfirmation', {
-                                    bookingId: booking.id,
+                                navigation.navigate('Booking', {
+                                    screen: 'BookingConfirmation',
+                                    params: {
+                                        bookingId: booking.id,
+                                    }
                                 })
                             }
                         >

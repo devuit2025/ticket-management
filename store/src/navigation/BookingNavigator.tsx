@@ -13,7 +13,7 @@ export type BookingStackParamList = {
     SelectSeat: undefined;
     ReviewBooking: undefined;
     Payment: undefined;
-    BookingConfirmation: undefined;
+    BookingConfirmation: { bookingId?: string };
 };
 
 const Stack = createNativeStackNavigator<BookingStackParamList>();
