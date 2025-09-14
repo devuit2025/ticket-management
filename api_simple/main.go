@@ -101,10 +101,15 @@ func setupRoutes(api *gin.RouterGroup) {
 	api.POST("/bookings", handlers.CreateBooking)
 	api.GET("/bookings/:code", handlers.GetBookingByCode)
 
+	
 	// Protected routes
 	protected := api.Group("/")
 	protected.Use(middleware.AuthMiddleware())
 	{
+		
+		// User management
+		protected.GET("/profile", handlers.GetProfile)
+		protected.POST("/profile", handlers.UpdateProfile)
 		protected.POST("/auth/logout", handlers.Logout)
 		protected.POST("/auth/change-password", handlers.ChangePassword)
 
@@ -138,6 +143,7 @@ func setupRoutes(api *gin.RouterGroup) {
 			admin.PUT("/bookings/:id/confirm", handlers.ConfirmBooking)
 			admin.PUT("/bookings/:id/payment", handlers.UpdateBookingPayment)
 			admin.PUT("/bookings/:id/status", handlers.UpdateBookingStatus)
+			
 
 			// User management
 			admin.GET("/users", handlers.GetUsers)

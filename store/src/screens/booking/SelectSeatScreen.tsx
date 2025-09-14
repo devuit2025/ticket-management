@@ -25,6 +25,9 @@ const SelectSeatScreen = ({ navigation }: Props) => {
     useEffect(() => {
         const fetchSeats = async () => {
             try {
+                if (!tripId) {
+                    return;
+                }
                 const data: GetTripSeatsResponse = await getTripSeats(tripId);
                 const numberToId: Record<string, number> = {};
 

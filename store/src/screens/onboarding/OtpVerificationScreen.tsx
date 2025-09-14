@@ -7,6 +7,8 @@ import Typography from '@components/global/typography/Typography';
 import { FormSubmitButton } from '@components/form/FormSubmitButton';
 import LoginImage from '@assets/image-actions/login.jpg';
 import Gap from '@components/global/gap/Gap';
+import { showToast } from '@utils/toast';
+import { verifyRegister, VerifyRegisterRequest } from '@api/auth';
 
 interface OtpForm {
     otp1: string;
@@ -17,7 +19,8 @@ interface OtpForm {
     otp6: string;
 }
 
-export default function OtpVerificationScreen() {
+export default function OtpVerificationScreen({ navigation, route }) {
+    const { phone } = route.params;
     const { translate } = useTranslation();
     const { control, handleSubmit, setValue } = useForm<OtpForm>({
         defaultValues: { otp1: '', otp2: '', otp3: '', otp4: '', otp5: '', otp6: '' },
@@ -36,10 +39,28 @@ export default function OtpVerificationScreen() {
         return () => clearInterval(interval);
     }, [timer]);
 
-    const onSubmit = (data: OtpForm) => {
+    const onSubmit = async (data: OtpForm) => {
         const otpCode = Object.values(data).join('');
-        console.log('OTP entered:', otpCode);
-        // Verify OTP logic here
+
+        if (!otpCode || otpCode.length < 6) {
+            showToast('error', translate('login.otpValid.invalidLength'));
+            return;
+        }
+        if (!/^\d{6}$/.test(otpCode)) {
+            showToast('error', translate('login.otpValid.digitsOnly'));
+            return;
+        }
+
+        const payload: VerifyRegisterRequest = {
+            phone,
+            code: otpCode,
+        };
+
+        await verifyRegister(payload);
+
+        showToast('success', translate('login.otpValid.success'));
+
+        navigation.navigate('Login');
     };
 
     const handleResendOtp = () => {
@@ -49,9 +70,8 @@ export default function OtpVerificationScreen() {
         setResendDisabled(true);
     };
 
-    const handleChangePhone = () => {
-        console.log('Change phone number triggered');
-        // Navigate back to phone login screen
+    const handleBackToRegis = () => {
+        navigation.navigate('OtpVerification');
     };
 
     const handleInputChange = (text: string, index: number, onChange: (val: string) => void) => {
@@ -134,9 +154,9 @@ export default function OtpVerificationScreen() {
                         </Typography>
                     </TouchableOpacity>
 
-                    <TouchableOpacity onPress={handleChangePhone}>
+                    <TouchableOpacity onPress={handleBackToRegis}>
                         <Typography variant="body" color="primary" weight="bold">
-                            {translate('login.changePhone') || 'Change Phone'}
+                            {translate('login.backToRegis') || 'Quay lại trang đăng ký'}
                         </Typography>
                     </TouchableOpacity>
                 </View>

@@ -1,8 +1,9 @@
 import i18n from './index';
+import { useLanguage } from './LanguageProvider';
 
 export const useTranslation = () => {
     const safeLocale = i18n?.locale ?? 'en'; // fallback just in case
-
+    const {changeLanguage } = useLanguage()
     return {
         translate: (key: string, params?: Record<string, string | number>) => {
             let text = i18n.t(key, params);
@@ -18,6 +19,7 @@ export const useTranslation = () => {
         },
         locale: safeLocale,
         setLanguage: (lang: string) => {
+            changeLanguage(lang)
             console.log('set language:', lang);
         },
     };

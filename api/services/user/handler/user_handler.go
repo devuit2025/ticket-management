@@ -7,14 +7,14 @@ import (
     "github.com/gin-gonic/gin"
     "github.com/devuit2025/ticket-management/api/services/user/model"
     "github.com/devuit2025/ticket-management/api/services/user/service"
-		"github.com/devuit2025/ticket-management/api/services/user/utils"
+	"github.com/devuit2025/ticket-management/api/services/user/utils"
 )
 
 func GetUsers(c *gin.Context) {
     users, err := service.GetUsers()
     if err != nil {
-        // c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-				utils.RespondError(c, http.StatusInternalServerError, "Failed to get users", nil)
+		// c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		utils.RespondError(c, http.StatusInternalServerError, "Failed to get users", nil)
         return
     }
 		utils.RespondSuccess(c, users, "Get users successfully")

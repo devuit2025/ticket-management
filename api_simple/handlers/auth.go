@@ -7,10 +7,12 @@ import (
 	"ticket-management/api_simple/config"
 	"ticket-management/api_simple/middleware"
 	"ticket-management/api_simple/models"
+	"ticket-management/api_simple/providers"
 	"ticket-management/api_simple/repository"
 	"ticket-management/api_simple/utils"
 
 	"github.com/gin-gonic/gin"
+	"golang.org/x/crypto/bcrypt"
 )
 
 type RegisterRequest struct {
@@ -100,6 +102,7 @@ func Register(c *gin.Context) {
 		Password: req.Password,
 		Name:     req.Name,
 		Role:     role,
+		Status:   models.UserStatusCreated,
 	}
 
 	if err := userRepo.Create(&user); err != nil {
@@ -107,21 +110,119 @@ func Register(c *gin.Context) {
 		return
 	}
 
-	token, err := middleware.GenerateToken(&user)
+	// Send OTP via Twilio
+	twilioProvider := providers.NewTwilioProvider()
+	if err := twilioProvider.SendOTP(req.Phone); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Không thể gửi OTP"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"message": "OTP đã được gửi. Vui lòng xác minh để hoàn tất đăng ký.",
+		"user_id": user.ID,
+	})
+
+
+	// token, err := middleware.GenerateToken(&user)
+	// if err != nil {
+	// 	c.JSON(http.StatusInternalServerError, gin.H{"error": utils.ErrServerError})
+	// 	return
+	// }
+
+	// c.JSON(http.StatusCreated, gin.H{
+	// 	"token": token,
+	// 	"user": gin.H{
+	// 		"id":    user.ID,
+	// 		"phone": user.Phone,
+	// 		"name":  user.Name,
+	// 		"role":  user.Role,
+	// 		"status":  user.Status,
+	// 	},
+	// })
+}
+
+func VerifyOTP(c *gin.Context) {
+	var req struct {
+		Phone string `json:"phone" binding:"required"`
+		Code  string `json:"code" binding:"required"`
+	}
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Thiếu thông tin"})
+		return
+	}
+
+	userRepo := repository.NewUserRepository(config.DB)
+
+	// Find user
+	user, err := userRepo.FindByPhone(req.Phone)
+	if err != nil || user == nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Người dùng không tồn tại"})
+		return
+	}
+
+	// Verify OTP
+	twilioProvider := providers.NewTwilioProvider()
+	ok, err := twilioProvider.VerifyOTP(req.Phone, req.Code)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Xác minh OTP thất bại"})
+		return
+	}
+	if !ok {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Mã OTP không chính xác"})
+		return
+	}
+
+	// Update user status → activated
+	user.Status = models.UserStatusVerified
+	if err := userRepo.Update(user); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": utils.ErrServerError})
+		return
+	}
+
+	// Issue token
+	token, err := middleware.GenerateToken(user)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": utils.ErrServerError})
 		return
 	}
 
-	c.JSON(http.StatusCreated, gin.H{
+	c.JSON(http.StatusOK, gin.H{
 		"token": token,
 		"user": gin.H{
-			"id":    user.ID,
-			"phone": user.Phone,
-			"name":  user.Name,
-			"role":  user.Role,
+			"id":     user.ID,
+			"phone":  user.Phone,
+			"name":   user.Name,
+			"role":   user.Role,
+			"status": user.Status,
 		},
 	})
+}
+
+func RequestOtp(c *gin.Context) {
+    phone := c.PostForm("phone")
+
+    // --- Cooldown check (disabled for testing) ---
+    /*
+    lastSent, found := redisClient.Get("otp_last:" + phone).Result()
+    if found && time.Since(lastSent) < 60*time.Second {
+        c.JSON(http.StatusTooManyRequests, gin.H{"error": "Vui lòng thử lại sau 60 giây"})
+        return
+    }
+    */
+
+   	twilioProvider := providers.NewTwilioProvider()
+    err := twilioProvider.SendOTP(phone)
+    if err != nil {
+        c.JSON(http.StatusInternalServerError, gin.H{"error": "Không thể gửi OTP"})
+        return
+    }
+
+    // save cooldown marker (disabled for testing)
+    /*
+    redisClient.Set("otp_last:"+phone, time.Now(), 10*time.Minute)
+    */
+
+    c.JSON(http.StatusOK, gin.H{"message": "OTP đã gửi"})
 }
 
 func Login(c *gin.Context) {
@@ -147,6 +248,12 @@ func Login(c *gin.Context) {
 
 	if err := user.ComparePassword(req.Password); err != nil {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": utils.ErrInvalidCredentials})
+		return
+	}
+
+	if user.Status != models.UserStatusVerified {
+		c.JSON(http.StatusForbidden, gin.H{"error": "Tài khoản chưa được xác minh"})
+		c.Abort()
 		return
 	}
 
@@ -232,35 +339,35 @@ func ForgotPassword(c *gin.Context) {
 	})
 }
 
-func VerifyOTP(c *gin.Context) {
-	var req VerifyOTPRequest
-	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Vui lòng điền đầy đủ thông tin"})
-		return
-	}
+// func VerifyOTP(c *gin.Context) {
+// 	var req VerifyOTPRequest
+// 	if err := c.ShouldBindJSON(&req); err != nil {
+// 		c.JSON(http.StatusBadRequest, gin.H{"error": "Vui lòng điền đầy đủ thông tin"})
+// 		return
+// 	}
 
-	// Validate phone
-	if !utils.ValidatePhone(req.Phone) {
-		c.JSON(http.StatusBadRequest, gin.H{"error": utils.ErrPhoneInvalid})
-		return
-	}
+// 	// Validate phone
+// 	if !utils.ValidatePhone(req.Phone) {
+// 		c.JSON(http.StatusBadRequest, gin.H{"error": utils.ErrPhoneInvalid})
+// 		return
+// 	}
 
-	// Get OTP from Redis
-	key := "otp:" + req.Phone
-	storedOTP, err := config.RedisClient.Get(config.Ctx, key).Result()
-	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": utils.ErrOTPExpired})
-		return
-	}
+// 	// Get OTP from Redis
+// 	key := "otp:" + req.Phone
+// 	storedOTP, err := config.RedisClient.Get(config.Ctx, key).Result()
+// 	if err != nil {
+// 		c.JSON(http.StatusBadRequest, gin.H{"error": utils.ErrOTPExpired})
+// 		return
+// 	}
 
-	// Verify OTP
-	if storedOTP != req.OTP {
-		c.JSON(http.StatusBadRequest, gin.H{"error": utils.ErrOTPInvalid})
-		return
-	}
+// 	// Verify OTP
+// 	if storedOTP != req.OTP {
+// 		c.JSON(http.StatusBadRequest, gin.H{"error": utils.ErrOTPInvalid})
+// 		return
+// 	}
 
-	c.JSON(http.StatusOK, gin.H{"message": "Xác thực OTP thành công"})
-}
+// 	c.JSON(http.StatusOK, gin.H{"message": "Xác thực OTP thành công"})
+// }
 
 func ResetPassword(c *gin.Context) {
 	var req ResetPasswordRequest
@@ -324,16 +431,30 @@ func ChangePassword(c *gin.Context) {
 	}
 
 	// Get user ID from context (set by AuthMiddleware)
-	userID, exists := c.Get("userID")
+	userIDInterface, exists := c.Get("userID")
 	if !exists {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": utils.ErrTokenRequired})
+		return
+	}
+
+	// Convert userID safely
+	var userID uint
+	switch v := userIDInterface.(type) {
+	case float64:
+		userID = uint(v)
+	case int:
+		userID = uint(v)
+	case uint:
+		userID = v
+	default:
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid userID type"})
 		return
 	}
 
 	userRepo := repository.NewUserRepository(config.DB)
 
 	// Get user
-	user, err := userRepo.FindByID(userID.(uint))
+	user, err := userRepo.FindByID(userID)
 	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": utils.ErrPhoneNotFound})
 		return
@@ -351,8 +472,14 @@ func ChangePassword(c *gin.Context) {
 		return
 	}
 
+	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(req.NewPassword), bcrypt.DefaultCost)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to hash password"})
+		return
+	}
+	user.Password = string(hashedPassword)
+
 	// Update password
-	user.Password = req.NewPassword
 	if err := userRepo.Update(user); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": utils.ErrServerError})
 		return
@@ -360,6 +487,7 @@ func ChangePassword(c *gin.Context) {
 
 	c.JSON(http.StatusOK, gin.H{"message": "Đổi mật khẩu thành công"})
 }
+
 
 // Helper function to generate 6-digit OTP
 func generateOTP() string {

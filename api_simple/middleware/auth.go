@@ -1,6 +1,7 @@
 package middleware
 
 import (
+	"log"
 	"net/http"
 	"strings"
 	"time"
@@ -132,8 +133,18 @@ func AuthMiddleware() gin.HandlerFunc {
 			return
 		}
 
+		if user.Status != models.UserStatusVerified {
+			c.JSON(http.StatusForbidden, gin.H{"error": "Tài khoản chưa được xác minh"})
+			c.Abort()
+			return
+		}
+		
+		log.Printf(" userID found:", userID)
+
 		// Set user in context
 		c.Set("user", user)
+		c.Set("userID", userID)
+		
 		c.Next()
 	}
 }

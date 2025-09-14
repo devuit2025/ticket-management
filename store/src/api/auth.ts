@@ -1,4 +1,5 @@
 import client from './client';
+
 import {
     LoginRequest,
     LoginResponse,
@@ -11,6 +12,24 @@ import {
     RequestOtpResponse,
 } from '@types/auth';
 
+
+// --- Verify Register ---
+export interface VerifyRegisterRequest {
+  phone: string;
+  code: string;
+}
+
+export interface VerifyRegisterResponse {
+  token: string;
+  user: {
+    id: number;
+    phone: string;
+    name: string;
+    role: string;
+    status: string;
+  };
+}
+
 // --- Email/Password Login ---
 export const login = async (data: LoginRequest): Promise<LoginResponse> => {
     try {
@@ -22,45 +41,12 @@ export const login = async (data: LoginRequest): Promise<LoginResponse> => {
     }
 };
 
-// --- Phone Login ---
-export const phoneLogin = async (data: PhoneLoginRequest): Promise<PhoneLoginResponse> => {
-    try {
-        const response = await client.post<PhoneLoginResponse>('/auth/phone-login', data);
-        return response.data;
-    } catch (error: any) {
-        console.error('Phone Login error:', error?.response?.error);
-        throw error;
-    }
-};
-
 export const requestOtp = async (data: RequestOtpRequest): Promise<RequestOtpResponse> => {
     try {
         const response = await client.post<RequestOtpResponse>('/auth/send-otp', data);
         return response.data;
     } catch (error: any) {
         console.error('Request OTP error:', error?.response?.error);
-        throw error;
-    }
-};
-
-// --- Facebook Login ---
-export const facebookLogin = async (data: SocialLoginRequest): Promise<LoginResponse> => {
-    try {
-        const response = await client.post<LoginResponse>('/auth/facebook-login', data);
-        return response.data;
-    } catch (error: any) {
-        console.error('Facebook Login error:', error?.response?.error);
-        throw error;
-    }
-};
-
-// --- Google Login ---
-export const googleLogin = async (data: SocialLoginRequest): Promise<LoginResponse> => {
-    try {
-        const response = await client.post<LoginResponse>('/auth/google-login', data);
-        return response.data;
-    } catch (error: any) {
-        console.error('Google Login error:', error?.response?.error);
         throw error;
     }
 };
@@ -86,22 +72,36 @@ export const register = async (data: RegisterRequest): Promise<RegisterResponse>
     }
 };
 
-// --- Forgot Password ---
-export const forgotPassword = async (email: string): Promise<void> => {
-    try {
-        await client.post('/auth/forgot-password', { email });
-    } catch (error: any) {
-        console.error('Forgot Password error:', error?.response?.error);
-        throw error;
-    }
+// --- Verify Register ---
+export const verifyRegister = async (
+  data: VerifyRegisterRequest
+): Promise<VerifyRegisterResponse> => {
+  try {
+    const response = await client.post<VerifyRegisterResponse>('/auth/verify-otp', data);
+    return response.data;
+  } catch (error: any) {
+    console.error('Verify Register error:', error?.response?.error);
+    throw error;
+  }
 };
 
-// --- Reset Password ---
-export const resetPassword = async (token: string, newPassword: string): Promise<void> => {
-    try {
-        await client.post('/auth/reset-password', { token, newPassword });
-    } catch (error: any) {
-        console.error('Reset Password error:', error?.response?.error);
-        throw error;
-    }
+export interface ChangePasswordRequest {
+  oldPassword: string;
+  newPassword: string;
+}
+
+export interface ChangePasswordResponse {
+  message: string;
+}
+
+export const changePassword = async (
+  data: ChangePasswordRequest
+): Promise<ChangePasswordResponse> => {
+  try {
+    const response = await client.post<ChangePasswordResponse>('/auth/change-password', data);
+    return response;
+  } catch (error: any) {
+    console.error('Change password error:', error?.response?.error || error);
+    throw error?.response?.data?.error || error;
+  }
 };

@@ -103,6 +103,13 @@ export default {
         otpSent: 'Chúng tôi đã gửi mã OTP đến số điện thoại của bạn',
         resendOtp: 'Gửi lại mã OTP',
         changePhone: 'Đổi số điện thoại',
+        backToRegis: 'Quay lại trang đăng nhập', 
+
+        otpValid: {
+            invalidLength: "Vui lòng nhập đủ 6 số OTP",
+            digitsOnly: "OTP chỉ được chứa số",
+            success: "Xác thực OTP thành công!"
+        }
     },
     register: {
         title: 'Đăng ký', // Screen title
@@ -178,4 +185,29 @@ export default {
         backToHome: 'Quay về trang chủ',
         bookingSuccessMessage: 'Cảm ơn bạn đã sử dụng dịch vụ. Vé của bạn đã được đặt thành công!',
     },
+      profile: {
+    title: "Thông tin người dùng",
+    name: "Họ và tên",
+    phone: "Số điện thoại",
+    role: "Vai trò",
+    status: "Trạng thái",
+    createdAt: "Ngày tạo",
+    updatedAt: "Cập nhật lúc",
+    verified: "Đã xác thực",
+    created: "Chưa xác thực",
+    password: "Mật khẩu",
+    confirmPassword: "Xác nhận mật khẩu",
+    save: "Lưu",
+    updated: "Cập nhật thành công!",
+    updateFailed: "Cập nhật thất bại",
+    passwordMismatch: "Mật khẩu và xác nhận mật khẩu không khớp",
+      changePassword: "Đổi mật khẩu",
+  oldPassword: "Mật khẩu cũ",
+  newPassword: "Mật khẩu mới",
+  passwordRequired: "Vui lòng điền đầy đủ các trường",
+  passwordUpdated: "Đổi mật khẩu thành công",
+
+
+  },
+
 };

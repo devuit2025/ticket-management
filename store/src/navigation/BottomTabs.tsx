@@ -81,9 +81,9 @@ export default function BottomTabs() {
         <Tab.Navigator screenOptions={createScreenOptions}>
             <Tab.Screen name="Home" component={SelectPickupDropoffScreen} />
             <Tab.Screen name="History" component={HistoryScreen} />
-            <Tab.Screen name="Checkout" component={CheckoutScreen} />
+            {/* <Tab.Screen name="Checkout" component={CheckoutScreen} /> */}
             {/* <Tab.Screen name="Notifications" component={NotificationScreen} /> */}
-            {/* <Tab.Screen name="Account" component={AccountScreen} /> */}
+            <Tab.Screen name="Account" component={AccountScreen} />
         </Tab.Navigator>
     );
 }

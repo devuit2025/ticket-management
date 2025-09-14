@@ -28,6 +28,7 @@ export default function SelectBusScreen({ navigation }: Props) {
     // Initial fetch + reactive fetch whenever routeId or day changes
     useEffect(() => {
         // console.log('here')
+        console.log('Fetch trips for routeId, Day: ', bookingData.routeId, bookingData.day)
         if (!bookingData.routeId || !bookingData.day) return;
 
         let isMounted = true; // to prevent state update if component unmounted

@@ -99,6 +99,13 @@ export default {
         resendOtp: 'Resend OTP',
         changePhone: 'Change Phone',
         button: 'Sign In',
+                backToRegis: 'Quay lại trang đăng nhập', 
+                  otpValid: {
+    invalidLength: "Please enter a 6-digit OTP",
+    digitsOnly: "OTP must contain only numbers",
+    success: "OTP verified successfully!"
+  }
+
     },
 
     register: {
@@ -168,4 +175,29 @@ export default {
 
         totalPrice: 'Total Price',
     },
+
+      profile: {
+    title: "User Profile",
+    name: "Name",
+    phone: "Phone",
+    role: "Role",
+    status: "Status",
+    createdAt: "Created At",
+    updatedAt: "Updated At",
+    verified: "Verified",
+    created: "Created",
+    password: "Password",
+    confirmPassword: "Confirm Password",
+    save: "Save",
+    updated: "Profile updated successfully!",
+    updateFailed: "Failed to update profile",
+    passwordMismatch: "Password and confirm password do not match",
+      changePassword: "Change Password",
+  oldPassword: "Old Password",
+  newPassword: "New Password",
+  passwordRequired: "Please fill all fields",
+  passwordUpdated: "Password changed successfully",
+
+  },
+
 };

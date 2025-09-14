@@ -48,10 +48,10 @@ export default function RegisterScreen({ navigation }) {
             password: data.password,
         };
 
-        const response = await register(payload);
+        await register(payload);
 
         // Navigate to login or home
-        navigation.navigate('Login');
+navigation.navigate('OtpVerification', { phone: data.phone });
     };
 
     return (
