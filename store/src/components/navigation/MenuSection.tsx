@@ -4,9 +4,11 @@ import MenuItem from './MenuItem';
 import Divider from '@components/global/divider/Divider';
 import { useAuth } from '@hooks/useAuth';
 import { CommonActions } from '@react-navigation/native';
+import { useTranslation } from '@i18n/useTranslation';
 
 const MenuSection: React.FC = ({ navigation, onClose }) => {
     const { logout } = useAuth();
+    const { translate } = useTranslation();
     const animValues = useRef(new Array(7).fill(null).map(() => new Animated.Value(0))).current;
 
     useEffect(() => {
@@ -46,23 +48,25 @@ const MenuSection: React.FC = ({ navigation, onClose }) => {
             {renderAnimatedItem(
                 animValues[0],
                 <MenuItem
-                    label="Home"
-                    iconName="home-outline"
-  onPress={() => {
-            navigation.navigate('Home');
-            onClose(); // Close the drawer after navigation
-        }}                />,
+                    label={translate('common.home')}
+                    iconName='home-outline'
+                    onPress={() => {
+                        navigation.navigate('Home');
+                        onClose(); // Close the drawer after navigation
+                    }}
+                />,
                 'home'
             )}
             {renderAnimatedItem(
                 animValues[1],
                 <MenuItem
-                    label="My Bookings"
-                    iconName="book-outline"
-       onPress={() => {
-            navigation.navigate('History');
-            onClose(); // Close the drawer
-        }}                />,
+                    label={translate('common.myBookings')}
+                    iconName='book-outline'
+                    onPress={() => {
+                        navigation.navigate('History');
+                        onClose(); // Close the drawer
+                    }}
+                />,
                 'bookings'
             )}
             {/* {renderAnimatedItem(
@@ -102,8 +106,8 @@ const MenuSection: React.FC = ({ navigation, onClose }) => {
             {renderAnimatedItem(
                 animValues[6],
                 <MenuItem
-                    label="Logout"
-                    iconName="log-out-outline"
+                    label={translate('common.logout')}
+                    iconName='log-out-outline'
                     onPress={() => handleLogout()}
                 />,
                 'logout'

@@ -38,11 +38,11 @@ const GlobalComponentsScreen = () => {
             <View style={styles.section}>
                 <Text style={styles.heading}>Button</Text>
                 <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 12 }}>
-                    <Button title="Book Now" />
-                    <Button title="Cancel" variant="secondary" />
-                    <Button title="More Info" variant="outline" />
-                    <Button title="Loading..." loading />
-                    <Button title="Disabled" disabled />
+                    <Button title={translate('common.bookNow')} />
+                    <Button title={translate('common.cancel')} variant="secondary" />
+                    <Button title={translate('common.moreInfo')} variant="outline" />
+                    <Button title={translate('common.loading')} loading />
+                    <Button title={translate('common.disabled')} disabled />
                 </View>
             </View>
             <Divider />
@@ -51,16 +51,16 @@ const GlobalComponentsScreen = () => {
 
                 {/* Basic TextInput */}
                 <TextInput
-                    label="Sample Input"
-                    placeholder="Enter something..."
+                    label={translate('common.sampleInput')}
+                    placeholder={translate('common.enterSomething')}
                     value={text}
                     onChangeText={setText}
                 />
 
                 {/* TextInput with helper text */}
                 <TextInput
-                    label="Email"
-                    placeholder="email@example.com"
+                    label={translate('login.email')}
+                    placeholder={translate('common.emailExample')}
                     keyboardType="email-address"
                     autoCapitalize="none"
                     value={email}
@@ -70,8 +70,8 @@ const GlobalComponentsScreen = () => {
 
                 {/* Password input */}
                 <TextInput
-                    label="Password"
-                    placeholder="Enter your password"
+                    label={translate('login.password')}
+                    placeholder={translate('common.enterPassword')}
                     secureTextEntry
                     value={password}
                     onChangeText={setPassword}
@@ -79,17 +79,17 @@ const GlobalComponentsScreen = () => {
 
                 {/* TextInput showing error */}
                 <TextInput
-                    label="Error input"
-                    placeholder="Try something"
+                    label={translate('common.errorInput')}
+                    placeholder={translate('common.trySomething')}
                     value={errorInput}
                     onChangeText={setErrorInput}
-                    error={errorInput.length < 5 ? 'Minimum 5 characters required' : undefined}
+                    error={errorInput.length < 5 ? translate('common.minimumCharacters') : undefined}
                 />
 
                 {/* Multiline input */}
                 <TextInput
-                    label="Multiline Input"
-                    placeholder="Type your message"
+                    label={translate('common.multilineInput')}
+                    placeholder={translate('common.typeMessage')}
                     multiline
                     numberOfLines={4}
                     style={{ height: 100, textAlignVertical: 'top' }}
@@ -100,29 +100,23 @@ const GlobalComponentsScreen = () => {
                 <Text style={[styles.heading, { marginBottom: 20 }]}>Typography</Text>
 
                 <Typography variant="h1" weight="bold" style={{ marginBottom: 10 }}>
-                    Welcome to Phuong Trang Tickets
+                    {translate('common.welcomeTitle')}
                 </Typography>
 
                 <Typography variant="h2" weight="bold" style={{ marginBottom: 10 }}>
-                    Welcome to Phuong Trang Tickets
+                    {translate('common.welcomeTitle')}
                 </Typography>
 
                 <Typography variant="h3" weight="bold" style={{ marginBottom: 10 }}>
-                    Welcome to Phuong Trang Tickets
+                    {translate('common.welcomeTitle')}
                 </Typography>
 
-                <Typography variant="body" style={{ marginBottom: 10 }}>
-                    Planning your trip has never been easier. Browse our extensive list of bus
-                    routes and schedules, select the best seat for your comfort, and book your
-                    ticket securely within minutes. Whether you're traveling for business or
-                    leisure, we ensure a smooth and safe journey with our modern fleet and
-                    professional drivers. Enjoy exclusive offers and real-time updates on your trip
-                    status right from your device.
+                <Typography variant='body' style={{ marginBottom: 10 }}>
+                    {translate('common.planningTrip')}
                 </Typography>
 
                 <Typography variant="caption" weight="medium" color="#888" style={{ marginTop: 8 }}>
-                    * Tickets are refundable up to 24 hours before departure. Please check our
-                    refund policy for details.
+                    {translate('common.refundPolicy')}
                 </Typography>
             </View>
             <Divider />
@@ -139,32 +133,32 @@ const GlobalComponentsScreen = () => {
                 >
                     <View style={styles.iconItem}>
                         <Icon name="home-outline" type="ion" size="lg" />
-                        <Text style={styles.iconLabel}>Home</Text>
+                        <Text style={styles.iconLabel}>{translate('common.homeIcon')}</Text>
                     </View>
 
                     <View style={styles.iconItem}>
                         <Icon name="person" type="material" color="#FF6B00" />
-                        <Text style={styles.iconLabel}>Profile</Text>
+                        <Text style={styles.iconLabel}>{translate('common.profileIcon')}</Text>
                     </View>
 
                     <View style={styles.iconItem}>
                         <Icon name="bus" type="fa" size="lg" />
-                        <Text style={styles.iconLabel}>Bus</Text>
+                        <Text style={styles.iconLabel}>{translate('common.busIcon')}</Text>
                     </View>
 
                     <View style={styles.iconItem}>
                         <Icon name="credit-card" type="fa" size="md" />
-                        <Text style={styles.iconLabel}>Payment</Text>
+                        <Text style={styles.iconLabel}>{translate('common.paymentIcon')}</Text>
                     </View>
 
                     <View style={styles.iconItem}>
                         <Icon name="calendar-outline" type="ion" />
-                        <Text style={styles.iconLabel}>Schedule</Text>
+                        <Text style={styles.iconLabel}>{translate('common.scheduleIcon')}</Text>
                     </View>
 
                     <View style={styles.iconItem}>
                         <Icon name="help-circle-outline" type="ion" />
-                        <Text style={styles.iconLabel}>Help</Text>
+                        <Text style={styles.iconLabel}>{translate('common.helpIcon')}</Text>
                     </View>
                 </View>
             </View>
@@ -174,17 +168,17 @@ const GlobalComponentsScreen = () => {
 
                 <Card>
                     <Typography variant="h3" weight="bold">
-                        Saigon → Da Lat
+                        {translate('common.saigonDalat')}
                     </Typography>
                     <Typography variant="body" style={{ marginTop: 4 }}>
-                        Departure: 10:00 AM · Duration: 6h 30m · Price: 250,000đ
+                        {translate('common.departureInfo')}
                     </Typography>
                 </Card>
 
                 <Card bordered style={{ marginTop: 16 }}>
-                    <Typography variant="body">Passenger: Nguyen Van A</Typography>
+                    <Typography variant="body">{translate('common.passengerInfo')}</Typography>
                     <Typography variant="caption" color="#888" style={{ marginTop: 4 }}>
-                        Seat: B12 · Payment: Momo
+                        {translate('common.seatPayment')}
                     </Typography>
                 </Card>
             </View>
@@ -192,10 +186,10 @@ const GlobalComponentsScreen = () => {
             <View style={styles.section}>
                 <Text style={styles.heading}>Modal</Text>
                 {/* Trigger modal */}
-                <Button title="Open Modal" onPress={() => setModalVisible(true)} />
+                <Button title={translate('common.openModal')} onPress={() => setModalVisible(true)} />
                 <Modal visible={modalVisible} onClose={() => setModalVisible(false)}>
-                    <Text>This is a modal content</Text>
-                    <Button title="Close Modal" onPress={() => setModalVisible(false)} />
+                    <Text>{translate('common.modalContent')}</Text>
+                    <Button title={translate('common.closeModal')} onPress={() => setModalVisible(false)} />
                 </Modal>
             </View>
 

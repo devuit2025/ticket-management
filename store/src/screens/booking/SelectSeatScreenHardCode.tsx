@@ -7,12 +7,14 @@ import { BookingStackParamList } from '@navigation/BookingNavigator';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { useTranslation } from '@i18n/useTranslation';
 
 type Props = NativeStackScreenProps<BookingStackParamList, 'SelectSeat'>;
 
 const SelectSeatScreen = ({ navigation }: Props) => {
     const { bookingData, setBookingData } = useBooking();
     const { theme } = useTheme();
+    const { translate } = useTranslation();
     const [selectedSeats, setSelectedSeats] = useState<string[]>([]);
 
     const tripId = bookingData.daySelectedTrip.id;
@@ -63,7 +65,7 @@ const SelectSeatScreen = ({ navigation }: Props) => {
             <View style={[styles.bottomBar, { backgroundColor: 'theme.colors.card' }]}>
                 <View>
                     <Text style={[styles.seatText, { color: theme.colors.text }]}>
-                        {selectedSeats.length} seat{selectedSeats.length !== 1 ? 's' : ''} selected
+                        {selectedSeats.length} {selectedSeats.length !== 1 ? translate('common.seatsSelectedPlural') : translate('common.seatsSelected')}
                     </Text>
                 </View>
 
@@ -72,7 +74,7 @@ const SelectSeatScreen = ({ navigation }: Props) => {
                     onPress={handleReviewBooking}
                     disabled={selectedSeats.length === 0}
                 >
-                    <Text style={styles.buttonText}>Review Booking</Text>
+                    <Text style={styles.buttonText}>{translate('common.reviewBooking')}</Text>
                 </TouchableOpacity>
             </View>
         </View>

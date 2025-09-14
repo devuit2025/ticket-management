@@ -3,6 +3,7 @@ import { View, StyleSheet } from 'react-native';
 import Card from '@components/global/card/Card';
 import Typography from '@components/global/typography/Typography';
 import { InfoRow } from '../typography/InfoRow';
+import { useTranslation } from '@i18n/useTranslation';
 
 interface Passenger {
     fullName: string;
@@ -16,20 +17,24 @@ interface PassengerCardProps {
     customer: Passenger;
 }
 
-export const PassengerCard: React.FC<PassengerCardProps> = ({ customer }) => (
-    <Card style={{ marginBottom: 15 }}>
-        <Typography variant="h2" weight="bold" style={styles.sectionTitle}>
-            Passenger Information
-        </Typography>
-        <InfoRow label="Full Name" value={customer.fullName} />
-        <InfoRow label="Phone" value={customer.phone} />
-        {/* <InfoRow label="Email" value={customer.email} /> */}
-        <InfoRow label="Passenger Type" value={customer.type} />
-        {customer.specialRequests && (
-            <InfoRow label="Special Requests" value={customer.specialRequests} />
-        )}
-    </Card>
-);
+export const PassengerCard: React.FC<PassengerCardProps> = ({ customer }) => {
+    const { translate } = useTranslation();
+    
+    return (
+        <Card style={{ marginBottom: 15 }}>
+            <Typography variant="h2" weight="bold" style={styles.sectionTitle}>
+                {translate('booking.passengerInfo')}
+            </Typography>
+            <InfoRow label={translate('common.fullName')} value={customer.fullName} />
+            <InfoRow label={translate('common.phone')} value={customer.phone} />
+            {/* <InfoRow label={translate('common.email')} value={customer.email} /> */}
+            <InfoRow label={translate('common.passengerType')} value={customer.type} />
+            {customer.specialRequests && (
+                <InfoRow label={translate('common.specialRequests')} value={customer.specialRequests} />
+            )}
+        </Card>
+    );
+};
 
 const styles = StyleSheet.create({
     sectionTitle: { marginBottom: 12 },
