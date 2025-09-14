@@ -5,7 +5,6 @@ import (
 	"log"
 	"os"
 
-	"github.com/gin-contrib/cors"
 	"ticket-management/api_simple/config"
 	"ticket-management/api_simple/handlers"
 	"ticket-management/api_simple/jobs"
@@ -13,9 +12,12 @@ import (
 	"ticket-management/api_simple/models"
 	"ticket-management/api_simple/seeders"
 
+	"github.com/gin-contrib/cors"
+
+	"time"
+
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
-	"time"
 )
 
 func main() {
@@ -26,7 +28,6 @@ func main() {
 
 	// Initialize database
 	config.InitDB()
-
 
 	// config.InitRedis()
 
@@ -48,15 +49,15 @@ func main() {
 
 	// Initialize router
 	router := gin.Default()
-	
+
 	// CORS middleware
 	router.Use(cors.New(cors.Config{
-		AllowOrigins: []string{"http://localhost:8081"},
-		AllowMethods: []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
-		AllowHeaders: []string{"Origin", "Content-Type", "Authorization"},
-		ExposeHeaders: []string{"Content-Length"},
+		AllowOrigins:     []string{"*"},
+		AllowMethods:     []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
+		AllowHeaders:     []string{"Origin", "Content-Type", "Authorization"},
+		ExposeHeaders:    []string{"Content-Length"},
 		AllowCredentials: true,
-		MaxAge: 12 * time.Hour,
+		MaxAge:           12 * time.Hour,
 	}))
 
 	// Setup routes
@@ -132,13 +133,25 @@ func setupRoutes(api *gin.RouterGroup) {
 			admin.POST("/trips/:id/seats", handlers.CreateSeats)
 
 			// Booking management
-			admin.GET("/bookings", handlers.GetAllBookings)
+			admin.GET("/bookings", handlers.GetAdminBookings)
+			admin.POST("/create-booking", handlers.CreateGuestBooking)
 			admin.PUT("/bookings/:id/confirm", handlers.ConfirmBooking)
 			admin.PUT("/bookings/:id/payment", handlers.UpdateBookingPayment)
+			admin.PUT("/bookings/:id/status", handlers.UpdateBookingStatus)
 
 			// User management
 			admin.GET("/users", handlers.GetUsers)
+			admin.POST("/users/create", handlers.CreateUser)
+			admin.DELETE("/users/:id", handlers.DeleteUser)
+			admin.PUT("/users/:id/role", handlers.UpdateUserRole)
 			admin.GET("/statistics", handlers.GetStatistics)
+
+			// Dashboard APIs
+			admin.GET("/dashboard/stats", handlers.GetDashboardStats)
+			admin.GET("/dashboard/activity", handlers.GetRecentActivity)
+
+			// Admin Trip Management
+			admin.GET("/trips/list", handlers.GetAdminTrips)
 		}
 	}
 }

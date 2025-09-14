@@ -15,6 +15,7 @@ import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '@navigation/navigationTypes';
 import { useTranslation } from '@i18n/useTranslation';
 import Loader from './Loader';
+import AdminDemoScreen from './AdminDemoScreen';
 
 type GlobalComponentsScreenNavigationProp = NativeStackNavigationProp<
     RootStackParamList,
@@ -212,6 +213,14 @@ const GlobalComponentsScreen = () => {
                     <Avatar size={40} initials="HN" showStatus statusOnline />
                     <Avatar size={40} initials="NH" showStatus statusOnline={false} />
                 </View>
+            </View>
+
+            <View style={styles.section}>
+                <Text style={styles.heading}>Admin System</Text>
+                <Button 
+                    title="Xem Admin Demo" 
+                    onPress={() => navigation.navigate('AdminDemo' as any)} 
+                />
             </View>
         </ScrollView>
     );

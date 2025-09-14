@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"errors"
+	"fmt"
 	"net/http"
 	"strconv"
 
@@ -15,8 +16,8 @@ import (
 )
 
 type CreateBookingRequest struct {
-	User		*models.User		`json:"user" binding:"required"`
-	UserId		*uint               `json:"user_id" binding:"required"`
+	User        *models.User       `json:"user" binding:"required"`
+	UserId      *uint              `json:"user_id" binding:"required"`
 	TripID      uint               `json:"trip_id" binding:"required"`
 	SeatIDs     []int64            `json:"seat_ids" binding:"required,min=1"`
 	PaymentType models.PaymentType `json:"payment_type" binding:"required,oneof=cash"`
@@ -32,9 +33,12 @@ type UpdatePaymentRequest struct {
 func CreateBooking(c *gin.Context) {
 	var req CreateBookingRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
+		fmt.Printf("DEBUG: CreateBooking validation error: %v\n", err)
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Vui lòng điền đầy đủ thông tin"})
 		return
 	}
+
+	fmt.Printf("DEBUG: CreateBooking request: %+v\n", req)
 
 	// Get repositories
 	bookingRepo := repository.NewBookingRepository(config.DB)
@@ -91,7 +95,7 @@ func CreateBooking(c *gin.Context) {
 	// Create booking
 	booking := &models.Booking{
 		UserID:        req.UserId,
-		User: req.User,
+		User:          req.User,
 		TripID:        req.TripID,
 		SeatIDs:       req.SeatIDs,
 		TotalAmount:   totalAmount,
@@ -315,16 +319,23 @@ func ConfirmBooking(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Chỉ có thể xác nhận đơn đang chờ"})
 		return
 	}
-	if booking.PaymentStatus != models.PaymentStatusPaid {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Đơn chưa được thanh toán"})
-		return
-	}
+	// Remove payment status check - admin can confirm and mark as paid at the same time
 
-	// Update booking status
+	// Update booking status and payment status
 	if err := bookingRepo.UpdateStatus(booking.ID, models.BookingStatusConfirmed); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": utils.ErrServerError})
 		return
 	}
+
+	// Also update payment status to paid when confirming
+	if err := bookingRepo.UpdatePaymentStatus(booking.ID, models.PaymentStatusPaid); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": utils.ErrServerError})
+		return
+	}
+
+	// Debug: Log the update
+	fmt.Printf("DEBUG: Updated booking ID %d - Status: %s, PaymentStatus: %s\n",
+		booking.ID, models.BookingStatusConfirmed, models.PaymentStatusPaid)
 
 	c.JSON(http.StatusOK, gin.H{"message": "Xác nhận đơn thành công"})
 }

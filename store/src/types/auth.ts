@@ -14,11 +14,14 @@ export interface RegisterRequest {
 }
 
 // --- Response payloads ---
+export type UserRole = 'user' | 'admin' | 'super_admin';
+
 export interface User {
     id: string;
     fullName: string;
     email: string;
     phone?: string;
+    role?: UserRole;
     // add more fields as returned by your API
 }
 

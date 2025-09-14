@@ -7,12 +7,13 @@ import {
     googleLogin as apiGoogleLogin,
     logout as apiLogout,
 } from '@api/auth';
-import { LoginRequest, LoginResponse, PhoneLoginRequest, PhoneLoginResponse } from '@types/auth';
+import { LoginRequest, LoginResponse, PhoneLoginRequest, PhoneLoginResponse } from '../types/auth';
 
 interface UserState {
     currentUser: LoginResponse['user'] | PhoneLoginResponse['user'] | null;
     token: string | null;
     isLoading: boolean;
+    isLoggingOut: boolean;
     error: string | null;
 }
 
@@ -20,6 +21,7 @@ const initialState: UserState = {
     currentUser: null,
     token: null,
     isLoading: false,
+    isLoggingOut: false,
     error: null,
 };
 
@@ -90,6 +92,18 @@ const userSlice = createSlice({
         },
         setToken(state, action: PayloadAction<string>) {
             state.token = action.payload;
+        },
+        setCurrentUser(state, action: PayloadAction<any>) {
+            state.currentUser = action.payload;
+        },
+        clearUserData(state) {
+            state.currentUser = null;
+            state.token = null;
+            state.isLoggingOut = false;
+            state.error = null;
+        },
+        setLoggingOut(state, action: PayloadAction<boolean>) {
+            state.isLoggingOut = action.payload;
         },
     },
     extraReducers: (builder) => {
@@ -168,5 +182,5 @@ const userSlice = createSlice({
     },
 });
 
-export const { clearError, setToken } = userSlice.actions;
+export const { clearError, setToken, setCurrentUser, clearUserData, setLoggingOut } = userSlice.actions;
 export default userSlice.reducer;

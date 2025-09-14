@@ -11,6 +11,7 @@ import (
 	"ticket-management/api_simple/utils"
 
 	"github.com/gin-gonic/gin"
+	"gorm.io/gorm"
 )
 
 type CreateTripRequest struct {
@@ -280,7 +281,7 @@ func UpdateTrip(c *gin.Context) {
 	})
 }
 
-// DeleteTrip soft deletes a trip
+// DeleteTrip soft deletes a trip and related bookings
 func DeleteTrip(c *gin.Context) {
 	tripRepo := repository.NewTripRepository(config.DB)
 
@@ -291,17 +292,41 @@ func DeleteTrip(c *gin.Context) {
 	}
 
 	// Check if trip exists
-	if _, err := tripRepo.FindByID(uint(id)); err != nil {
+	trip, err := tripRepo.FindByID(uint(id))
+	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "Không tìm thấy chuyến đi"})
 		return
 	}
 
-	if err := tripRepo.Delete(uint(id)); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": utils.ErrServerError})
+	// Delete in transaction to ensure data consistency
+	err = config.DB.Transaction(func(tx *gorm.DB) error {
+		// First, delete all bookings related to this trip
+		if err := tx.Where("trip_id = ?", id).Delete(&models.Booking{}).Error; err != nil {
+			return err
+		}
+
+		// Then delete all seats related to this trip
+		if err := tx.Where("trip_id = ?", id).Delete(&models.Seat{}).Error; err != nil {
+			return err
+		}
+
+		// Finally, delete the trip
+		if err := tx.Delete(trip).Error; err != nil {
+			return err
+		}
+
+		return nil
+	})
+
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Không thể xóa chuyến đi và dữ liệu liên quan"})
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"message": "Xóa chuyến đi thành công"})
+	c.JSON(http.StatusOK, gin.H{
+		"message":         "Xóa chuyến đi và tất cả booking liên quan thành công",
+		"deleted_trip_id": id,
+	})
 }
 
 // Helper function to format trip response

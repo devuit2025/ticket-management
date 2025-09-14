@@ -43,19 +43,19 @@ type GuestInfo struct {
 // Booking represents a ticket booking
 type Booking struct {
 	gorm.Model
-	UserID        *uint         `json:"user_id"`                                         // ID người dùng (nếu đã đăng nhập)
-	User          *User         `json:"user,omitempty"`                                  // Thông tin người dùng
-	GuestInfo     *GuestInfo    `json:"guest_info,omitempty" gorm:"embedded"`            // Thông tin khách vãng lai
-	TripID        uint          `json:"trip_id" gorm:"not null"`                         // ID chuyến đi
-	Trip          *Trip         `json:"trip,omitempty"`                                  // Thông tin chuyến đi
-	SeatIDs       pq.Int64Array `json:"seat_ids" gorm:"type:integer[];not null"`         // Danh sách ID ghế
-	Seats         []Seat        `json:"seats,omitempty" gorm:"many2many:booking_seats;"` // Thông tin ghế
-	TotalAmount   float64       `json:"total_amount" gorm:"not null"`                    // Tổng tiền
-	Status        BookingStatus `json:"status" gorm:"not null;default:'pending'"`        // Trạng thái đặt vé
-	PaymentType   PaymentType   `json:"payment_type" gorm:"not null;default:'cash'"`     // Hình thức thanh toán
-	PaymentStatus PaymentStatus `json:"payment_status" gorm:"not null;default:'unpaid'"` // Trạng thái thanh toán
-	BookingCode   string        `json:"booking_code" gorm:"unique;not null"`             // Mã đặt vé
-	Note          string        `json:"note"`                                            // Ghi chú
+	UserID        *uint         `json:"user_id"`                                             // ID người dùng (nếu đã đăng nhập)
+	User          *User         `json:"user,omitempty"`                                      // Thông tin người dùng
+	GuestInfo     *GuestInfo    `json:"guest_info,omitempty" gorm:"embedded"`                // Thông tin khách vãng lai
+	TripID        uint          `json:"trip_id" gorm:"not null;constraint:OnDelete:CASCADE"` // ID chuyến đi
+	Trip          *Trip         `json:"trip,omitempty"`                                      // Thông tin chuyến đi
+	SeatIDs       pq.Int64Array `json:"seat_ids" gorm:"type:integer[];not null"`             // Danh sách ID ghế
+	Seats         []Seat        `json:"seats,omitempty" gorm:"many2many:booking_seats;"`     // Thông tin ghế
+	TotalAmount   float64       `json:"total_amount" gorm:"not null"`                        // Tổng tiền
+	Status        BookingStatus `json:"status" gorm:"not null;default:'pending'"`            // Trạng thái đặt vé
+	PaymentType   PaymentType   `json:"payment_type" gorm:"not null;default:'cash'"`         // Hình thức thanh toán
+	PaymentStatus PaymentStatus `json:"payment_status" gorm:"not null;default:'unpaid'"`     // Trạng thái thanh toán
+	BookingCode   string        `json:"booking_code" gorm:"unique;not null"`                 // Mã đặt vé
+	Note          string        `json:"note"`                                                // Ghi chú
 }
 
 // BeforeCreate hook to generate booking code

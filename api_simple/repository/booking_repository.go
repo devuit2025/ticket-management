@@ -1,6 +1,7 @@
 package repository
 
 import (
+	"fmt"
 	"ticket-management/api_simple/models"
 
 	"github.com/lib/pq"
@@ -23,7 +24,7 @@ func (r *BookingRepository) Create(booking *models.Booking) error {
 // FindByID finds a booking by ID
 func (r *BookingRepository) FindByID(id uint) (*models.Booking, error) {
 	var booking models.Booking
-	err := r.db.Preload("User").Preload("Trip").Preload("Seats").First(&booking, id).Error
+	err := r.db.Preload("User").Preload("Trip.Route").Preload("Trip.Bus").Preload("Seats").First(&booking, id).Error
 	if err != nil {
 		return nil, err
 	}
@@ -33,7 +34,7 @@ func (r *BookingRepository) FindByID(id uint) (*models.Booking, error) {
 // FindByCode finds a booking by booking code
 func (r *BookingRepository) FindByCode(code string) (*models.Booking, error) {
 	var booking models.Booking
-	err := r.db.Preload("User").Preload("Trip").Preload("Seats").Where("booking_code = ?", code).First(&booking).Error
+	err := r.db.Preload("User").Preload("Trip.Route").Preload("Trip.Bus").Preload("Seats").Where("booking_code = ?", code).First(&booking).Error
 	if err != nil {
 		return nil, err
 	}
@@ -59,12 +60,25 @@ func (r *BookingRepository) FindAll(filters map[string]interface{}, page, limit 
 	}
 
 	// Get paginated results
-	err = query.Preload("User").Preload("Trip").Preload("Seats").
+	err = query.Preload("User").Preload("Trip.Route").Preload("Trip.Bus").
 		Offset((page - 1) * limit).
 		Limit(limit).
 		Find(&bookings).Error
 	if err != nil {
 		return nil, 0, err
+	}
+
+	// Load seats for each booking based on SeatIDs
+	for i := range bookings {
+		if len(bookings[i].SeatIDs) > 0 {
+			var seats []models.Seat
+			// Convert pq.Int64Array to []int64 slice
+			seatIDs := []int64(bookings[i].SeatIDs)
+			err := r.db.Where("id IN ?", seatIDs).Find(&seats).Error
+			if err == nil {
+				bookings[i].Seats = seats
+			}
+		}
 	}
 
 	return bookings, total, nil
@@ -103,10 +117,10 @@ func (r *BookingRepository) Delete(id uint) error {
 // FindPendingBookings finds all pending bookings that have exceeded the timeout
 func (r *BookingRepository) FindPendingBookings(timeout int) ([]models.Booking, error) {
 	var bookings []models.Booking
-	err := r.db.Where("status = ? AND payment_status = ? AND created_at <= NOW() - INTERVAL '? minutes'",
+	err := r.db.Where("status = ? AND payment_status = ? AND created_at <= NOW() - INTERVAL ?",
 		models.BookingStatusPending,
 		models.PaymentStatusUnpaid,
-		timeout).
+		fmt.Sprintf("'%d minutes'", timeout)).
 		Find(&bookings).Error
 	return bookings, err
 }
