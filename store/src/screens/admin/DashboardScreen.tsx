@@ -43,6 +43,14 @@ export default function AdminDashboardScreen() {
         refreshDashboard
     } = useAdminDashboard();
 
+    const sortedActivities = React.useMemo(() => {
+        return [...activities].sort((a, b) => {
+            const tb = new Date(b.timestamp).getTime();
+            const ta = new Date(a.timestamp).getTime();
+            return tb - ta;
+        });
+    }, [activities]);
+
     const onRefresh = async () => {
         setRefreshing(true);
         await refreshDashboard();
@@ -121,6 +129,8 @@ export default function AdminDashboardScreen() {
         },
     ] : [];
 
+    
+
     return (
         <Container>
             <ScrollView 
@@ -176,16 +186,16 @@ export default function AdminDashboardScreen() {
                         Hoạt động gần đây
                     </Typography>
                     
-                    {activities.length > 0 ? (
+                    {sortedActivities.length > 0 ? (
                         <View style={{ gap: 12 }}>
-                            {activities.map((activity, index) => (
+                            {sortedActivities.map((activity, index) => (
                                 <View 
                                     key={activity.id || index}
                                     style={{ 
                                         flexDirection: 'row', 
                                         justifyContent: 'space-between',
                                         paddingVertical: 8,
-                                        borderBottomWidth: index < activities.length - 1 ? 1 : 0,
+                                        borderBottomWidth: index < sortedActivities.length - 1 ? 1 : 0,
                                         borderBottomColor: theme.colors.border
                                     }}
                                 >

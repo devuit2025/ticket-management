@@ -218,6 +218,10 @@ export default function AdminBookingsScreen() {
         return true;
     });
 
+    const sortedBookings = React.useMemo(() => {
+        return [...filteredBookings].sort((a, b) => b.ID - a.ID);
+    }, [filteredBookings]);
+
 
     const getStatusColor = (status: string) => {
         switch (status) {
@@ -351,8 +355,8 @@ export default function AdminBookingsScreen() {
                                 Đang tải danh sách đặt vé...
                             </Typography>
                         </View>
-                    ) : filteredBookings.length > 0 ? (
-                        filteredBookings?.map((booking) => (
+                    ) : sortedBookings.length > 0 ? (
+                        sortedBookings?.map((booking) => (
                         <Card key={booking.ID}>
                             <View style={{ padding: 16 }}>
                                 <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start' }}>

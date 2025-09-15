@@ -198,6 +198,12 @@ export default {
         roundTrip: 'Round Trip',
 
         totalPrice: 'Total Price',
+        recentBookings: 'Recent Bookings',
+        paymentButton: 'Payment',
+        recentSearch: 'Recent Search',
+        bookingSuccess: 'Booking Success',
+        bookingSuccessMessage: 'Booking successful! Thank you for using our service.',
+        backToHome: 'Back to Home',
     },
 
       profile: {

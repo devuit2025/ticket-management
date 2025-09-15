@@ -183,6 +183,9 @@ export default function AdminUsersScreen() {
     };
 
     const handleDeleteUser = async (userId: number, userName: string) => {
+        // await deleteUser(userId.toString());
+        // Alert.alert('Thành công', 'Xóa người dùng thành công!');
+        // fetchUsers(); // Refresh data
         Alert.alert(
             'Xác nhận xóa',
             `Bạn có chắc chắn muốn xóa người dùng "${userName}"?`,

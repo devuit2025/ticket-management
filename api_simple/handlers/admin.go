@@ -591,10 +591,36 @@ func CreateUser(c *gin.Context) {
 
 // DeleteUser deletes a user (admin only)
 func DeleteUser(c *gin.Context) {
-	c.JSON(http.StatusOK, gin.H{
-		"message": "Test DeleteUser API",
-		"status":  "working",
-	})
+	id, err := strconv.ParseUint(c.Param("id"), 10, 64)
+	if err != nil || id == 0 {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "ID không hợp lệ"})
+		return
+	}
+
+	userRepo := repository.NewUserRepository(config.DB)
+
+	// Ensure user exists
+	user, err := userRepo.FindByID(uint(id))
+	if err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Không tìm thấy người dùng"})
+		return
+	}
+
+	// Optional: prevent deleting last admin
+	if user.Role == models.RoleAdmin {
+		admins, _ := userRepo.FindByRole(models.RoleAdmin)
+		if len(admins) <= 1 {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "Không thể xóa admin cuối cùng"})
+			return
+		}
+	}
+
+	if err := userRepo.ForceDelete(user.ID); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Không thể xóa người dùng"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "Xóa người dùng thành công"})
 }
 
 // AdminCancelBooking cancels a booking (admin only)

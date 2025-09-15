@@ -54,3 +54,8 @@ func (r *UserRepository) FindByID(id uint) (*models.User, error) {
 	}
 	return &user, nil
 }
+
+// ForceDelete permanently deletes a user (bypass soft delete)
+func (r *UserRepository) ForceDelete(id uint) error {
+	return r.db.Unscoped().Delete(&models.User{}, id).Error
+}
