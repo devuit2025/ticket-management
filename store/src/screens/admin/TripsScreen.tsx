@@ -87,6 +87,7 @@ export default function AdminTripsScreen() {
     const [trips, setTrips] = useState<Trip[]>([]);
     const [loading, setLoading] = useState(true);
     const [refreshing, setRefreshing] = useState(false);
+    const [searchQuery, setSearchQuery] = useState('');
     
     // Form states
     const [showModal, setShowModal] = useState(false);
@@ -439,11 +440,29 @@ export default function AdminTripsScreen() {
 
     const filteredTrips = trips.filter(trip => {
         const status = getTripStatus(trip);
+        let matchesTab = false;
+        
         if (selectedTab === 'active') {
-            return status === 'active';
+            matchesTab = status === 'active';
         } else {
-            return status === 'scheduled';
+            matchesTab = status === 'scheduled';
         }
+        
+        if (!matchesTab) return false;
+        
+        // Search filter
+        if (searchQuery.trim()) {
+            const query = searchQuery.toLowerCase();
+            return (
+                trip.route.origin.toLowerCase().includes(query) ||
+                trip.route.destination.toLowerCase().includes(query) ||
+                trip.bus.plate_number.toLowerCase().includes(query) ||
+                trip.driver.name.toLowerCase().includes(query) ||
+                trip.driver.phone.includes(query)
+            );
+        }
+        
+        return true;
     });
 
     if (loading) {
@@ -480,6 +499,46 @@ export default function AdminTripsScreen() {
                         style={{ paddingHorizontal: 16, paddingVertical: 8 }}
                     />
                 </View>
+                
+                <Gap />
+                
+                {/* Search Form */}
+                <Card>
+                    <View style={{ padding: 16 }}>
+                        <Typography variant="body" color={theme.colors.text} style={{ marginBottom: 8 }}>
+                            Tìm kiếm chuyến xe
+                        </Typography>
+                        <TextInput
+                            style={{
+                                borderWidth: 1,
+                                borderColor: theme.colors.border,
+                                borderRadius: 8,
+                                padding: 12,
+                                color: theme.colors.text,
+                                backgroundColor: theme.colors.background
+                            }}
+                            value={searchQuery}
+                            onChangeText={setSearchQuery}
+                            placeholder="Tìm theo tuyến đường, xe, tài xế..."
+                            placeholderTextColor={theme.colors.textSecondary}
+                        />
+                        {searchQuery.trim() && (
+                            <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 8 }}>
+                                <Typography variant="caption" color={theme.colors.textSecondary}>
+                                    Tìm thấy {filteredTrips.length} kết quả
+                                </Typography>
+                                <TouchableOpacity
+                                    style={{ marginLeft: 'auto' }}
+                                    onPress={() => setSearchQuery('')}
+                                >
+                                    <Typography variant="caption" color={theme.colors.primary}>
+                                        Xóa tìm kiếm
+                                    </Typography>
+                                </TouchableOpacity>
+                            </View>
+                        )}
+                    </View>
+                </Card>
                 
                 <Gap />
                 
@@ -856,7 +915,7 @@ export default function AdminTripsScreen() {
                                             placeholderTextColor={theme.colors.textSecondary}
                                         />
                                         <Button
-                                            title="Ngày mai"
+                                            title="Tự động điền"
                                             variant="outline"
                                             onPress={() => {
                                                 const tomorrow = new Date();
@@ -869,7 +928,7 @@ export default function AdminTripsScreen() {
                                         />
                                     </View>
                                     <Typography variant="caption" color={theme.colors.textSecondary} style={{ marginTop: 4 }}>
-                                        💡 Gợi ý: Sử dụng định dạng YYYY-MM-DD HH:MM hoặc nhấn "Ngày mai"
+                                        💡 Gợi ý: Sử dụng định dạng YYYY-MM-DD HH:MM hoặc nhấn "Tự động điền"
                                     </Typography>
                                 </View>
 

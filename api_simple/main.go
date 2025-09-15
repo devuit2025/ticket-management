@@ -143,11 +143,12 @@ func setupRoutes(api *gin.RouterGroup) {
 			admin.PUT("/bookings/:id/confirm", handlers.ConfirmBooking)
 			admin.PUT("/bookings/:id/payment", handlers.UpdateBookingPayment)
 			admin.PUT("/bookings/:id/status", handlers.UpdateBookingStatus)
-			
+			admin.PUT("/bookings/:id/cancel", handlers.AdminCancelBooking)
 
 			// User management
 			admin.GET("/users", handlers.GetUsers)
 			admin.POST("/users/create", handlers.CreateUser)
+			admin.PUT("/users/:id", handlers.UpdateUser)
 			admin.DELETE("/users/:id", handlers.DeleteUser)
 			admin.PUT("/users/:id/role", handlers.UpdateUserRole)
 			admin.GET("/statistics", handlers.GetStatistics)

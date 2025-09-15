@@ -9,7 +9,7 @@ import Gap from '@components/global/gap/Gap';
 import Button from '@components/global/button/Button';
 import Avatar from '@components/global/avatar/Avatar';
 import Icon from '@components/global/icon/Icon';
-import { getAdminUsers, updateUserRole, createUser, deleteUser } from '@api/admin';
+import { getAdminUsers, updateUserRole, updateUser, createUser, deleteUser } from '@api/admin';
 
 interface User {
     ID: number;
@@ -33,9 +33,12 @@ export default function AdminUsersScreen() {
     const [users, setUsers] = useState<User[]>([]);
     const [loading, setLoading] = useState(true);
     const [refreshing, setRefreshing] = useState(false);
+    const [searchQuery, setSearchQuery] = useState('');
     
     // Form states
     const [showCreateModal, setShowCreateModal] = useState(false);
+    const [showEditModal, setShowEditModal] = useState(false);
+    const [editingUser, setEditingUser] = useState<User | null>(null);
     const [formData, setFormData] = useState<UserFormData>({
         name: '',
         phone: '',
@@ -73,10 +76,39 @@ export default function AdminUsersScreen() {
     };
 
     const handleCreateUser = async () => {
+        // Validation
+        if (!formData.name.trim()) {
+            Alert.alert('Lỗi', 'Vui lòng nhập tên người dùng');
+            return;
+        }
+        
+        if (!formData.phone.trim()) {
+            Alert.alert('Lỗi', 'Vui lòng nhập số điện thoại');
+            return;
+        }
+        
+        if (!formData.password.trim()) {
+            Alert.alert('Lỗi', 'Vui lòng nhập mật khẩu');
+            return;
+        }
+        
+        // Phone validation (basic)
+        const phoneRegex = /^[0-9]{10,11}$/;
+        if (!phoneRegex.test(formData.phone.replace(/\s/g, ''))) {
+            Alert.alert('Lỗi', 'Số điện thoại không hợp lệ (10-11 chữ số)');
+            return;
+        }
+        
+        // Password validation (minimum 6 characters)
+        if (formData.password.length < 6) {
+            Alert.alert('Lỗi', 'Mật khẩu phải có ít nhất 6 ký tự');
+            return;
+        }
+
         try {
             await createUser({
-                name: formData.name,
-                phone: formData.phone,
+                name: formData.name.trim(),
+                phone: formData.phone.trim(),
                 password: formData.password,
                 role: formData.role
             });
@@ -84,9 +116,10 @@ export default function AdminUsersScreen() {
             setShowCreateModal(false);
             resetForm();
             fetchUsers();
-        } catch (error) {
+        } catch (error: any) {
             console.error('Error creating user:', error);
-            Alert.alert('Lỗi', 'Không thể tạo người dùng. Vui lòng thử lại.');
+            const errorMessage = error?.response?.data?.error || 'Không thể tạo người dùng. Vui lòng thử lại.';
+            Alert.alert('Lỗi', errorMessage);
         }
     };
 
@@ -97,6 +130,56 @@ export default function AdminUsersScreen() {
             password: '',
             role: 'customer'
         });
+    };
+
+    const handleEditUser = async () => {
+        if (!editingUser) return;
+        
+        // Validation
+        if (!formData.name.trim()) {
+            Alert.alert('Lỗi', 'Vui lòng nhập tên người dùng');
+            return;
+        }
+        
+        if (!formData.phone.trim()) {
+            Alert.alert('Lỗi', 'Vui lòng nhập số điện thoại');
+            return;
+        }
+        
+        // Phone validation (basic)
+        const phoneRegex = /^[0-9]{10,11}$/;
+        if (!phoneRegex.test(formData.phone.replace(/\s/g, ''))) {
+            Alert.alert('Lỗi', 'Số điện thoại không hợp lệ (10-11 chữ số)');
+            return;
+        }
+        
+        try {
+            await updateUser(editingUser.ID.toString(), {
+                name: formData.name.trim(),
+                phone: formData.phone.trim(),
+                role: formData.role
+            });
+            Alert.alert('Thành công', 'Cập nhật thông tin người dùng thành công!');
+            setShowEditModal(false);
+            setEditingUser(null);
+            resetForm();
+            fetchUsers();
+        } catch (error: any) {
+            console.error('Error updating user:', error);
+            const errorMessage = error?.response?.data?.error || 'Không thể cập nhật thông tin người dùng. Vui lòng thử lại.';
+            Alert.alert('Lỗi', errorMessage);
+        }
+    };
+
+    const openEditModal = (user: User) => {
+        setEditingUser(user);
+        setFormData({
+            name: user.name,
+            phone: user.phone,
+            password: '', // Don't pre-fill password
+            role: user.role
+        });
+        setShowEditModal(true);
     };
 
     const handleDeleteUser = async (userId: number, userName: string) => {
@@ -138,8 +221,25 @@ export default function AdminUsersScreen() {
     };
 
     const filteredUsers = users.filter(user => {
-        if (selectedRole === 'all') return true;
-        return user.role === selectedRole;
+        // Role filter
+        let matchesRole = true;
+        if (selectedRole !== 'all') {
+            matchesRole = user.role === selectedRole;
+        }
+        
+        if (!matchesRole) return false;
+        
+        // Search filter
+        if (searchQuery.trim()) {
+            const query = searchQuery.toLowerCase();
+            return (
+                user.name.toLowerCase().includes(query) ||
+                user.phone.includes(query) ||
+                user.ID.toString().includes(query)
+            );
+        }
+        
+        return true;
     });
 
 
@@ -189,6 +289,46 @@ export default function AdminUsersScreen() {
                         style={{ paddingHorizontal: 16, paddingVertical: 8 }}
                     />
                 </View>
+                
+                <Gap />
+                
+                {/* Search Form */}
+                <Card>
+                    <View style={{ padding: 16 }}>
+                        <Typography variant="body" color={theme.colors.text} style={{ marginBottom: 8 }}>
+                            Tìm kiếm người dùng
+                        </Typography>
+                        <TextInput
+                            style={{
+                                borderWidth: 1,
+                                borderColor: theme.colors.border,
+                                borderRadius: 8,
+                                padding: 12,
+                                color: theme.colors.text,
+                                backgroundColor: theme.colors.background
+                            }}
+                            value={searchQuery}
+                            onChangeText={setSearchQuery}
+                            placeholder="Tìm theo tên, số điện thoại, ID..."
+                            placeholderTextColor={theme.colors.textSecondary}
+                        />
+                        {searchQuery.trim() && (
+                            <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 8 }}>
+                                <Typography variant="caption" color={theme.colors.textSecondary}>
+                                    Tìm thấy {filteredUsers.length} kết quả
+                                </Typography>
+                                <TouchableOpacity
+                                    style={{ marginLeft: 'auto' }}
+                                    onPress={() => setSearchQuery('')}
+                                >
+                                    <Typography variant="caption" color={theme.colors.primary}>
+                                        Xóa tìm kiếm
+                                    </Typography>
+                                </TouchableOpacity>
+                            </View>
+                        )}
+                    </View>
+                </Card>
                 
                 <Gap />
                 
@@ -296,7 +436,7 @@ export default function AdminUsersScreen() {
                                             minWidth: 40,
                                             minHeight: 40
                                         }}
-                                        onPress={() => {}}
+                                        onPress={() => openEditModal(user)}
                                     >
                                         <Icon 
                                             name="create-outline" 
@@ -522,6 +662,120 @@ export default function AdminUsersScreen() {
                                 style={{ flex: 1 }}
                             />
                         </View>
+                        
+                        <Gap />
+                    </ScrollView>
+                </Container>
+            </Modal>
+
+            {/* Edit User Modal */}
+            <Modal
+                visible={showEditModal}
+                animationType="slide"
+                presentationStyle="pageSheet"
+                onRequestClose={() => setShowEditModal(false)}
+            >
+                <Container style={{ flex: 1 }}>
+                    <ScrollView style={{ flex: 1 }} contentContainerStyle={{ padding: 16 }}>
+                        <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
+                            <Typography variant="h2">Chỉnh sửa người dùng</Typography>
+                            <TouchableOpacity onPress={() => setShowEditModal(false)}>
+                                <Icon name="close" type="ion" size="lg" color={theme.colors.text} />
+                            </TouchableOpacity>
+                        </View>
+
+                        <Card style={{ padding: 16 }}>
+                            <Typography variant="h4" style={{ marginBottom: 16 }}>Thông tin người dùng</Typography>
+                            
+                            <Gap size="md" />
+                            
+                            <View style={{ marginBottom: 16 }}>
+                                <Typography variant="body" style={{ marginBottom: 8 }}>Tên người dùng *</Typography>
+                                <TextInput
+                                    style={{
+                                        borderWidth: 1,
+                                        borderColor: theme.colors.border,
+                                        borderRadius: 8,
+                                        padding: 12,
+                                        fontSize: 16,
+                                        color: theme.colors.text,
+                                        backgroundColor: theme.colors.background
+                                    }}
+                                    value={formData.name}
+                                    onChangeText={(text) => setFormData({ ...formData, name: text })}
+                                    placeholder="Nhập tên người dùng"
+                                    placeholderTextColor={theme.colors.textSecondary}
+                                />
+                            </View>
+
+                            <View style={{ marginBottom: 16 }}>
+                                <Typography variant="body" style={{ marginBottom: 8 }}>Số điện thoại *</Typography>
+                                <TextInput
+                                    style={{
+                                        borderWidth: 1,
+                                        borderColor: theme.colors.border,
+                                        borderRadius: 8,
+                                        padding: 12,
+                                        fontSize: 16,
+                                        color: theme.colors.text,
+                                        backgroundColor: theme.colors.background
+                                    }}
+                                    value={formData.phone}
+                                    onChangeText={(text) => setFormData({ ...formData, phone: text })}
+                                    placeholder="Nhập số điện thoại"
+                                    placeholderTextColor={theme.colors.textSecondary}
+                                    keyboardType="phone-pad"
+                                />
+                            </View>
+
+                            <View style={{ marginBottom: 16 }}>
+                                <Typography variant="body" style={{ marginBottom: 8 }}>Vai trò *</Typography>
+                                <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
+                                    {['customer', 'staff', 'driver', 'admin'].map((role) => (
+                                        <TouchableOpacity
+                                            key={role}
+                                            style={{
+                                                paddingHorizontal: 16,
+                                                paddingVertical: 8,
+                                                borderRadius: 20,
+                                                backgroundColor: formData.role === role ? theme.colors.primary : theme.colors.surface,
+                                                borderWidth: 1,
+                                                borderColor: formData.role === role ? theme.colors.primary : theme.colors.border
+                                            }}
+                                            onPress={() => setFormData({ ...formData, role: role as any })}
+                                        >
+                                            <Typography 
+                                                variant="body" 
+                                                style={{ 
+                                                    color: formData.role === role ? 'white' : theme.colors.text,
+                                                    fontSize: 14
+                                                }}
+                                            >
+                                                {role === 'customer' ? 'Khách hàng' : 
+                                                 role === 'staff' ? 'Nhân viên' : 
+                                                 role === 'driver' ? 'Tài xế' : 'Admin'}
+                                            </Typography>
+                                        </TouchableOpacity>
+                                    ))}
+                                </View>
+                            </View>
+
+                            <Gap size="lg" />
+                            
+                            <View style={{ flexDirection: 'row', gap: 12 }}>
+                                <Button
+                                    title="Hủy"
+                                    onPress={() => setShowEditModal(false)}
+                                    style={{ flex: 1, backgroundColor: theme.colors.surface }}
+                                    textStyle={{ color: theme.colors.text }}
+                                />
+                                <Button
+                                    title="Cập nhật"
+                                    onPress={handleEditUser}
+                                    style={{ flex: 1 }}
+                                />
+                            </View>
+                        </Card>
                         
                         <Gap />
                     </ScrollView>

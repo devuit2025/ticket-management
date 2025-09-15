@@ -100,7 +100,7 @@ func CreateBooking(c *gin.Context) {
 		SeatIDs:       req.SeatIDs,
 		TotalAmount:   totalAmount,
 		PaymentType:   req.PaymentType,
-		PaymentStatus: models.PaymentStatusUnpaid,
+		PaymentStatus: models.PaymentStatusPaid,
 		Status:        models.BookingStatusPending,
 		Note:          req.Note,
 	}

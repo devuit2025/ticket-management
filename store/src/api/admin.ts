@@ -60,6 +60,16 @@ export const updateBookingStatus = async (bookingId: string, status: 'confirmed'
   return response;
 };
 
+export const updateBookingPayment = async (bookingId: string, paymentStatus: 'paid' | 'unpaid') => {
+  const response = await client.put(`/admin/bookings/${bookingId}/payment`, { payment_status: paymentStatus });
+  return response;
+};
+
+export const cancelBooking = async (bookingId: string) => {
+  const response = await client.put(`/admin/bookings/${bookingId}/cancel`);
+  return response;
+};
+
 export const getBookingDetails = async (bookingId: string) => {
   const response = await client.get(`/admin/bookings/${bookingId}`);
   return response;

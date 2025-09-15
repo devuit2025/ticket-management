@@ -69,6 +69,10 @@ const LogoutButton: React.FC = () => {
             console.error('Error during logout:', error);
             // Even if API fails, still clear local data
             await AsyncStorage.multiRemove(['AUTH_TOKEN', 'CURRENT_USER']);
+        } finally {
+            // Always reset logging out state
+            dispatch(setLoggingOut(false));
+            console.log('Reset logging out state');
         }
     };
 

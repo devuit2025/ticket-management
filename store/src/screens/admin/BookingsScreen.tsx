@@ -7,7 +7,8 @@ import Typography from '@components/global/typography/Typography';
 import Card from '@components/global/card/Card';
 import Gap from '@components/global/gap/Gap';
 import Button from '@components/global/button/Button';
-import { getAdminBookings, updateBookingStatus, createGuestBooking, getAdminTrips } from '@api/admin';
+import { getAdminBookings, updateBookingStatus, updateBookingPayment, cancelBooking, createGuestBooking, getAdminTrips } from '@api/admin';
+import BookingDetailModal from '@components/admin/BookingDetailModal';
 
 interface Booking {
     ID: number;
@@ -63,6 +64,7 @@ export default function AdminBookingsScreen() {
     const [bookings, setBookings] = useState<Booking[]>([]);
     const [loading, setLoading] = useState(true);
     const [refreshing, setRefreshing] = useState(false);
+    const [searchQuery, setSearchQuery] = useState('');
     
     // Form states
     const [showCreateModal, setShowCreateModal] = useState(false);
@@ -78,6 +80,10 @@ export default function AdminBookingsScreen() {
         },
         note: ''
     });
+    
+    // Detail modal states
+    const [showDetailModal, setShowDetailModal] = useState(false);
+    const [selectedBooking, setSelectedBooking] = useState<Booking | null>(null);
 
     const fetchBookings = async () => {
         try {
@@ -142,6 +148,34 @@ export default function AdminBookingsScreen() {
         }
     };
 
+    const handlePaymentUpdate = async (bookingId: number, newStatus: 'paid' | 'unpaid') => {
+        try {
+            await updateBookingPayment(bookingId.toString(), newStatus);
+            await fetchBookings(); // Refresh data
+        } catch (error) {
+            console.error('Error updating payment status:', error);
+        }
+    };
+
+    const openBookingDetail = (booking: Booking) => {
+        setSelectedBooking(booking);
+        setShowDetailModal(true);
+    };
+
+    const closeBookingDetail = () => {
+        setShowDetailModal(false);
+        setSelectedBooking(null);
+    };
+
+    const handleCancelBooking = async (bookingId: number) => {
+        try {
+            await cancelBooking(bookingId.toString());
+            await fetchBookings(); // Refresh data
+        } catch (error) {
+            console.error('Error cancelling booking:', error);
+        }
+    };
+
     // Only fetch data when screen is focused, not on every mount
     useFocusEffect(
         React.useCallback(() => {
@@ -162,8 +196,26 @@ export default function AdminBookingsScreen() {
     };
 
     const filteredBookings = bookings.filter(booking => {
-        if (selectedStatus === 'all') return true;
-        return booking.status === selectedStatus;
+        // Status filter
+        let matchesStatus = true;
+        if (selectedStatus !== 'all') {
+            matchesStatus = booking.status === selectedStatus;
+        }
+        
+        if (!matchesStatus) return false;
+        
+        // Search filter
+        if (searchQuery.trim()) {
+            const query = searchQuery.toLowerCase();
+            return (
+                booking.trip.route.origin.toLowerCase().includes(query) ||
+                booking.trip.route.destination.toLowerCase().includes(query) ||
+                booking.ID.toString().includes(query) ||
+                booking.seats.some(seat => seat.number.toLowerCase().includes(query))
+            );
+        }
+        
+        return true;
     });
 
 
@@ -213,6 +265,46 @@ export default function AdminBookingsScreen() {
                 </View>
                 
                 <Gap  />
+                
+                {/* Search Form */}
+                <Card>
+                    <View style={{ padding: 16 }}>
+                        <Typography variant="body" color={theme.colors.text} style={{ marginBottom: 8 }}>
+                            Tìm kiếm đặt vé
+                        </Typography>
+                        <TextInput
+                            style={{
+                                borderWidth: 1,
+                                borderColor: theme.colors.border,
+                                borderRadius: 8,
+                                padding: 12,
+                                color: theme.colors.text,
+                                backgroundColor: theme.colors.background
+                            }}
+                            value={searchQuery}
+                            onChangeText={setSearchQuery}
+                            placeholder="Tìm theo tuyến đường, mã đặt vé, ghế..."
+                            placeholderTextColor={theme.colors.textSecondary}
+                        />
+                        {searchQuery.trim() && (
+                            <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 8 }}>
+                                <Typography variant="caption" color={theme.colors.textSecondary}>
+                                    Tìm thấy {filteredBookings.length} kết quả
+                                </Typography>
+                                <TouchableOpacity
+                                    style={{ marginLeft: 'auto' }}
+                                    onPress={() => setSearchQuery('')}
+                                >
+                                    <Typography variant="caption" color={theme.colors.primary}>
+                                        Xóa tìm kiếm
+                                    </Typography>
+                                </TouchableOpacity>
+                            </View>
+                        )}
+                    </View>
+                </Card>
+                
+                <Gap />
                 
                 {/* Status Filter */}
                 <ScrollView horizontal showsHorizontalScrollIndicator={false}>
@@ -307,14 +399,32 @@ export default function AdminBookingsScreen() {
                                 
                                 <Gap  />
                                 
-                                {/* <Typography variant="caption" color={theme.colors.textSecondary}>
-                                    Đặt lúc: {formatDateTime(booking.created_at)}
-                                </Typography> */}
+                                <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+                                    {/* <Typography variant="caption" color={theme.colors.textSecondary}>
+                                        Đặt lúc: {booking.created_at}
+                                    </Typography> */}
+                                    
+                                    <TouchableOpacity
+                                        onPress={() => openBookingDetail(booking)}
+                                        style={{
+                                            paddingHorizontal: 12,
+                                            paddingVertical: 6,
+                                            backgroundColor: theme.colors.primary + '20',
+                                            borderRadius: 8,
+                                            borderWidth: 1,
+                                            borderColor: theme.colors.primary,
+                                        }}
+                                    >
+                                        <Typography variant="caption" color={theme.colors.primary}>
+                                            Xem chi tiết
+                                        </Typography>
+                                    </TouchableOpacity>
+                                </View>
                                 
                                 <Gap  />
                                 
                                 <View style={{ flexDirection: 'row', gap: 8 }}>
-                                    {booking.status === 'pending' && (
+                                    {/* {(booking.status === 'pending' || booking.status === 'cancelled') && (
                                         <>
                                             <Button
                                                 title="Xác nhận"
@@ -328,15 +438,15 @@ export default function AdminBookingsScreen() {
                                                 style={{ flex: 1 }}
                                             />
                                         </>
-                                    )}
-                                    {booking.status === 'confirmed' && (
+                                    )} */}
+                                    {/* {booking.status === 'confirmed' && (
                                         <Button
                                             title="Chi tiết"
                                             variant="outline"
                                             onPress={() => {}}
                                             style={{ flex: 1 }}
                                         />
-                                    )}
+                                    )} */}
                                 </View>
                             </View>
                         </Card>
@@ -531,6 +641,16 @@ export default function AdminBookingsScreen() {
                     </ScrollView>
                 </Container>
             </Modal>
+            
+            {/* Booking Detail Modal */}
+            <BookingDetailModal
+                visible={showDetailModal}
+                booking={selectedBooking}
+                onClose={closeBookingDetail}
+                onStatusUpdate={handleStatusUpdate}
+                onPaymentUpdate={handlePaymentUpdate}
+                onCancelBooking={handleCancelBooking}
+            />
         </Container>
     );
 }

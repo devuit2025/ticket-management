@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { ScrollView, View, ActivityIndicator, RefreshControl } from 'react-native';
+import { useFocusEffect } from '@react-navigation/native';
 import { useTheme } from '@context/ThemeContext';
 import { useSelector } from 'react-redux';
 import { RootState } from '../../store';
@@ -8,11 +9,12 @@ import Typography from '@components/global/typography/Typography';
 import Card from '@components/global/card/Card';
 import Gap from '@components/global/gap/Gap';
 import { getDashboardStats, getRecentActivity } from '@api/admin';
+import { useAdminDashboard } from '@hooks/useAdminData';
 
 interface DashboardStats {
     total_users: number;
     total_trips: number;
-    active_trips: number;
+    cancelled_bookings: number;
     total_bookings: number;
     today_bookings: number;
     today_revenue: number;
@@ -30,47 +32,24 @@ interface Activity {
 export default function AdminDashboardScreen() {
     const { theme } = useTheme();
     const token = useSelector((state: RootState) => state.user.token);
-    const [stats, setStats] = useState<DashboardStats | null>(null);
-    const [activities, setActivities] = useState<Activity[]>([]);
-    const [loading, setLoading] = useState(true);
     const [refreshing, setRefreshing] = useState(false);
-
-    const fetchData = async () => {
-        try {
-            console.log('fetchData called - starting API calls');
-            setLoading(true);
-            const [statsResponse, activityResponse] = await Promise.all([
-                getDashboardStats(),
-                getRecentActivity()
-            ]);
-            
-            console.log('fetchData completed - API calls successful');
-            setStats(statsResponse);
-            setActivities(activityResponse.activities || []);
-        } catch (error) {
-            console.error('Error fetching dashboard data:', error);
-        } finally {
-            setLoading(false);
-        }
-    };
+    
+    // Use the optimized hook with caching and auto-refresh
+    const {
+        stats,
+        activities,
+        isLoading: loading,
+        error,
+        refreshDashboard
+    } = useAdminDashboard();
 
     const onRefresh = async () => {
         setRefreshing(true);
-        await fetchData();
+        await refreshDashboard();
         setRefreshing(false);
     };
 
-    useEffect(() => {
-        console.log('DashboardScreen useEffect triggered, token:', token ? 'exists' : 'null');
-        if (token) {
-            console.log('Fetching dashboard data...');
-            // Small delay to ensure token is saved to AsyncStorage
-            const timer = setTimeout(() => {
-                fetchData();
-            }, 100);
-            return () => clearTimeout(timer);
-        }
-    }, [token]);
+    // Hook handles data fetching automatically with useFocusEffect
 
     const formatNumber = (num: number) => {
         if (num >= 1000000) {
@@ -121,9 +100,9 @@ export default function AdminDashboardScreen() {
             color: theme.colors.warning 
         },
         { 
-            title: 'Chuyến xe hoạt động', 
-            value: formatNumber(stats.active_trips), 
-            color: theme.colors.success 
+            title: 'Vé đã hủy', 
+            value: formatNumber(stats.cancelled_bookings), 
+            color: theme.colors.error 
         },
         { 
             title: 'Tổng vé bán', 

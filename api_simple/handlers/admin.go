@@ -12,6 +12,7 @@ import (
 	"ticket-management/api_simple/utils"
 
 	"github.com/gin-gonic/gin"
+	"gorm.io/gorm"
 )
 
 // GetUsers returns list of users with optional filters
@@ -159,22 +160,22 @@ func GetDashboardStats(c *gin.Context) {
 		}
 	}
 
-	// Count active trips
-	var activeTrips int
-	for _, trip := range trips {
-		if trip.IsActive {
-			activeTrips++
+	// Count cancelled bookings
+	var cancelledBookings int
+	for _, booking := range bookings {
+		if booking.Status == models.BookingStatusCancelled {
+			cancelledBookings++
 		}
 	}
 
 	c.JSON(http.StatusOK, gin.H{
-		"total_users":    len(users),
-		"total_trips":    len(trips),
-		"active_trips":   activeTrips,
-		"total_bookings": totalBookings,
-		"today_bookings": todayBookings,
-		"today_revenue":  todayRevenue,
-		"total_revenue":  totalRevenue,
+		"total_users":        len(users),
+		"total_trips":        len(trips),
+		"cancelled_bookings": cancelledBookings,
+		"total_bookings":     totalBookings,
+		"today_bookings":     todayBookings,
+		"today_revenue":      todayRevenue,
+		"total_revenue":      totalRevenue,
 	})
 }
 
@@ -398,6 +399,59 @@ func UpdateUserRole(c *gin.Context) {
 	})
 }
 
+// UpdateUser updates user information (admin only)
+func UpdateUser(c *gin.Context) {
+	userRepo := repository.NewUserRepository(config.DB)
+
+	// Get user ID from URL parameter
+	userID, err := strconv.ParseUint(c.Param("id"), 10, 64)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "ID người dùng không hợp lệ"})
+		return
+	}
+
+	var req struct {
+		Name  string `json:"name"`
+		Phone string `json:"phone"`
+		Role  string `json:"role"`
+	}
+
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	// Check if user exists
+	user, err := userRepo.FindByID(uint(userID))
+	if err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Không tìm thấy người dùng"})
+		return
+	}
+
+	// Update user fields
+	if req.Name != "" {
+		user.Name = req.Name
+	}
+	if req.Phone != "" {
+		user.Phone = req.Phone
+	}
+	if req.Role != "" {
+		user.Role = models.Role(req.Role)
+	}
+
+	// Save updated user
+	err = userRepo.Update(user)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Không thể cập nhật thông tin người dùng"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"message": "Cập nhật thông tin thành công",
+		"user":    user,
+	})
+}
+
 // CreateGuestBooking creates a booking for guest (admin only)
 func CreateGuestBooking(c *gin.Context) {
 	var req struct {
@@ -468,9 +522,70 @@ func CreateGuestBooking(c *gin.Context) {
 
 // CreateUser creates a new user (admin only)
 func CreateUser(c *gin.Context) {
-	c.JSON(http.StatusOK, gin.H{
-		"message": "Test CreateUser API",
-		"status":  "working",
+	var req struct {
+		Name     string `json:"name" binding:"required"`
+		Phone    string `json:"phone" binding:"required"`
+		Password string `json:"password" binding:"required"`
+		Role     string `json:"role" binding:"required"`
+	}
+
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	// Validate role
+	validRoles := []string{"customer", "admin", "staff", "driver"}
+	roleValid := false
+	for _, role := range validRoles {
+		if req.Role == role {
+			roleValid = true
+			break
+		}
+	}
+	if !roleValid {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Vai trò không hợp lệ"})
+		return
+	}
+
+	// Validate phone format (basic)
+	if len(req.Phone) < 10 || len(req.Phone) > 11 {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Số điện thoại không hợp lệ"})
+		return
+	}
+
+	// Validate password length
+	if len(req.Password) < 6 {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Mật khẩu phải có ít nhất 6 ký tự"})
+		return
+	}
+
+	userRepo := repository.NewUserRepository(config.DB)
+
+	// Check if phone already exists
+	existingUser, err := userRepo.FindByPhone(req.Phone)
+	if err == nil && existingUser != nil {
+		c.JSON(http.StatusConflict, gin.H{"error": "Số điện thoại đã được sử dụng"})
+		return
+	}
+
+	// Create user (password will be hashed automatically by BeforeSave hook)
+	user := &models.User{
+		Name:     req.Name,
+		Phone:    req.Phone,
+		Password: req.Password, // Raw password, will be hashed by BeforeSave
+		Role:     models.Role(req.Role),
+	}
+
+	err = userRepo.Create(user)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Không thể tạo người dùng"})
+		return
+	}
+
+	c.JSON(http.StatusCreated, gin.H{
+		"message": "Tạo người dùng thành công",
+		"user":    user,
 	})
 }
 
@@ -480,4 +595,54 @@ func DeleteUser(c *gin.Context) {
 		"message": "Test DeleteUser API",
 		"status":  "working",
 	})
+}
+
+// AdminCancelBooking cancels a booking (admin only)
+func AdminCancelBooking(c *gin.Context) {
+	id, err := strconv.ParseUint(c.Param("id"), 10, 64)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "ID không hợp lệ"})
+		return
+	}
+
+	// Get repositories
+	bookingRepo := repository.NewBookingRepository(config.DB)
+	seatRepo := repository.NewSeatRepository(config.DB)
+
+	// Get booking
+	booking, err := bookingRepo.FindByID(uint(id))
+	if err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Không tìm thấy đơn đặt vé"})
+		return
+	}
+
+	// Check if booking can be cancelled
+	if booking.Status == models.BookingStatusCancelled {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Đơn đã được hủy"})
+		return
+	}
+
+	// Cancel booking in transaction
+	err = config.DB.Transaction(func(tx *gorm.DB) error {
+		// Update booking status
+		if err := bookingRepo.UpdateStatus(uint(id), models.BookingStatusCancelled); err != nil {
+			return err
+		}
+
+		// Release seats
+		for _, seatID := range booking.SeatIDs {
+			if err := seatRepo.UpdateStatus(uint(seatID), models.SeatStatusAvailable); err != nil {
+				return err
+			}
+		}
+
+		return nil
+	})
+
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Không thể hủy đơn đặt vé"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "Hủy đơn thành công"})
 }

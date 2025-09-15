@@ -15,13 +15,12 @@ export const AppStack = () => (
         <Stack.Screen name="Booking" component={BookingNavigator} />
         <Stack.Screen name="GlobalComponents" component={GlobalComponentsScreen} />
         <Stack.Screen name="AuthTest" component={AuthTestScreen} />
-        <Stack.Screen 
-            name="AdminDemo" 
-            component={() => (
+        <Stack.Screen name="AdminDemo">
+            {() => (
                 <AdminGuard>
                     <AdminDemoScreen />
                 </AdminGuard>
-            )} 
-        />
+            )}
+        </Stack.Screen>
     </Stack.Navigator>
 );

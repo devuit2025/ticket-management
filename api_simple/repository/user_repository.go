@@ -36,6 +36,16 @@ func (r *UserRepository) UpdateRole(userID uint, role models.Role) error {
 	return r.Update(user)
 }
 
+// Create creates a new user
+func (r *UserRepository) Create(user *models.User) error {
+	return r.db.Create(user).Error
+}
+
+// Update updates a user
+func (r *UserRepository) Update(user *models.User) error {
+	return r.db.Save(user).Error
+}
+
 // Add FindByID method
 func (r *UserRepository) FindByID(id uint) (*models.User, error) {
 	var user models.User

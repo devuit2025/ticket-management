@@ -120,7 +120,7 @@ func (r *BookingRepository) FindPendingBookings(timeout int) ([]models.Booking, 
 	err := r.db.Where("status = ? AND payment_status = ? AND created_at <= NOW() - INTERVAL ?",
 		models.BookingStatusPending,
 		models.PaymentStatusUnpaid,
-		fmt.Sprintf("'%d minutes'", timeout)).
+		fmt.Sprintf("%d minutes", timeout)).
 		Find(&bookings).Error
 	return bookings, err
 }

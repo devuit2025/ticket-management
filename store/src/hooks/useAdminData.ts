@@ -32,7 +32,11 @@ export function useAdminTrips() {
   // Fetch data when screen is focused
   useFocusEffect(
     useCallback(() => {
-      fetchData();
+      // Small delay to ensure token is saved to AsyncStorage
+      const timer = setTimeout(() => {
+        fetchData();
+      }, 100);
+      return () => clearTimeout(timer);
     }, [fetchData])
   );
 
@@ -66,7 +70,11 @@ export function useAdminBookings() {
   // Fetch data when screen is focused
   useFocusEffect(
     useCallback(() => {
-      fetchData();
+      // Small delay to ensure token is saved to AsyncStorage
+      const timer = setTimeout(() => {
+        fetchData();
+      }, 100);
+      return () => clearTimeout(timer);
     }, [fetchData])
   );
 
@@ -100,7 +108,11 @@ export function useAdminUsers() {
   // Fetch data when screen is focused
   useFocusEffect(
     useCallback(() => {
-      fetchData();
+      // Small delay to ensure token is saved to AsyncStorage
+      const timer = setTimeout(() => {
+        fetchData();
+      }, 100);
+      return () => clearTimeout(timer);
     }, [fetchData])
   );
 
@@ -123,8 +135,8 @@ export function useAdminDashboard() {
     fetchData: fetchStats,
     invalidateCache: invalidateStats
   } = useApiCache('admin-stats', getDashboardStats, {
-    staleTime: 1 * 60 * 1000, // 1 minute
-    cacheTime: 3 * 60 * 1000   // 3 minutes
+    staleTime: 0, // Always fetch fresh data for dashboard
+    cacheTime: 1 * 60 * 1000   // 1 minute
   });
 
   const {
@@ -148,8 +160,13 @@ export function useAdminDashboard() {
   // Fetch data when screen is focused
   useFocusEffect(
     useCallback(() => {
-      fetchStats();
-      fetchActivity();
+      console.log('useAdminDashboard: Screen focused - fetching stats and activity');
+      // Small delay to ensure token is saved to AsyncStorage
+      const timer = setTimeout(() => {
+        fetchStats();
+        fetchActivity();
+      }, 100);
+      return () => clearTimeout(timer);
     }, [fetchStats, fetchActivity])
   );
 
@@ -207,7 +224,11 @@ export function useAdminOptions() {
   // Fetch options when screen is focused (only once per session)
   useFocusEffect(
     useCallback(() => {
-      fetchOptions();
+      // Small delay to ensure token is saved to AsyncStorage
+      const timer = setTimeout(() => {
+        fetchOptions();
+      }, 100);
+      return () => clearTimeout(timer);
     }, [fetchOptions])
   );
 

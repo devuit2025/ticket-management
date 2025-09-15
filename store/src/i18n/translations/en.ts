@@ -160,7 +160,7 @@ export default {
         returnDatePlaceholder: 'Select return date (if any)',
         seatPreference: 'Seat Preference',
         seatPreferencePlaceholder: 'Select seat type',
-
+        searchBus: 'Search Bus',
         // Trip type
         status: {
             success: 'Success',

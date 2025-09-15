@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"fmt"
 	"net/http"
 	"strconv"
 	"time"
@@ -208,6 +209,14 @@ func CreateTrip(c *gin.Context) {
 		return
 	}
 
+	// Create seats automatically based on bus configuration
+	if err := createSeatsForTrip(&trip); err != nil {
+		// If seat creation fails, delete the trip
+		tripRepo.Delete(trip.ID)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Không thể tạo ghế cho chuyến đi: " + err.Error()})
+		return
+	}
+
 	c.JSON(http.StatusCreated, gin.H{
 		"message": "Tạo chuyến đi thành công",
 		"trip":    formatTripResponse(&trip),
@@ -349,4 +358,76 @@ func formatTripResponse(trip *models.Trip) *TripResponse {
 		CreatedAt:     trip.CreatedAt.Format("2006-01-02 15:04:05"),
 		UpdatedAt:     trip.UpdatedAt.Format("2006-01-02 15:04:05"),
 	}
+}
+
+// createSeatsForTrip creates seats automatically based on bus configuration
+func createSeatsForTrip(trip *models.Trip) error {
+	// Get bus information
+	var bus models.Bus
+	if err := config.DB.First(&bus, trip.BusID).Error; err != nil {
+		return err
+	}
+
+	// Calculate seats per floor
+	seatsPerFloor := bus.SeatCount
+	if bus.FloorCount == 2 {
+		seatsPerFloor = bus.SeatCount / 2
+	}
+
+	// Create seats for each floor
+	for floor := 1; floor <= bus.FloorCount; floor++ {
+		if err := createSeatsForFloor(trip.ID, floor, seatsPerFloor, trip.Price); err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+// createSeatsForFloor creates seats for a specific floor
+func createSeatsForFloor(tripID uint, floor int, seatCount int, basePrice float64) error {
+	floorPrefix := "A"
+	if floor == 2 {
+		floorPrefix = "B"
+	}
+
+	for i := 1; i <= seatCount; i++ {
+		seatNumber := fmt.Sprintf("%s%02d", floorPrefix, i)
+		seatType := models.SeatTypeSingle
+		price := basePrice
+
+		// Special seats (first 4 seats)
+		if i <= 4 {
+			seatType = models.SeatTypeSpecial
+			price = basePrice * 1.2 // +20% for special
+		}
+
+		// Double seats (odd numbers)
+		if i%2 != 0 {
+			seatType = models.SeatTypeDouble
+		}
+
+		// Upstairs premium (+10% for floor 2)
+		if floor == 2 {
+			price = basePrice * 1.1
+			if i <= 4 {
+				price = basePrice * 1.3 // +30% for special upstairs
+			}
+		}
+
+		seat := models.Seat{
+			TripID: tripID,
+			Number: seatNumber,
+			Type:   seatType,
+			Floor:  floor,
+			Status: models.SeatStatusAvailable,
+			Price:  price,
+		}
+
+		if err := config.DB.Create(&seat).Error; err != nil {
+			return err
+		}
+	}
+
+	return nil
 }
