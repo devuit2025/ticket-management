@@ -2,8 +2,6 @@ import React from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 
 import HistoryScreen from '@screens/orders/MyTicketsScreen';
-import CheckoutScreen from '@screens/booking/ReviewBookingScreen';
-import NotificationScreen from '@screens/support/NotificationsScreen';
 import AccountScreen from '@screens/profile/MyAccountScreen';
 
 import HeaderLeft from '@components/navigation/HeaderLeft';
@@ -12,6 +10,7 @@ import { useTheme } from '@context/ThemeContext';
 import { SelectPickupDropoffScreen } from '@screens/booking';
 import HeaderRightLanguageSwitcher from '@components/navigation/HeaderRightLanguageSwitcher';
 import { StyleSheet } from 'react-native';
+import { useTranslation } from '@i18n/useTranslation';
 
 const Tab = createBottomTabNavigator();
 
@@ -77,13 +76,35 @@ function createScreenOptions({ route, navigation }: { route: any; navigation: an
 }
 
 export default function BottomTabs() {
+    const { translate } = useTranslation()
+
     return (
         <Tab.Navigator screenOptions={createScreenOptions}>
-            <Tab.Screen name="Home" component={SelectPickupDropoffScreen} />
-            <Tab.Screen name="History" component={HistoryScreen} />
-            {/* <Tab.Screen name="Checkout" component={CheckoutScreen} /> */}
-            {/* <Tab.Screen name="Notifications" component={NotificationScreen} /> */}
-            <Tab.Screen name="Account" component={AccountScreen} />
+<Tab.Screen
+  name="Home"
+  component={SelectPickupDropoffScreen}
+  options={{ title: translate('tabs.home') }}
+/>
+<Tab.Screen
+  name="History"
+  component={HistoryScreen}
+  options={{ title: translate('tabs.history') }}
+/>
+{/* <Tab.Screen
+  name="Checkout"
+  component={CheckoutScreen}
+  options={{ title: translate('tabs.checkout') }}
+/> */}
+{/* <Tab.Screen
+  name="Notifications"
+  component={NotificationScreen}
+  options={{ title: translate('tabs.notifications') }}
+/> */}
+<Tab.Screen
+  name="Account"
+  component={AccountScreen}
+  options={{ title: translate('tabs.account') }}
+/>
         </Tab.Navigator>
     );
 }

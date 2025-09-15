@@ -1,4 +1,22 @@
 export default {
+    searchResult: 'Kết quả tìm kiếm',
+    home: {
+        welcomeMessage: 'Chào mừng đến với Phương Trang Tickets',
+        travelPrompt: 'Hãy cho chúng tôi biết bạn muốn đi đâu và khi nào',
+    },
+    errors: {
+        pastDateTitle: 'Ngày không hợp lệ',
+        pastDateMessage: 'Bạn không thể chọn ngày trong quá khứ.',
+    },
+    tabs: {
+        home: 'Trang chủ',
+        history: 'Lịch sử',
+        checkout: 'Thanh toán',
+        notifications: 'Thông báo',
+        account: 'Tài khoản',
+    },
+
+
     common: {
         welcome: 'Chào mừng',
         logout: 'Đăng xuất',
@@ -140,6 +158,13 @@ export default {
     },
 
     booking: {
+        selectSeat: 'Chọn ghế',
+        seatsLeft: 'ghế trống',
+        reviewBooking: 'Review Booking',
+        seat: 'ghế',
+        selected: 'đã chọn',
+
+
         title: 'Đặt vé',
         ticket: 'Vé',
         recentSearch: 'Tìm kiếm gần đây',
@@ -148,6 +173,7 @@ export default {
         paymentMethod: 'Phương thức thanh toán',
         confirmButton: 'Xác nhận đặt vé',
         successMessage: 'Đặt vé thành công! Cảm ơn bạn đã sử dụng dịch vụ.',
+
 
         // Booking form fields
         searchBus: 'Tìm kiếm tuyến',

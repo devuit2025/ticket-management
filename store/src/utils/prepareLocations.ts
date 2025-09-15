@@ -43,10 +43,8 @@ const getCachedRoutes = async (): Promise<Route[] | null> => {
         const json = await AsyncStorage.getItem(STORAGE_KEY);
         if (!json) return null;
 
-        const { timestamp, routes } = JSON.parse(json) as { timestamp: number; routes: Route[] };
-        if (Date.now() - timestamp > EXPIRY_MS) return null;
-
-        return routes;
+        const jsonStored = JSON.parse(json);
+        return jsonStored.data
     } catch (error) {
         console.error('Error reading cached routes:', error);
         return null;
@@ -127,7 +125,7 @@ export const getRouteId = async (
     destinationValue: string
 ): Promise<string> => {
     const routes: Route[] = await getRoutes();
-
+    console.log(routes)
     const route = routes.find(
         (r) =>
             (r.originValue ?? r.origin.toLowerCase().replace(/\s+/g, '')) === originValue &&

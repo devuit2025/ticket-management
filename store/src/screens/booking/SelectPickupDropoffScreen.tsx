@@ -98,10 +98,10 @@ export default function SelectPickupDropoffScreen({
                             color={theme.colors.onPrimary}
                             style={{ marginBottom: 0 }}
                         >
-                            Welcome to Phuong Trang Tickets
+                            { translate('home.welcomeMessage') }
                         </Typography>
                         <Typography variant="body" color={theme.colors.onPrimary}>
-                            Tell us where you go and when
+                            { translate('home.travelPrompt') }
                         </Typography>
                     </View>
 
@@ -120,9 +120,3 @@ export default function SelectPickupDropoffScreen({
         </View>
     );
 }
-
-const styles = StyleSheet.create({
-    card: {
-        marginBottom: 10,
-    },
-});

@@ -1,5 +1,23 @@
 export default {
+        searchResult: 'Search Results',
+    home: {
+        welcomeMessage: 'Welcome to Phuong Trang Tickets',
+        travelPrompt: 'Tell us where you go and when',
+    },
+    errors: {
+        pastDateTitle: 'Invalid Date',
+        pastDateMessage: 'You cannot select a past date.',
+    },
+    tabs: {
+        home: 'Home',
+        history: 'History',
+        checkout: 'Checkout',
+        notifications: 'Notifications',
+        account: 'Account',
+    },
+
     common: {
+        
         welcome: 'Welcome',
         logout: 'Logout',
         language: 'Language',
@@ -136,6 +154,12 @@ export default {
         login: 'Login',
     },
     booking: {
+        selectSeat: 'Chọn ghế',
+        seatsLeft: 'ghế trống',
+        reviewBooking: 'Review Booking',
+        seat: 'ghế',
+        selected: 'đã chọn',
+
         title: 'Booking',
         description: 'Please fill in your booking information below.',
         passengerInfo: 'Passenger Information',

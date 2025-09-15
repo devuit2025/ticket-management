@@ -37,37 +37,9 @@ const BusList: React.FC<BusListProps> = ({ onSelectBus, data }) => {
                         endLocation={trip.route.destination}
                         onSelect={() => onSelectBus(trip)}
                     />
-
-                    // <BusCard
-                    //     key={1}
-                    //     startTime="08:00"
-                    //     endTime="14:00"
-                    //     price="350,000 VND"
-                    //     carType="Limousine"
-                    //     availableSeats={5}
-                    //     startLocation="Ho Chi Minh City (Mien Dong Station)"
-                    //     endLocation="Da Nang (Central Station)"
-                    //     onSelect={onSelectBus}
-                    // />
                 );
             })}
         </>
-
-        // <>
-        //     {(data || Array.from({ length: 10 })).map((_, i) => (
-        //         <BusCard
-        //             key={i}
-        //             startTime="08:00"
-        //             endTime="14:00"
-        //             price="350,000 VND"
-        //             carType="Limousine"
-        //             availableSeats={5}
-        //             startLocation="Ho Chi Minh City (Mien Dong Station)"
-        //             endLocation="Da Nang (Central Station)"
-        //             onSelect={onSelectBus}
-        //         />
-        //     ))}
-        // </>
     );
 };
 

@@ -4,6 +4,7 @@ import Button from '@components/global/button/Button';
 import Card from '@components/global/card/Card';
 
 import Typography from '@components/global/typography/Typography';
+import { useTranslation } from '@i18n/useTranslation';
 
 interface BusCardProps {
     startTime: string;
@@ -26,6 +27,8 @@ const BusCard: React.FC<BusCardProps> = ({
     endLocation,
     onSelect,
 }) => {
+    const { translate } = useTranslation();
+    
     return (
         <Card style={styles.card}>
             {/* Header: Time + Price */}
@@ -44,7 +47,7 @@ const BusCard: React.FC<BusCardProps> = ({
                     {carType}
                 </Typography>
                 <Typography variant="body" color={availableSeats > 3 ? '#2E7D32' : '#D32F2F'}>
-                    {availableSeats} seats left
+                    {availableSeats} {translate('booking.seatsLeft')}
                 </Typography>
             </View>
 
@@ -63,10 +66,7 @@ const BusCard: React.FC<BusCardProps> = ({
                     </Typography>
                 </View>
 
-                {/* Select button */}
-                {/* <Button style={styles.button} onPress={onSelect}>
-        </Button> */}
-                <Button title="Select Seat" onPress={onSelect} />
+                <Button title={translate('booking.selectSeat')} onPress={onSelect} />
             </View>
         </Card>
     );

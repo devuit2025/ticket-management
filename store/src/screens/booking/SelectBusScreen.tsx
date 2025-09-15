@@ -14,10 +14,10 @@ import { useBooking } from '@context/BookingContext';
 type Props = NativeStackScreenProps<BookingStackParamList, 'SelectBus'>;
 
 export default function SelectBusScreen({ navigation }: Props) {
-    const { bookingData, setBookingData, trips, loading, fetchTripsForDay } = useBooking();
+    const { bookingData, setBookingData, trips, loading, fetchTripsForDay, updateRouteId } = useBooking();
     const { theme } = useTheme();
     const { translate } = useTranslation();
-    // console.log(bookingData)
+
     const [selectedDate, setSelectedDate] = useState(bookingData.day);
 
     // Sync local selectedDate with bookingData.day
@@ -27,8 +27,8 @@ export default function SelectBusScreen({ navigation }: Props) {
 
     // Initial fetch + reactive fetch whenever routeId or day changes
     useEffect(() => {
-        // console.log('here')
-        console.log('Fetch trips for routeId, Day: ', bookingData.routeId, bookingData.day)
+        updateRouteId()
+        console.log('Fetch trips for: ',  bookingData)
         if (!bookingData.routeId || !bookingData.day) return;
 
         let isMounted = true; // to prevent state update if component unmounted
@@ -42,7 +42,7 @@ export default function SelectBusScreen({ navigation }: Props) {
         return () => {
             isMounted = false;
         };
-    }, [bookingData.routeId, bookingData.day]);
+    }, [bookingData.day]);
 
     const goToSeatSelect = (trip) => {
         setBookingData((prev) => ({ ...prev, daySelectedTrip: trip }));
@@ -75,7 +75,7 @@ export default function SelectBusScreen({ navigation }: Props) {
                         weight="bold"
                         style={{ marginBottom: 10 }}
                     >
-                        Search result
+                    { translate('searchResult') }
                     </Typography>
 
                     {/* Loader or BusList */}

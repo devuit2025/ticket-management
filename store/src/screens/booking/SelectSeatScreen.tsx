@@ -8,6 +8,7 @@ import { useTheme } from '@context/ThemeContext';
 import { BookingStackParamList } from '@navigation/BookingNavigator';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { getTripSeats, GetTripSeatsResponse } from '@api/trips';
+import { useTranslation } from '@i18n/useTranslation';
 
 type Props = NativeStackScreenProps<BookingStackParamList, 'SelectSeat'>;
 
@@ -15,6 +16,7 @@ type SeatStatus = 'available' | 'booked' | 'locked';
 
 const SelectSeatScreen = ({ navigation }: Props) => {
     const { bookingData, setBookingData } = useBooking();
+    const { translate } = useTranslation()
     const { theme } = useTheme();
     const [selectedSeats, setSelectedSeats] = useState<string[]>([]);
     const [seatMap, setSeatMap] = useState<Record<string, SeatStatus>>({});
@@ -80,7 +82,7 @@ const SelectSeatScreen = ({ navigation }: Props) => {
             <View style={[styles.bottomBar, { backgroundColor: theme.colors.card }]}>
                 <View>
                     <Text style={[styles.seatText, { color: theme.colors.text }]}>
-                        {selectedSeats.length} seat{selectedSeats.length !== 1 ? 's' : ''} selected
+                        {selectedSeats.length} {translate('booking.seat')}{selectedSeats.length !== 1 ? '' : ''} {translate('booking.selected')}
                     </Text>
                 </View>
 
@@ -89,7 +91,7 @@ const SelectSeatScreen = ({ navigation }: Props) => {
                     onPress={handleReviewBooking}
                     disabled={selectedSeats.length === 0}
                 >
-                    <Text style={styles.buttonText}>Review Booking</Text>
+                    <Text style={styles.buttonText}>{translate('booking.reviewBooking')}</Text>
                 </TouchableOpacity>
             </View>
         </View>

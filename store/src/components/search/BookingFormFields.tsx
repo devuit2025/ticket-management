@@ -110,18 +110,6 @@ export const BookingFormFields = forwardRef<BookingFormFieldsRef, BookingFormFie
                     iconName="calendar-outline"
                 />
 
-                {/* <FormDatePicker
-                    name="dayBack"
-                    control={control}
-                    label={`${translate('booking.travelDate')} ${translate('booking.roundTrip')}`}
-                    placeholder={translate('booking.travelDatePlaceholder')}
-                    value={watch('dayBack')}
-                    onChange={(val: string | Date | null) => setValue('dayBack', val)}
-                    error={errors.dayBack?.message}
-                    textAlign="left"
-                    iconName="calendar-outline"
-                /> */}
-
                 <FormSubmitButton
                     title={translate('booking.searchBus')}
                     onPress={handleSubmit(onSubmit)}

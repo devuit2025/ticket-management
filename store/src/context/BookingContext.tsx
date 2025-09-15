@@ -20,6 +20,7 @@ interface BookingContextValue {
     fetchTripsForDay: () => Promise<void>;
     fetchTripsForDayBack: () => Promise<void>;
     createBooking: (guestInfo?: GuestInfo, note?: string) => Promise<CreateBookingResponse>;
+    updateRouteId: () => {}
 }
 
 const BookingContext = createContext<BookingContextValue | undefined>(undefined);
@@ -91,7 +92,8 @@ export const BookingProvider = ({ children }: { children: ReactNode }) => {
         if (!bookingData.from || !bookingData.to) return;
 
         try {
-            const routeId = await getRouteId(bookingData.from, bookingData.to); // <-- await here
+            const routeId = await getRouteId(bookingData.from, bookingData.to); 
+            console.log(routeId)
             setBookingData((prev: BookingData) => ({ ...prev, routeId }));
         } catch (error) {
             console.error('Failed to fetch routeId:', error);
@@ -144,6 +146,7 @@ export const BookingProvider = ({ children }: { children: ReactNode }) => {
                 fetchTripsForDay,
                 fetchTripsForDayBack,
                 createBooking,
+                updateRouteId
             }}
         >
             {children}

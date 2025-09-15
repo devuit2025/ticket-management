@@ -1,6 +1,8 @@
 import React, { useEffect, useRef, useMemo } from 'react';
 import { View, Text, FlatList, TouchableOpacity, StyleSheet } from 'react-native';
 import dayjs from 'dayjs';
+import { showToast } from '@utils/toast';
+import { useTranslation } from '@i18n/useTranslation';
 
 interface DateItem {
     id: string;
@@ -20,6 +22,26 @@ const HorizontalDateSelector: React.FC<HorizontalDateSelectorProps> = ({
     prevDays = 3,
     nextDays = 3,
 }) => {
+    const { translate, locale } = useTranslation()
+
+    const WEEKDAY_MAP: Record<string, string> = {
+        Mon: 'T2',
+        Tue: 'T3',
+        Wed: 'T4',
+        Thu: 'T5',
+        Fri: 'T6',
+        Sat: 'T7',
+        Sun: 'CN',
+    };
+
+    const getWeekdayByLocale = (eng: string): string => {
+    if (locale === 'vi') {
+        return WEEKDAY_MAP[eng] || eng;
+    }
+    return eng; // default: English
+    };
+
+
     const flatListRef = useRef<FlatList<DateItem>>(null);
     const normalizedValue = dayjs(value).format('YYYY-MM-DD');
 
@@ -29,6 +51,7 @@ const HorizontalDateSelector: React.FC<HorizontalDateSelectorProps> = ({
         return Array.from({ length: prevDays + nextDays + 1 }, (_, i) => {
             const offset = i - prevDays;
             const date = center.add(offset, 'day');
+
             return { id: date.format('YYYY-MM-DD'), date };
         });
     }, [value, prevDays, nextDays]);
@@ -48,6 +71,22 @@ const HorizontalDateSelector: React.FC<HorizontalDateSelectorProps> = ({
     }, [value, dates]);
 
     const handlePress = (date: string) => {
+        const selectedDate = new Date(date);
+        const today = new Date();
+
+        // Remove time part for accurate "day only" comparison
+        today.setHours(0, 0, 0, 0);
+        selectedDate.setHours(0, 0, 0, 0);
+
+        if (selectedDate < today) {
+            showToast(
+                    'error',
+    translate('errors.pastDateMessage'),
+    translate('errors.pastDateTitle'));
+            return;
+        }
+
+        
         onChange?.(date);
     };
 
@@ -59,7 +98,8 @@ const HorizontalDateSelector: React.FC<HorizontalDateSelectorProps> = ({
                 onPress={() => handlePress(item.id)}
             >
                 <Text style={[styles.weekday, isSelected && styles.textSelected]}>
-                    {item.date.format('ddd')}
+                    
+                    { getWeekdayByLocale(item.date.format('ddd'))}
                 </Text>
                 <Text style={[styles.dayMonth, isSelected && styles.textSelected]}>
                     {item.date.format('DD/MM')}
